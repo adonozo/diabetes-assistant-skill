@@ -1,0 +1,1074 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "diabetes assistant",
+      "intents": [
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": [
+            "help"
+          ]
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": [
+            "stop"
+          ]
+        },
+        {
+          "name": "AMAZON.NavigateHomeIntent",
+          "samples": []
+        },
+        {
+          "name": "MedicationForDateIntent",
+          "slots": [
+            {
+              "name": "treatmentDate",
+              "type": "AMAZON.DATE"
+            }
+          ],
+          "samples": [
+            "What medicines I took {treatmentDate}",
+            "Which pills I took {treatmentDate}",
+            "What is the plan for {treatmentDate}",
+            "What medicines I will take {treatmentDate}",
+            "Medicines for {treatmentDate}",
+            "Medicines on {treatmentDate}",
+            "My medication for {treatmentDate}",
+            "My medication {treatmentDate}",
+            "medications for {treatmentDate}",
+            "medications {treatmentDate}"
+          ]
+        },
+        {
+          "name": "CarePlanIntent",
+          "slots": [
+            {
+              "name": "carePlanDate",
+              "type": "AMAZON.DATE"
+            }
+          ],
+          "samples": [
+            "What I have to do {carePlanDate}",
+            "What should I do {carePlanDate}",
+            "What is my treatment {carePlanDate}",
+            "What is the plan for {carePlanDate}",
+            "What's my plan for {carePlanDate}",
+            "What was my treatment {carePlanDate}"
+          ]
+        },
+        {
+          "name": "MedicationReminderIntent",
+          "slots": [],
+          "samples": [
+            "Remind me to take my medications",
+            "Remind me my medications",
+            "Please remind me to take my medications",
+            "Remind me to take my pills",
+            "Please remind me my medications"
+          ]
+        },
+        {
+          "name": "SetTimingIntent",
+          "slots": [
+            {
+              "name": "event",
+              "type": "timingEvent",
+              "samples": [
+                "it is for {event}",
+                "The time is for {event}",
+                "I want to set a time for {event}",
+                "I mean {event}",
+                "is for {event}",
+                "{event}"
+              ]
+            },
+            {
+              "name": "time",
+              "type": "AMAZON.TIME",
+              "samples": [
+                "when it's {time}",
+                "{time}",
+                "at {time}"
+              ]
+            }
+          ],
+          "samples": [
+            "Set {event} time",
+            "Set my {event} time",
+            "Update my {event} time",
+            "Update {event} at {time}",
+            "Set {event} at {time}",
+            "I take {event} at {time}",
+            "My {event} is at {time}",
+            "I take it at {time}",
+            "I have {event} at {time}",
+            "I have it at {time}",
+            "I eat {event} at {time}"
+          ]
+        },
+        {
+          "name": "SetStartDateIntent",
+          "slots": [
+            {
+              "name": "healthRequest",
+              "type": "healthRequestName",
+              "samples": [
+                "Start date for {healthRequest}",
+                "Initial date for {healthRequest}"
+              ]
+            },
+            {
+              "name": "date",
+              "type": "AMAZON.DATE",
+              "samples": [
+                "I'll start it on {date}",
+                "on {date}",
+                "{date}",
+                "maybe {date}",
+                "I'll start it on {date} at {healthRequestTime}",
+                "on {date} at {healthRequestTime}",
+                "{date} at {healthRequestTime}",
+                "maybe {date} at {healthRequestTime}"
+              ]
+            },
+            {
+              "name": "healthRequestTime",
+              "type": "AMAZON.TIME",
+              "samples": [
+                "at {healthRequestTime}",
+                "{healthRequestTime}",
+                "around {healthRequestTime}"
+              ]
+            }
+          ],
+          "samples": [
+            "I'll start taking {healthRequest} on {date}",
+            "I'll start taking {healthRequest} {date}",
+            "Set the start date for {healthRequest}",
+            "{healthRequest} start date",
+            "start date for {healthRequest}"
+          ]
+        },
+        {
+          "name": "CreateRemindersIntent",
+          "slots": [],
+          "samples": [
+            "Create reminders",
+            "Set up reminders",
+            "Set reminders",
+            "Make reminders",
+            "I want you create reminders",
+            "I want you to setup reminders",
+            "Please create reminders"
+          ]
+        },
+        {
+          "name": "RegisterGlucoseLevelIntent",
+          "slots": [
+            {
+              "name": "level",
+              "type": "customDecimal",
+              "samples": [
+                "The level is {level}",
+                "{level}",
+                "My blood glucose is {level}",
+                "blood glucose {level}",
+                "blood glucose is {level}"
+              ]
+            },
+            {
+              "name": "glucoseTiming",
+              "type": "measureEvent",
+              "samples": [
+                "{glucoseTiming}",
+                "at {glucoseTiming}",
+                "on {glucoseTiming}"
+              ]
+            }
+          ],
+          "samples": [
+            "Note my glucose level",
+            "Note my blood glucose level",
+            "Note my blood glucose",
+            "Save my glucose level",
+            "Save my blood glucose level",
+            "Take note of my blood glucose level",
+            "Take note of my glucose level",
+            "My glucose level is {level}",
+            "My glucose is {level}",
+            "My blood glucose is {level}",
+            "Note that my glucose level is {level}",
+            "Note that my glucose is {level}",
+            "Note that my blood glucose is {level}",
+            "I have {level} for my glucose level",
+            "I read {level} for my blood glucose",
+            "I have {level} for my blood glucose",
+            "I read {level} for my glucose"
+          ]
+        },
+        {
+          "name": "AskGlucoseLevelIntent",
+          "slots": [
+            {
+              "name": "time",
+              "type": "AMAZON.TIME",
+              "samples": [
+                "{time}",
+                "at {time}",
+                "around {time}"
+              ]
+            },
+            {
+              "name": "timing",
+              "type": "timingEvent",
+              "samples": [
+                "{timing}",
+                "at {timing}"
+              ]
+            },
+            {
+              "name": "date",
+              "type": "AMAZON.DATE",
+              "samples": [
+                "{date}",
+                "on {date}"
+              ]
+            }
+          ],
+          "samples": [
+            "What was my glucose level {date}",
+            "What was my glucose level on {date}",
+            "What was my blood glucose {date}",
+            "What was my blood glucose on {date}",
+            "What was my blood glucose at {time}",
+            "What was my blood glucose this {time}",
+            "What was my glucose level at {time}",
+            "What was my glucose level this {time}",
+            "What was my glucose level {date} at {time}",
+            "What was my blood glucose {date} at {time}",
+            "What was my glucose {date} at {time}",
+            "What was my glucose {date}",
+            "What was my glucose on {date}",
+            "What was my glucose at {time}",
+            "What was my glucose this {time}",
+            "What was my glucose level at {timing}",
+            "What was my blood glucose at {timing}",
+            "What was my glucose level {date} at {timing}",
+            "What was my blood glucose {date} at {timing}",
+            "What was my glucose {date} at {timing}",
+            "What was my glucose at {timing}",
+            "Did I measured my glucose level {date}",
+            "Did I measured my glucose level at {timing}",
+            "Did I measured my glucose level {date} {time}",
+            "Did I measured my glucose level {date} at {timing}",
+            "Did I measured my glucose {date}",
+            "Did I measured my glucose at {timing}",
+            "Did I measured my glucose {date} {time}",
+            "Did I measured my glucose {date} at {timing}",
+            "Did I measured my blood glucose {date}",
+            "Did I measured my blood glucose at {timing}",
+            "Did I measured my blood glucose {date} {time}",
+            "Did I measured my blood glucose {date} at {timing}",
+            "my glucose level {date}",
+            "my glucose level on {date}",
+            "my glucose level {date} {time}",
+            "my blood glucose {date}",
+            "my blood glucose on {date}",
+            "my blood glucose {date} {time}",
+            "my blood glucose at {time}",
+            "my blood glucose this {time}",
+            "my glucose level at {time}",
+            "my glucose level this {time}",
+            "my glucose level {date} at {time}",
+            "my blood glucose {date} at {time}",
+            "my glucose {date} at {time}",
+            "my glucose {date}",
+            "my glucose on {date}",
+            "my glucose {date} {time}",
+            "my glucose at {time}",
+            "my glucose this {time}",
+            "my glucose level at {timing}",
+            "my blood glucose at {timing}",
+            "my glucose level {date} at {timing}",
+            "my blood glucose {date} at {timing}",
+            "my glucose {date} at {timing}",
+            "my glucose at {timing}",
+            "What was my blood sugar {date}",
+            "What was my blood sugar on {date}",
+            "What was my blood sugar at {time}",
+            "What was my blood sugar this {time}",
+            "Did I measured my blood sugar {date}",
+            "Did I measured my blood sugar at {timing}",
+            "Did I measured my blood sugar {date} {time}",
+            "Did I measured my blood sugar {date} at {timing}",
+            "my blood sugar {date}",
+            "my blood sugar on {date}",
+            "my blood sugar {date} {time}",
+            "my blood sugar at {time}",
+            "my blood sugar this {time}",
+            "my blood sugar at {timing}"
+          ]
+        }
+      ],
+      "types": [
+        {
+          "name": "timingEvent",
+          "values": [
+            {
+              "name": {
+                "value": "breakfast"
+              }
+            },
+            {
+              "name": {
+                "value": "lunch"
+              }
+            },
+            {
+              "name": {
+                "value": "dinner"
+              }
+            }
+          ]
+        },
+        {
+          "name": "measureEvent",
+          "values": [
+            {
+              "name": {
+                "value": "before breakfast"
+              }
+            },
+            {
+              "name": {
+                "value": "after breakfast"
+              }
+            },
+            {
+              "name": {
+                "value": "before lunch"
+              }
+            },
+            {
+              "name": {
+                "value": "after lunch"
+              }
+            },
+            {
+              "name": {
+                "value": "before dinner"
+              }
+            },
+            {
+              "name": {
+                "value": "after dinner"
+              }
+            },
+            {
+              "name": {
+                "value": "before meal"
+              }
+            },
+            {
+              "name": {
+                "value": "after meal"
+              }
+            },
+            {
+              "name": {
+                "value": "none"
+              }
+            },
+            {
+              "name": {
+                "value": "any"
+              }
+            }
+          ]
+        },
+        {
+          "name": "healthRequestName",
+          "values": [
+            {
+              "name": {
+                "value": "metformin"
+              }
+            },
+            {
+              "name": {
+                "value": "glyburide"
+              }
+            },
+            {
+              "name": {
+                "value": "glipizide"
+              }
+            },
+            {
+              "name": {
+                "value": "glynase"
+              }
+            },
+            {
+              "name": {
+                "value": "repaglinide"
+              }
+            },
+            {
+              "name": {
+                "value": "nateglinide"
+              }
+            },
+            {
+              "name": {
+                "value": "actos"
+              }
+            },
+            {
+              "name": {
+                "value": "glynase"
+              }
+            },
+            {
+              "name": {
+                "value": "avandia"
+              }
+            },
+            {
+              "name": {
+                "value": "pioglitazone"
+              }
+            },
+            {
+              "name": {
+                "value": "januvia"
+              }
+            },
+            {
+              "name": {
+                "value": "onglyza"
+              }
+            },
+            {
+              "name": {
+                "value": "tradjenta"
+              }
+            },
+            {
+              "name": {
+                "value": "exenatide"
+              }
+            },
+            {
+              "name": {
+                "value": "byetta"
+              }
+            },
+            {
+              "name": {
+                "value": "liraglutide"
+              }
+            },
+            {
+              "name": {
+                "value": "semaglutide"
+              }
+            },
+            {
+              "name": {
+                "value": "liraglutide"
+              }
+            },
+            {
+              "name": {
+                "value": "Glucose measurement"
+              }
+            },
+            {
+              "name": {
+                "value": "Blood Glucose measurement"
+              }
+            }
+          ]
+        },
+        {
+          "name": "customDecimal",
+          "values": [
+            {
+              "name": {
+                "value": "3.0"
+              }
+            },
+            {
+              "name": {
+                "value": "3.1"
+              }
+            },
+            {
+              "name": {
+                "value": "3.2"
+              }
+            },
+            {
+              "name": {
+                "value": "3.3"
+              }
+            },
+            {
+              "name": {
+                "value": "3.4"
+              }
+            },
+            {
+              "name": {
+                "value": "3.5"
+              }
+            },
+            {
+              "name": {
+                "value": "3.6"
+              }
+            },
+            {
+              "name": {
+                "value": "3.7"
+              }
+            },
+            {
+              "name": {
+                "value": "3.8"
+              }
+            },
+            {
+              "name": {
+                "value": "3.9"
+              }
+            },
+            {
+              "name": {
+                "value": "4.0"
+              }
+            },
+            {
+              "name": {
+                "value": "4.1"
+              }
+            },
+            {
+              "name": {
+                "value": "4.2"
+              }
+            },
+            {
+              "name": {
+                "value": "4.3"
+              }
+            },
+            {
+              "name": {
+                "value": "4.4"
+              }
+            },
+            {
+              "name": {
+                "value": "4.5"
+              }
+            },
+            {
+              "name": {
+                "value": "4.6"
+              }
+            },
+            {
+              "name": {
+                "value": "4.7"
+              }
+            },
+            {
+              "name": {
+                "value": "4.8"
+              }
+            },
+            {
+              "name": {
+                "value": "4.9"
+              }
+            },
+            {
+              "name": {
+                "value": "5.0"
+              }
+            },
+            {
+              "name": {
+                "value": "5.1"
+              }
+            },
+            {
+              "name": {
+                "value": "5.2"
+              }
+            },
+            {
+              "name": {
+                "value": "5.3"
+              }
+            },
+            {
+              "name": {
+                "value": "5.4"
+              }
+            },
+            {
+              "name": {
+                "value": "5.5"
+              }
+            },
+            {
+              "name": {
+                "value": "5.6"
+              }
+            },
+            {
+              "name": {
+                "value": "5.7"
+              }
+            },
+            {
+              "name": {
+                "value": "5.8"
+              }
+            },
+            {
+              "name": {
+                "value": "5.9"
+              }
+            },
+            {
+              "name": {
+                "value": "6.0"
+              }
+            },
+            {
+              "name": {
+                "value": "6.1"
+              }
+            },
+            {
+              "name": {
+                "value": "6.2"
+              }
+            },
+            {
+              "name": {
+                "value": "6.3"
+              }
+            },
+            {
+              "name": {
+                "value": "6.4"
+              }
+            },
+            {
+              "name": {
+                "value": "6.5"
+              }
+            },
+            {
+              "name": {
+                "value": "6.6"
+              }
+            },
+            {
+              "name": {
+                "value": "6.7"
+              }
+            },
+            {
+              "name": {
+                "value": "6.8"
+              }
+            },
+            {
+              "name": {
+                "value": "6.9"
+              }
+            },
+            {
+              "name": {
+                "value": "7.0"
+              }
+            },
+            {
+              "name": {
+                "value": "7.1"
+              }
+            },
+            {
+              "name": {
+                "value": "7.2"
+              }
+            },
+            {
+              "name": {
+                "value": "7.3"
+              }
+            },
+            {
+              "name": {
+                "value": "7.4"
+              }
+            },
+            {
+              "name": {
+                "value": "7.5"
+              }
+            },
+            {
+              "name": {
+                "value": "7.6"
+              }
+            },
+            {
+              "name": {
+                "value": "7.7"
+              }
+            },
+            {
+              "name": {
+                "value": "7.8"
+              }
+            },
+            {
+              "name": {
+                "value": "7.9"
+              }
+            },
+            {
+              "name": {
+                "value": "8.0"
+              }
+            },
+            {
+              "name": {
+                "value": "8.1"
+              }
+            },
+            {
+              "name": {
+                "value": "8.2"
+              }
+            },
+            {
+              "name": {
+                "value": "8.3"
+              }
+            },
+            {
+              "name": {
+                "value": "8.4"
+              }
+            },
+            {
+              "name": {
+                "value": "8.5"
+              }
+            },
+            {
+              "name": {
+                "value": "8.6"
+              }
+            },
+            {
+              "name": {
+                "value": "8.7"
+              }
+            },
+            {
+              "name": {
+                "value": "8.8"
+              }
+            },
+            {
+              "name": {
+                "value": "8.9"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "dialog": {
+      "intents": [
+        {
+          "name": "SetTimingIntent",
+          "confirmationRequired": false,
+          "slots": [
+            {
+              "name": "time",
+              "type": "AMAZON.TIME",
+              "confirmationRequired": true,
+              "elicitationRequired": true,
+              "prompts": {
+                "confirmation": "Confirm.Slot.1543037949542.877378806019",
+                "elicitation": "Elicit.Slot.1543037949542.877378806019"
+              }
+            },
+            {
+              "name": "event",
+              "type": "timingEvent",
+              "confirmationRequired": false,
+              "elicitationRequired": true,
+              "prompts": {
+                "elicitation": "Elicit.Slot.1543037949542.388844148382"
+              }
+            }
+          ]
+        },
+        {
+          "name": "SetStartDateIntent",
+          "confirmationRequired": false,
+          "slots": [
+            {
+              "name": "healthRequest",
+              "type": "healthRequestName",
+              "confirmationRequired": false,
+              "elicitationRequired": false
+            },
+            {
+              "name": "date",
+              "type": "AMAZON.DATE",
+              "confirmationRequired": false,
+              "elicitationRequired": true,
+              "prompts": {
+                "elicitation": "Elicit.Slot.startHealthRequestDate.date"
+              }
+            },
+            {
+              "name": "healthRequestTime",
+              "type": "AMAZON.TIME",
+              "confirmationRequired": true,
+              "elicitationRequired": true,
+              "prompts": {
+                "confirmation": "Confirm.Slot.startHealthRequestDate.healthRequestTime",
+                "elicitation": "Elicit.Slot.startHealthRequestDate.healthRequestTime"
+              }
+            }
+          ]
+        },
+        {
+          "name": "RegisterGlucoseLevelIntent",
+          "confirmationRequired": false,
+          "delegationStrategy": "SKILL_RESPONSE",
+          "slots": [
+            {
+              "name": "level",
+              "type": "customDecimal",
+              "confirmationRequired": true,
+              "elicitationRequired": true,
+              "prompts": {
+                "confirmation": "Confirm.Slot.glucoseLevel.level",
+                "elicitation": "Elicitation.Slot.glucoseLevel.level"
+              }
+            },
+            {
+              "name": "glucoseTiming",
+              "type": "measureEvent",
+              "confirmationRequired": false,
+              "elicitationRequired": true,
+              "prompts": {
+                "elicitation": "Elicitation.Slot.glucoseLevel.glucoseTiming"
+              }
+            }
+          ]
+        },
+        {
+          "name": "AskGlucoseLevelIntent",
+          "confirmationRequired": false,
+          "delegationStrategy": "SKILL_RESPONSE",
+          "slots": [
+            {
+              "name": "time",
+              "type": "AMAZON.TIME",
+              "confirmationRequired": false,
+              "elicitationRequired": true,
+              "prompts": {
+                "elicitation": "Elicit.Slot.AskGlucoseLevel.time"
+              }
+            },
+            {
+              "name": "timing",
+              "type": "timingEvent",
+              "confirmationRequired": false,
+              "elicitationRequired": true,
+              "prompts": {
+                "elicitation": "Elicit.Slot.AskGlucoseLevel.timing"
+              }
+            },
+            {
+              "name": "date",
+              "type": "AMAZON.DATE",
+              "confirmationRequired": false,
+              "elicitationRequired": true,
+              "prompts": {
+                "elicitation": "Elicit.Slot.AskGlucoseLevel.date"
+              }
+            }
+          ]
+        }
+      ],
+      "delegationStrategy": "ALWAYS"
+    },
+    "prompts": [
+      {
+        "id": "Confirm.Slot.1543037949542.877378806019",
+        "variations": [
+          {
+            "type": "SSML",
+            "value": "<speak>I heard <say-as interpret-as=\"time\">{time}</say-as>, is that correct?</speak>"
+          },
+          {
+            "type": "SSML",
+            "value": "<speak>Is <say-as interpret-as=\"time\">{time}</say-as> correct?</speak>"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.1543037949542.877378806019",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "What time do you have {event}?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.1543037949542.388844148382",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "The time {time} is for breakfast, lunch, or dinner?"
+          },
+          {
+            "type": "PlainText",
+            "value": "Do you want to set a time for breakfast, lunch, or dinner?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.startHealthRequestDate.date",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "On which day are you starting or have you started it?"
+          }
+        ]
+      },
+      {
+        "id": "Confirm.Slot.startHealthRequestDate.healthRequestTime",
+        "variations": [
+          {
+            "type": "SSML",
+            "value": "<speak>I heard <say-as interpret-as=\"time\">{healthRequestTime}</say-as>, is that correct?</speak>"
+          },
+          {
+            "type": "SSML",
+            "value": "<speak>Is <say-as interpret-as=\"time\">{healthRequestTime}</say-as> correct?</speak>"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.startHealthRequestDate.healthRequestTime",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "At what time are you taking it?"
+          },
+          {
+            "type": "PlainText",
+            "value": "At what time are your starting or have you started taking it?"
+          }
+        ]
+      },
+      {
+        "id": "Confirm.Slot.glucoseLevel.level",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "I heard {level}, is that correct?"
+          },
+          {
+            "type": "PlainText",
+            "value": "Is {level} correct?"
+          }
+        ]
+      },
+      {
+        "id": "Elicitation.Slot.glucoseLevel.level",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "What is your blood glucose level?"
+          },
+          {
+            "type": "PlainText",
+            "value": "What value you have for your blood glucose level?"
+          }
+        ]
+      },
+      {
+        "id": "Elicitation.Slot.glucoseLevel.glucoseTiming",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Is this measure before a meal, after a meal, or none?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.AskGlucoseLevel.time",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "At what moment in the day?"
+          },
+          {
+            "type": "PlainText",
+            "value": "At what time in the day?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.AskGlucoseLevel.timing",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "When?"
+          },
+          {
+            "type": "PlainText",
+            "value": "Is it for breakfast, lunch, dinner...?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.AskGlucoseLevel.date",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "On which day?"
+          },
+          {
+            "type": "PlainText",
+            "value": "For which day?"
+          }
+        ]
+      }
+    ]
+  }
+}

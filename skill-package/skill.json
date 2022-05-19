@@ -1,0 +1,31 @@
+{
+  "manifest": {
+    "publishingInformation": {
+      "locales": {
+        "en-GB": {
+          "summary": "The Diabetes Assistant",
+          "examplePhrases": [
+            "Alexa open diabetes assistant",
+            "Ask diabetes assistant about my plan for today",
+            "Ask diabetes assistant about my glucose level yesterday at dinner"
+          ],
+          "name": "diabetes assistant",
+          "description": "The Alexa Diabetes Voice Assistant. Part of a dissertation project for the MSc Computer Science at QMUL."
+        }
+      },
+      "isAvailableWorldwide": true,
+      "testingInstructions": "No testing instructions yet.",
+      "category": "HEALTH_AND_FITNESS",
+      "distributionCountries": []
+    },
+    "permissions": [
+      {
+        "name": "alexa::alerts:reminders:skill:readwrite"
+      }
+    ],
+    "apis": {
+      "custom": { }
+    },
+    "manifestVersion": "1.0"
+  }
+}

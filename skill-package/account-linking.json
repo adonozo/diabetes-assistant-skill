@@ -1,0 +1,18 @@
+{
+  "accountLinkingResponse": {
+    "accessTokenScheme": "REQUEST_BODY_CREDENTIALS",
+    "accessTokenUrl": "__ENV_ACCESS_TOKEN",
+    "authorizationUrl": "__ENV_ACCESS_URL",
+    "clientId": "__ENV_CLIENT_ID",
+    "defaultTokenExpirationInSeconds": 86400,
+    "domains": [
+      "__ENV_DOMAIN"
+    ],
+    "scopes": [
+      "openid",
+      "profile"
+    ],
+    "skipOnEnablement": true,
+    "type": "AUTH_CODE"
+  }
+}
