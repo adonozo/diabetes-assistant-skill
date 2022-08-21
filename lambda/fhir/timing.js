@@ -1,6 +1,8 @@
 const {DateTime} = require("luxon");
 const {RRule} = require("rrule")
 
+const DEFAULT_TIMEZONE = 'UTC'
+
 const timingEvent = {
     C: 'C',
     CD: 'CD',
@@ -212,6 +214,14 @@ const compareWhen = (a, b) => {
     return 0;
 }
 
+const tryParseDate = (datetime) => {
+    try {
+        return DateTime.fromISO(datetime, {zone: DEFAULT_TIMEZONE});
+    } catch (e) {
+        return undefined;
+    }
+}
+
 module.exports = {
     timingEvent,
     numericTiming,
@@ -222,5 +232,6 @@ module.exports = {
     timingCodeToString,
     getDatesFromTiming,
     getTimesFromTimingWithFrequency,
-    dayToRruleDay
+    dayToRruleDay,
+    tryParseDate,
 }
