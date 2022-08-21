@@ -2,6 +2,7 @@ const luxon = require("luxon");
 const {DateTime} = require("luxon");
 const fhirTiming = require("./fhir/timing");
 const strings = require("./strings");
+const fhirPatient = require("./fhir/patient");
 
 const minBloodGlucoseValue = 4;
 const maxFastingGlucoseValue = 7;
@@ -217,15 +218,19 @@ function getSuggestedTiming(patient) {
     const date = DateTime.utc();
     let suggestion = fhirTiming.timingEvent.C;
     let minHourDiff = 10;
-    Object.keys(patient.exactEventTimes).map(timing => {
-        const userTime = DateTime.fromISO(patient.exactEventTimes[timing], {zone: 'UTC'});
-        let hoursDifference = date.diff(userTime, ["days", "hours"]).toObject().hours;
+    const timingPreferences = fhirPatient.getTimingPreferences(patient);
+    if (!timingPreferences) {
+        return fhirTiming.relatedTimingCodeToString(suggestion);
+    }
+
+    timingPreferences.forEach((datetime, timing) => {
+        let hoursDifference = date.diff(datetime, ["days", "hours"]).toObject().hours;
         hoursDifference = Math.abs(hoursDifference);
         if (hoursDifference < 3 && hoursDifference < minHourDiff) {
             minHourDiff = hoursDifference;
             suggestion = timing;
         }
-    });
+    })
 
     return fhirTiming.relatedTimingCodeToString(suggestion);
 }

@@ -1,7 +1,9 @@
 const {DateTime} = require("luxon");
 const fhirTiming = require("./timing")
+const fhirPatient = require("./patient")
 
 const observationBase = {
+    resourceType: "Observation",
     status: "final",
     code: {
         coding: [
@@ -12,26 +14,32 @@ const observationBase = {
             }
         ]
     },
-    subject: {
-        id: "610060fc3101595f17be6529",
-        reference: "Patient/pat1",
-        display: "Donald Duck"
-    },
+    subject: {},
     effectiveDateTime: "2020-01-01T10:00:00Z",
     issued: "2020-01-01T10:00:00Z",
-    performer: [
-        {
-            id: "610060fc3101595f17be6529",
-            reference: "Patient/pat1",
-            display: "Donald Duck"
-        }
-    ],
+    performer: [],
     valueQuantity: {
         value: 1.0,
         unit: "mmol/l",
         system: "http://unitsofmeasure.org",
         code: "mmol/L"
     },
+    referenceRange: [
+        {
+            low: {
+                value: 3.1,
+                unit: "mmol/l",
+                system: "http://unitsofmeasure.org",
+                code: "mmol/L"
+            },
+            high: {
+                value: 6.2,
+                unit: "mmol/l",
+                system: "http://unitsofmeasure.org",
+                code: "mmol/L"
+            }
+        }
+    ],
     extension: [
         {
             url: "http://www.diabetesreminder.com/observationTiming",
@@ -41,10 +49,7 @@ const observationBase = {
 }
 
 function createObservationObject(patient, level, timing) {
-    const subject = {
-        id: patient.id,
-        display: `${patient.firstName} ${patient.lastName}`
-    };
+    const subject = fhirPatient.getPatientSubject(patient);
     const date = DateTime.utc().toISO();
     const observation = JSON.parse(JSON.stringify(observationBase));
     const observationTiming = fhirTiming.stringToTimingCode(timing)

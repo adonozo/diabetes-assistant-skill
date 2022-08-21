@@ -1,4 +1,4 @@
-const http = require("http");
+const http = require("https");
 const api = require("./api");
 
 function getActiveMedicationRequests(email) {
