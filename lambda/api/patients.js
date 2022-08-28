@@ -1,4 +1,4 @@
-const http = require("http");
+const http = require("https");
 const api = require("./api");
 
 function getSelf(email) {
@@ -74,6 +74,7 @@ function getObservationsOnDate(email, date, timing) {
     });
 }
 
+// Deprecated
 function getMedicationRequestsForDate(email, date, requestType, timing, timezone) {
     return new Promise((resolve, reject) => {
         const params = new URLSearchParams();
@@ -88,11 +89,25 @@ function getMedicationRequestsForDate(email, date, requestType, timing, timezone
     });
 }
 
+function getMedicationRequests(email, date, timing, timezone) {
+    return new Promise((resolve, reject) => {
+        const params = new URLSearchParams();
+        params.append("date", date)
+        params.append("timing", timing)
+        params.append("timezone", timezone)
+        const path = `/patients/${email}/alexa/medicationRequest?${params.toString()}`
+        const options = api.getOptionsFor(path, 'GET');
+        const request = http.request(options, response => api.createJsonResponse(resolve, reject, response));
+        request.end();
+    })
+}
+
 module.exports = {
     getSelf,
     updateTiming,
     setStartDate,
     saveBloodGlucoseLevel,
     getObservationsOnDate,
+    getMedicationRequests,
     getMedicationRequestsForDate
 }

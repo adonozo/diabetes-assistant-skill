@@ -1,6 +1,3 @@
-// This sample demonstrates handling intents from an Alexa skill using the Alexa Skills Kit SDK (v2).
-// Please visit https://alexa.design/cookbook for additional examples on implementing slots, dialog management,
-// session persistence, api calls, and more.
 const Alexa = require('ask-sdk-core');
 const reminders = require('./reminder');
 const strings = require('./strings');
@@ -44,7 +41,7 @@ const MedicationForDateIntentHandler = {
         const self = await patients.getSelf(userInfo.username);
         const date = handlerInput.requestEnvelope.request.intent.slots.treatmentDate.value;
         const userTimezone = await helper.getTimezoneOrDefault(handlerInput);
-        const medicationRequest = await patients.getMedicationRequestsForDate(userInfo.username, date, "medication",
+        const medicationRequest = await patients.getMedicationRequests(userInfo.username, date,
             fhirTiming.timingEvent.ALL_DAY, userTimezone);
         const medications = fhirCarePlain.medicationsFromBundle(medicationRequest);
         // Check missing dates in requests
