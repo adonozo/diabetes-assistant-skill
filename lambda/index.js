@@ -244,8 +244,7 @@ const SetStartDateCompletedIntentHandler = {
         const userTimeZone = await helper.getTimezoneOrDefault(handlerInput);
         const dateTime = luxon.DateTime.fromISO(`${date}T${time}`, {zone: userTimeZone});
         await patients.setStartDate(userInfo.username, missingDate.id, { startDate: dateTime.toUTC().toISO() });
-        // TODO move to strings
-        const {speakOutput, reprompt} = getStartDateConfirmedResponse(session, `You have set the start date for ${healthRequest}.`);
+        const {speakOutput, reprompt} = getStartDateConfirmedResponse(session, healthRequest);
         delete session[helper.sessionValues.requestMissingDate];
         attributesManager.setSessionAttributes(session);
 
@@ -291,8 +290,7 @@ const RegisterGlucoseLevelIntentInProgressWithValueHandler = {
 
         const self = await patients.getSelf(userInfo.username);
         const meal = helper.getSuggestedTiming(self);
-        // TODO move to strings
-        const message = `Is this measure before ${meal}, after ${meal}, or none?`
+        const message = strings.getSuggestedTimeText(meal);
         return handlerInput.responseBuilder
             .speak(message)
             .reprompt(message)
@@ -476,8 +474,7 @@ const ConnectionsResponseHandler = {
             case "DENIED":
             case "NOT_ANSWERED":
                 return handlerInput.responseBuilder
-                    // TODO move to strings
-                    .speak("Without permissions, I can't set a reminder.")
+                    .speak(strings.responses.enGb.PERMISSIONS_REQUIRED)
                     .getResponse();
             case "ACCEPTED":
             default:
@@ -668,7 +665,8 @@ const getAskGlucoseResponse = (handlerInput, bundle, timezone) => {
         .getResponse();
 }
 
-const getStartDateConfirmedResponse = (session, speakOutput) => {
+const getStartDateConfirmedResponse = (session, healthRequest) => {
+    let speakOutput = strings.getConfirmationDateText(healthRequest);
     let reprompt = strings.responses.enGb.HELP;
     if (session[helper.sessionValues.medicationReminderIntent]) {
         reprompt = strings.responses.enGb.MEDICATIONS_REMINDERS_SETUP;

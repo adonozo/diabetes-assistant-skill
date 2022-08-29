@@ -25,67 +25,23 @@ const responses = {
         NO_RECORDS_FOUND: "I didn't find records",
         QUERY_SETUP: 'Now, try asking me about your care plan for a date again.',
         LOW_GLUCOSE: 'Your blood glucose level is lower than the recommended value. Please consider consulting to your GP or to a health provider.',
-        HIGH_GLUCOSE: 'Your blood glucose level is higher than the recommended value. Please consider consulting to your GP or to a health provider.'
+        HIGH_GLUCOSE: 'Your blood glucose level is higher than the recommended value. Please consider consulting to your GP or to a health provider.',
+        PERMISSIONS_REQUIRED: "Without permissions, I can't set a reminder.",
     }
-}
-
-function promptTimingEventTime(timing) {
-    switch (timing) {
-        case timingEvent.ACD:
-        case timingEvent.CD:
-        case timingEvent.PCD:
-            return 'What time do you usually have lunch?';
-        case timingEvent.ACM:
-        case timingEvent.CM:
-        case timingEvent.PCM:
-            return 'What time do you usually have breakfast?';
-        case timingEvent.ACV:
-        case timingEvent.CV:
-        case timingEvent.PCV:
-            return 'What time do you usually have dinner?';
-    }
-}
-
-function timingToText(timing) {
-    switch (timing) {
-        case 'ACD':
-            return 'before lunch';
-        case 'CD':
-            return 'at lunch';
-        case 'PCD':
-            return 'after lunch';
-        case 'ACM':
-            return 'before breakfast';
-        case 'CM':
-            return 'at breakfast';
-        case 'PCM':
-            return 'before breakfast';
-        case 'ACV':
-            return 'before dinner';
-        case 'CV':
-            return 'at dinner';
-        case 'PCV':
-            return 'after dinner';
-        case 'AC':
-            return 'before meals';
-        case 'C':
-            return 'with meals';
-        case 'PC':
-            return 'after meals';
-        default:
-            return '';
-    }
-}
-
-function promptMedicationStart(medication, duration, time) {
-    const message = `You have to take ${medication} for ${duration} days ${timingString(time)}. Which day will you take the first dose?`;
-    return wrapSpeakMessage(message);
 }
 
 function getMedicationReminderText(value, unit, medication, time) {
     const regex = new RegExp('^[0-2][0-9]');
     const timing = regex.test(time) ? `at ${time}` : timingToText(time);
     return `Take ${value} ${unit} of ${medication} ${timing}`;
+}
+
+function getConfirmationDateText(healthRequest) {
+    return `You have set the start date for ${healthRequest}.`;
+}
+
+function getSuggestedTimeText(meal) {
+    return `Is this measure before ${meal}, after ${meal}, or none?`
 }
 
 function getMedicationSsmlReminderText(value, unit, medication, time) {
@@ -408,8 +364,6 @@ function unitsToStrings(unit, isPlural) {
 
 module.exports = {
     responses,
-    promptTimingEventTime,
-    promptMedicationStart,
     getMedicationReminderText,
     getMedicationSsmlReminderText,
     getStartDatePrompt,
@@ -418,9 +372,10 @@ module.exports = {
     makeTextFromObservations,
     getMedicationTextData,
     getServiceTextData,
-    timingToText,
     getMedicationValues,
     makeMedicationText,
     makeServiceText,
     getTextForDay,
+    getConfirmationDateText,
+    getSuggestedTimeText,
 }
