@@ -45,23 +45,6 @@
           ]
         },
         {
-          "name": "CarePlanIntent",
-          "slots": [
-            {
-              "name": "carePlanDate",
-              "type": "AMAZON.DATE"
-            }
-          ],
-          "samples": [
-            "What I have to do {carePlanDate}",
-            "What should I do {carePlanDate}",
-            "What is my treatment {carePlanDate}",
-            "What is the plan for {carePlanDate}",
-            "What's my plan for {carePlanDate}",
-            "What was my treatment {carePlanDate}"
-          ]
-        },
-        {
           "name": "MedicationReminderIntent",
           "slots": [],
           "samples": [
@@ -394,96 +377,6 @@
         {
           "name": "healthRequestName",
           "values": [
-            {
-              "name": {
-                "value": "metformin"
-              }
-            },
-            {
-              "name": {
-                "value": "glyburide"
-              }
-            },
-            {
-              "name": {
-                "value": "glipizide"
-              }
-            },
-            {
-              "name": {
-                "value": "glynase"
-              }
-            },
-            {
-              "name": {
-                "value": "repaglinide"
-              }
-            },
-            {
-              "name": {
-                "value": "nateglinide"
-              }
-            },
-            {
-              "name": {
-                "value": "actos"
-              }
-            },
-            {
-              "name": {
-                "value": "glynase"
-              }
-            },
-            {
-              "name": {
-                "value": "avandia"
-              }
-            },
-            {
-              "name": {
-                "value": "pioglitazone"
-              }
-            },
-            {
-              "name": {
-                "value": "januvia"
-              }
-            },
-            {
-              "name": {
-                "value": "onglyza"
-              }
-            },
-            {
-              "name": {
-                "value": "tradjenta"
-              }
-            },
-            {
-              "name": {
-                "value": "exenatide"
-              }
-            },
-            {
-              "name": {
-                "value": "byetta"
-              }
-            },
-            {
-              "name": {
-                "value": "liraglutide"
-              }
-            },
-            {
-              "name": {
-                "value": "semaglutide"
-              }
-            },
-            {
-              "name": {
-                "value": "liraglutide"
-              }
-            },
             {
               "name": {
                 "value": "Glucose measurement"
