@@ -64,45 +64,6 @@ const MedicationForDateIntentHandler = {
     }
 };
 
-const CarePlanIntentHandler = {
-    canHandle(handlerInput) {
-        return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
-            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'CarePlanIntent';
-    },
-    async handle(handlerInput) {
-        let userInfo = await getValidatedUser(handlerInput);
-        if (!userInfo) {
-            return requestAccountLink(handlerInput);
-        }
-
-        const date = handlerInput.requestEnvelope.request.intent.slots.carePlanDate.value;
-        const self = await patients.getSelf(userInfo.username);
-        const userTimezone = await helper.getTimezoneOrDefault(handlerInput);
-        const requestsBundle = await patients.getMedicationRequestsForDate(userInfo.username, date, "carePlan",
-            fhirTiming.timingEvent.ALL_DAY, userTimezone);
-        // Check missing dates in requests
-        const missingDate = helper.getActiveMissingDate(self, fhirCarePlain.requestListFromBundle(requestsBundle));
-        if (missingDate) {
-            return switchContextToStartDate(handlerInput, missingDate, userTimezone);
-        }
-
-        let speakOutput
-        const medications = fhirCarePlain.medicationsFromBundle(requestsBundle);
-        const services = fhirCarePlain.serviceRequestsFromBundle(requestsBundle);
-        if (medications.length === 0 && services.length === 0) {
-            speakOutput = `${strings.responses.enGb.NO_RECORDS_FOUND} for ${strings.getTextForDay(date, userTimezone, '')}`;
-        } else {
-            const medicationText = fhirMedicationRequest.getTextForMedicationRequests(medications, self, userTimezone);
-            const servicesText = fhirServiceRequest.getTextForServiceRequests(services, self, userTimezone);
-            speakOutput = `${strings.getTextForDay(date, userTimezone, 'On')}, ${medicationText} ${servicesText}`;
-        }
-
-        return handlerInput.responseBuilder
-            .speak(speakOutput)
-            .getResponse();
-    }
-}
-
 const MedicationReminderIntentHandler = {
     canHandle(handlerInput) {
         return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
@@ -283,6 +244,7 @@ const SetStartDateCompletedIntentHandler = {
         const userTimeZone = await helper.getTimezoneOrDefault(handlerInput);
         const dateTime = luxon.DateTime.fromISO(`${date}T${time}`, {zone: userTimeZone});
         await patients.setStartDate(userInfo.username, missingDate.id, { startDate: dateTime.toUTC().toISO() });
+        // TODO move to strings
         const {speakOutput, reprompt} = getStartDateConfirmedResponse(session, `You have set the start date for ${healthRequest}.`);
         delete session[helper.sessionValues.requestMissingDate];
         attributesManager.setSessionAttributes(session);
@@ -329,6 +291,7 @@ const RegisterGlucoseLevelIntentInProgressWithValueHandler = {
 
         const self = await patients.getSelf(userInfo.username);
         const meal = helper.getSuggestedTiming(self);
+        // TODO move to strings
         const message = `Is this measure before ${meal}, after ${meal}, or none?`
         return handlerInput.responseBuilder
             .speak(message)
@@ -513,6 +476,7 @@ const ConnectionsResponseHandler = {
             case "DENIED":
             case "NOT_ANSWERED":
                 return handlerInput.responseBuilder
+                    // TODO move to strings
                     .speak("Without permissions, I can't set a reminder.")
                     .getResponse();
             case "ACCEPTED":
@@ -607,7 +571,6 @@ exports.handler = Alexa.SkillBuilders.custom()
     .addRequestHandlers(
         LaunchRequestHandler,
         MedicationForDateIntentHandler,
-        CarePlanIntentHandler,
         MedicationReminderIntentHandler,
         ConnectionsResponseHandler,
         HelpIntentHandler,
