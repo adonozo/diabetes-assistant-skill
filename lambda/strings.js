@@ -20,12 +20,6 @@ function getLocalizedStrings(locale) {
     }
 }
 
-function getMedicationReminderText(value, unit, medication, time) {
-    const regex = new RegExp('^[0-2][0-9]');
-    const timing = regex.test(time) ? `at ${time}` : timingToText(time);
-    return `Take ${value} ${unit} of ${medication} ${timing}`;
-}
-
 function getConfirmationDateText(healthRequest) {
     return `You have set the start date for ${healthRequest}.`;
 }
@@ -34,47 +28,8 @@ function getSuggestedTimeText(meal) {
     return `Is this measure before ${meal}, after ${meal}, or none?`
 }
 
-function getMedicationSsmlReminderText(value, unit, medication, time) {
-    const message = `Take ${value} ${unit} of ${medication} ${timingString(time)}`;
-    return wrapSpeakMessage(message);
-}
-
-function getServiceReminderText(action, time) {
-    const regex = new RegExp('^[0-2][0-9]');
-    const timing = regex.test(time) ? `at ${time}` : timingToText(time);
-    return `${action} ${timing}`;
-}
-
-function getServiceSsmlReminderText(action, time) {
-    const message = `${action} ${timingString(time)}`
-    return wrapSpeakMessage(message);
-}
-
-/**
- * Convert a timing to a spoken string
- * @param timing: Can be a time (00:00 - 23:59) or an event date
- * @returns {string}: The text Alexa will tell
- */
-function timingString(timing) {
-    const regex = new RegExp('^[0-2][0-9]');
-    return regex.test(timing) ? `at <say-as interpret-as="time">${timing}</say-as>` : timingToText(timing);
-}
-
 function wrapSpeakMessage(message) {
     return `<speak>${message}</speak>`
-}
-
-function getStartDatePrompt(missingDate) {
-    const init = 'I need some information first.';
-    if (missingDate.type === 'MedicationRequest') {
-        return `${init} You need to take ${missingDate.name} for ${missingDate.duration} days.`;
-    }
-
-    if (missingDate.type === 'ServiceRequest') {
-        return `${init} Your plan includes: ${missingDate.name} for ${missingDate.duration} days.`;
-    }
-
-    return '';
 }
 
 function makeTextFromObservations(observations, timezone) {
@@ -265,11 +220,6 @@ function unitsToStrings(unit, isPlural) {
 }
 
 module.exports = {
-    getMedicationReminderText,
-    getMedicationSsmlReminderText,
-    getStartDatePrompt,
-    getServiceReminderText,
-    getServiceSsmlReminderText,
     makeTextFromObservations,
     makeMedicationText,
     makeServiceText,

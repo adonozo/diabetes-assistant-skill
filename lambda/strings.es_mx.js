@@ -265,4 +265,9 @@ function unitsToStrings(unit, isPlural) {
 
 module.exports = {
     responses,
+    getMedicationReminderText,
+    getMedicationSsmlReminderText,
+    getServiceReminderText,
+    getServiceSsmlReminderText,
+    getStartDatePrompt,
 }

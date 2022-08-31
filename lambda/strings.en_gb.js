@@ -53,6 +53,11 @@ function getServiceReminderText(action, time) {
     return `${action} ${timing}`;
 }
 
+function getServiceSsmlReminderText(action, time) {
+    const message = `${action} ${timingString(time)}`
+    return wrapSpeakMessage(message);
+}
+
 /**
  * Convert a timing to a spoken string
  * @param timing: Can be a time (00:00 - 23:59) or an event date
@@ -388,4 +393,9 @@ function unitsToStrings(unit, isPlural) {
 
 module.exports = {
     responses,
+    getMedicationReminderText,
+    getMedicationSsmlReminderText,
+    getServiceReminderText,
+    getServiceSsmlReminderText,
+    getStartDatePrompt,
 }

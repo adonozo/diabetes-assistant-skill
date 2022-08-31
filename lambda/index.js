@@ -5,7 +5,7 @@ const auth = require('./auth');
 const medicationRequests = require("./api/medicationRequest");
 const carePlan = require("./api/carePlan")
 const fhirMedicationRequest = require("./fhir/medicationRequest");
-const fhirCarePlain = require("./fhir/carePlan");
+const fhirCarePlan = require("./fhir/carePlan");
 const helper = require("./helper");
 const patients = require("./api/patients");
 const fhirTiming = require("./fhir/timing");
@@ -45,11 +45,11 @@ const MedicationForDateIntentHandler = {
         const userTimezone = await helper.getTimezoneOrDefault(handlerInput);
         const medicationRequest = await patients.getMedicationRequests(userInfo.username, date,
             fhirTiming.timingEvent.ALL_DAY, userTimezone);
-        const medications = fhirCarePlain.medicationsFromBundle(medicationRequest);
+        const medications = fhirCarePlan.medicationsFromBundle(medicationRequest);
         // Check missing dates in requests
         const missingDate = helper.getActiveMissingDate(self, medications);
         if (missingDate) {
-            return switchContextToStartDate(handlerInput, missingDate, userTimezone);
+            return switchContextToStartDate(handlerInput, missingDate, userTimezone, localizedMessages);
         }
 
         let speakOutput
@@ -97,12 +97,16 @@ const MedicationReminderIntentHandler = {
         const missingDate = helper.getActiveMissingDate(self, requests);
         if (missingDate) {
             const userTimezone = await helper.getTimezoneOrDefault(handlerInput);
-            return switchContextToStartDate(handlerInput, missingDate, userTimezone);
+            return switchContextToStartDate(handlerInput, missingDate, userTimezone, localizedMessages);
         }
 
         // Create reminders
         const userTimeZone = await helper.getTimezoneOrDefault(handlerInput);
-        const medicationReminders = reminders.getRemindersForMedicationRequests(requests, self, userTimeZone)
+        const medicationReminders = reminders.getRemindersForMedicationRequests({
+            requests,
+            patient: self,
+            timezone: userTimeZone,
+            localizedMessages})
         const remindersApiClient = handlerInput.serviceClientFactory.getReminderManagementServiceClient();
         for (const reminder of medicationReminders) {
             await remindersApiClient.createReminder(reminder);
@@ -136,7 +140,7 @@ const CreateRemindersIntentHandler = {
 
         // Check if timing setup is needed.
         const requestBundle = await carePlan.getActiveCarePlan(userInfo.username);
-        const requests = fhirCarePlain.requestListFromBundle(requestBundle);
+        const requests = fhirCarePlan.requestListFromBundle(requestBundle);
         const timingValidations = helper.getActiveMissingTimings(self, requests);
         if (timingValidations.size > 0) {
             return switchContextToTiming(handlerInput, timingValidations.values().next().value);
@@ -146,7 +150,7 @@ const CreateRemindersIntentHandler = {
         const missingDate = helper.getActiveMissingDate(self, requests);
         if (missingDate) {
             const userTimezone = await helper.getTimezoneOrDefault(handlerInput);
-            return switchContextToStartDate(handlerInput, missingDate, userTimezone);
+            return switchContextToStartDate(handlerInput, missingDate, userTimezone, localizedMessages);
         }
 
         // Create reminders
@@ -649,7 +653,7 @@ const switchContextToTiming = (handlerInput, timing) => {
         .getResponse()
 };
 
-const switchContextToStartDate = (handlerInput, missingDate, userTimeZone) => {
+const switchContextToStartDate = (handlerInput, missingDate, userTimeZone, localizedMessages) => {
     const attributesManager = handlerInput.attributesManager;
     const session = attributesManager.getSessionAttributes();
     const intent = handlerInput.requestEnvelope.request.intent;
@@ -665,7 +669,7 @@ const switchContextToStartDate = (handlerInput, missingDate, userTimeZone) => {
         delegatedIntent= helper.getDelegatedSetStartDateWithTimeIntent(missingDate.name, time);
     }
 
-    const requiredSetup = strings.getStartDatePrompt(missingDate);
+    const requiredSetup = localizedMessages.getStartDatePrompt(missingDate);
     return handlerInput.responseBuilder
         .addDelegateDirective(delegatedIntent)
         .speak(requiredSetup)
