@@ -151,7 +151,11 @@ const CreateRemindersIntentHandler = {
 
         // Create reminders
         const userTimeZone = await helper.getTimezoneOrDefault(handlerInput);
-        const requestReminders = reminders.getRemindersForRequests(requests, self, userTimeZone);
+        const requestReminders = reminders.getRemindersForRequests({
+            requests,
+            patient: self,
+            timezone: userTimeZone,
+            localizedMessages});
         const remindersApiClient = handlerInput.serviceClientFactory.getReminderManagementServiceClient();
         for (const reminder of requestReminders) {
             await remindersApiClient.createReminder(reminder);

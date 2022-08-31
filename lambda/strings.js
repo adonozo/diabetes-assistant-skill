@@ -77,125 +77,6 @@ function getStartDatePrompt(missingDate) {
     return '';
 }
 
-function getMedicationTextData(request, patient, timezone, textProcessor) {
-    const medicationData = [];
-    const medication = request.medicationReference.display;
-    request.dosageInstruction.forEach(dosage => {
-        const {start, end} = fhirTiming.getDatesFromTiming(dosage.timing, patient, dosage.id);
-        const {value, unit} = getMedicationValues(dosage);
-        if (dosage.timing.repeat.when && Array.isArray(dosage.timing.repeat.when) && dosage.timing.repeat.when.length > 0) {
-            dosage.timing.repeat.when.forEach(timing => {
-                const patientDate = patient.exactEventTimes[timing];
-                const dateTime = DateTime.fromISO(patientDate).setZone(timezone); // Date already in UTC
-                const processedText = textProcessor({
-                    value: value,
-                    unit: unit,
-                    medication: medication,
-                    timing: timing,
-                    dateTime: dateTime,
-                    start: start,
-                    end: end,
-                    frequency: dosage.timing.repeat.frequency,
-                    dayOfWeek: dosage.timing.repeat.dayOfWeek
-                })
-                medicationData.push(processedText)
-            });
-        } else if (dosage.timing.repeat.timeOfDay && Array.isArray(dosage.timing.repeat.timeOfDay) && dosage.timing.repeat.timeOfDay.length > 0) {
-            dosage.timing.repeat.timeOfDay.forEach(time => {  // Timing is in local time
-                const date = DateTime.utc();
-                const dateTime = DateTime.fromISO(`${date.toISODate()}T${time}Z`);
-                const processedText = textProcessor({
-                    value: value,
-                    unit: unit,
-                    medication: medication,
-                    timing: time,
-                    dateTime: dateTime,
-                    start: start,
-                    end: end,
-                    frequency: dosage.timing.repeat.frequency,
-                    dayOfWeek: dosage.timing.repeat.dayOfWeek
-                })
-                medicationData.push(processedText)
-            });
-        } else if (dosage.timing.repeat.frequency && dosage.timing.repeat.frequency > 1) {
-            const patientDate = patient.resourceStartDate[dosage.id]; // This is in UTC
-            const dateTime = DateTime.fromISO(patientDate).setZone(timezone);
-            const processedText = textProcessor({
-                value: value,
-                unit: unit,
-                medication: medication,
-                timing: dateTime.toISOTime({ suppressSeconds: true, includeOffset: false }),
-                dateTime: dateTime,
-                start: start,
-                end: end,
-                frequency: dosage.timing.repeat.frequency,
-                dayOfWeek: dosage.timing.repeat.dayOfWeek
-            })
-            medicationData.push(processedText)
-        }
-    });
-
-    return medicationData;
-}
-
-function getServiceTextData(request, patient, timezone, textProcessor) {
-    const serviceData = [];
-    const action = request.code.coding[0].display;
-
-    if (!request.occurrenceTiming) {
-        return serviceData;
-    }
-
-    const {start, end} = fhirTiming.getDatesFromTiming(request.occurrenceTiming, patient, request.id);
-    const repeat = request.occurrenceTiming.repeat;
-    if (repeat.when && Array.isArray(repeat.when) && repeat.when.length > 0) {
-        repeat.when.forEach(timing => {
-            const patientDate = patient.exactEventTimes[timing];
-            const dateTime = DateTime.fromISO(patientDate).setZone(timezone);
-            const processedText = textProcessor({
-                action: action,
-                timing: timing,
-                dateTime: dateTime,
-                start: start,
-                end: end,
-                frequency: repeat.frequency,
-                dayOfWeek: repeat.dayOfWeek
-            })
-            serviceData.push(processedText)
-        });
-    } else if (repeat.timeOfDay && Array.isArray(repeat.timeOfDay) && repeat.timeOfDay.length > 0) {
-        repeat.timeOfDay.forEach(timing => {  // Timing is in local time (hh:mm)
-            const date = DateTime.utc();
-            const dateTime = DateTime.fromISO(`${date.toISODate()}T${timing}Z`);
-            const processedText = textProcessor({
-                action: action,
-                timing: timing,
-                dateTime: dateTime, // RRULE uses local time, should not convert to UTC
-                start: start,
-                end: end,
-                frequency: repeat.frequency,
-                dayOfWeek: repeat.dayOfWeek
-            })
-            serviceData.push(processedText)
-        });
-    } else if (repeat.frequency && repeat.frequency > 1) {
-        const patientDate = patient.resourceStartDate[dosage.id]; // This is in UTC
-        const dateTime = DateTime.fromISO(patientDate).setZone(timezone);
-        const processedText = textProcessor({
-            action: action,
-            timing: dateTime.toISOTime({ suppressSeconds: true, includeOffset: false }),
-            dateTime: dateTime,
-            start: start,
-            end: end,
-            frequency: repeat.frequency,
-            dayOfWeek: repeat.dayOfWeek
-        })
-        serviceData.push(processedText)
-    }
-
-    return serviceData;
-}
-
 function makeTextFromObservations(observations, timezone) {
     const dateMap = new Map();
     observations.forEach(observation => {
@@ -390,9 +271,6 @@ module.exports = {
     getServiceReminderText,
     getServiceSsmlReminderText,
     makeTextFromObservations,
-    getMedicationTextData,
-    getServiceTextData,
-    getMedicationValues,
     makeMedicationText,
     makeServiceText,
     getTextForDay,

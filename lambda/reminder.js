@@ -1,7 +1,8 @@
 const {RRule} = require("rrule")
 const {DateTime} = require("luxon");
-const strings = require("./strings");
 const fhirTiming = require("./fhir/timing");
+const fhirMedicationRequest = require("./fhir/medicationRequest");
+const fhirServiceRequest = require("./fhir/serviceRequest");
 
 const reminderDirective = {
     type: "Connections.SendRequest",
@@ -43,28 +44,44 @@ const absoluteReminderRequest = {
     }
 }
 
-function createAbsoluteReminder({scheduledTime, startDateTime, endDateTime, recurrenceRules, text, ssml, timezone}) {
-    const request = JSON.parse(JSON.stringify(absoluteReminderRequest));
-    request.trigger.scheduledTime = scheduledTime;
-    request.trigger.timeZoneId = timezone;
-    request.trigger.recurrence.startDateTime = startDateTime;
-    request.trigger.recurrence.endDateTime = endDateTime;
-    request.trigger.recurrence.recurrenceRules = recurrenceRules;
-    request.alertInfo.spokenInfo.content[0].text = text;
-    request.alertInfo.spokenInfo.content[0].ssml = ssml;
-    return request;
-}
-
-function getRemindersForRequests(requests, patient, timezone) {
+function getRemindersForRequests({
+    requests,
+    patient,
+    timezone,
+    localizedMessages
+}) {
     const medicationRequests = requests.filter(request => request.resourceType === "MedicationRequest");
     const serviceRequests = requests.filter(request => request.resourceType === "ServiceRequest");
-    return [...getRemindersForMedicationRequests(medicationRequests, patient, timezone),
-        ...getRemindersForServiceRequests(serviceRequests, patient, timezone)];
+    return [
+        ...getRemindersForMedicationRequests({
+            requests: medicationRequests,
+            patient,
+            timezone,
+            localizedMessages
+        }),
+        ...getRemindersForServiceRequests({
+            requests: serviceRequests,
+            patient,
+            timezone,
+            localizedMessages
+        })
+    ];
 }
 
-function getRemindersForMedicationRequests(requests, patient, timezone) {
+function getRemindersForMedicationRequests({
+   requests,
+   patient,
+   timezone,
+   localizedMessages
+}) {
     const currentDateTime = DateTime.utc().toISO();
-    return requests.map(request => strings.getMedicationTextData(request, patient, timezone, getBaseMedicationReminder))
+    return requests.map(request => fhirMedicationRequest.getMedicationTextData({
+        request,
+        patient,
+        timezone,
+        textProcessor: getBaseMedicationReminder,
+        localizedMessages
+    }))
         .flat(1)
         .map(data => createAbsoluteReminder({
             scheduledTime: currentDateTime,
@@ -77,9 +94,20 @@ function getRemindersForMedicationRequests(requests, patient, timezone) {
         }));
 }
 
-function getRemindersForServiceRequests(requests, patient, timezone) {
+function getRemindersForServiceRequests({
+    requests,
+    patient,
+    timezone,
+    localizedMessages
+}) {
     const currentDateTime = DateTime.utc().toISO();
-    return requests.map(request => strings.getServiceTextData(request, patient, timezone, getBaseServiceReminder))
+    return requests.map(request => fhirServiceRequest.getServiceTextData({
+        request,
+        patient,
+        timezone,
+        textProcessor: getBaseServiceReminder,
+        localizedMessages
+    }))
         .flat(1)
         .map(data => createAbsoluteReminder({
             scheduledTime: currentDateTime,
@@ -92,9 +120,20 @@ function getRemindersForServiceRequests(requests, patient, timezone) {
         }));
 }
 
-function getBaseMedicationReminder({value, unit, medication, timing, dateTime, start, end, frequency, dayOfWeek}) {
-    const text = strings.getMedicationReminderText(value, unit, medication, timing);
-    const ssml = strings.getMedicationSsmlReminderText(value, unit, medication, timing);
+function getBaseMedicationReminder({
+    value,
+    unit,
+    medication,
+    timing,
+    dateTime,
+    start,
+    end,
+    frequency,
+    dayOfWeek,
+    localizedMessages
+}){
+    const text = localizedMessages.getMedicationReminderText(value, unit, medication, timing);
+    const ssml = localizedMessages.getMedicationSsmlReminderText(value, unit, medication, timing);
     const rule = getRRule(dateTime, frequency, dayOfWeek);
 
     return {
@@ -106,9 +145,18 @@ function getBaseMedicationReminder({value, unit, medication, timing, dateTime, s
     };
 }
 
-function getBaseServiceReminder({action, timing, dateTime, start, end, frequency, dayOfWeek}) {
-    const text = strings.getServiceReminderText(action, timing);
-    const ssml = strings.getServiceSsmlReminderText(action, timing);
+function getBaseServiceReminder({
+    action,
+    timing,
+    dateTime,
+    start,
+    end,
+    frequency,
+    dayOfWeek,
+    localizedMessages
+}) {
+    const text = localizedMessages.getServiceReminderText(action, timing);
+    const ssml = localizedMessages.getServiceSsmlReminderText(action, timing);
     const rule = getRRule(dateTime, frequency, dayOfWeek);
     return {
         text: text,
@@ -166,6 +214,26 @@ const getWeeklyRrule = (dateTime, days) => days.map(day => fhirTiming.dayToRrule
             interval: 1
         }).toString().replace('RRULE:', '')
     );
+
+function createAbsoluteReminder({
+    scheduledTime,
+    startDateTime,
+    endDateTime,
+    recurrenceRules,
+    text,
+    ssml,
+    timezone
+}) {
+    const request = JSON.parse(JSON.stringify(absoluteReminderRequest));
+    request.trigger.scheduledTime = scheduledTime;
+    request.trigger.timeZoneId = timezone;
+    request.trigger.recurrence.startDateTime = startDateTime;
+    request.trigger.recurrence.endDateTime = endDateTime;
+    request.trigger.recurrence.recurrenceRules = recurrenceRules;
+    request.alertInfo.spokenInfo.content[0].text = text;
+    request.alertInfo.spokenInfo.content[0].ssml = ssml;
+    return request;
+}
 
 module.exports = {
     reminderDirective,
