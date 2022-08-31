@@ -246,15 +246,15 @@ function getDaysDifference(start, end) {
     return Math.abs(days);
 }
 
-function getBloodGlucoseAlert(value, stringTiming) {
+function getBloodGlucoseAlert(value, stringTiming, localizedMessages) {
     if (value < minBloodGlucoseValue) {
-        return strings.responses.enGb.LOW_GLUCOSE;
+        return localizedMessages.responses.LOW_GLUCOSE;
     }
 
     const timing = fhirTiming.stringToTimingCode(stringTiming);
     if ((timing === fhirTiming.timingEvent.ACM && value > maxFastingGlucoseValue)
         || value > maxAfterMealGlucoseValue) {
-        return strings.responses.enGb.HIGH_GLUCOSE;
+        return localizedMessages.responses.HIGH_GLUCOSE;
     }
 
     return '';
