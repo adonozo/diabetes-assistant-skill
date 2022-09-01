@@ -41,6 +41,17 @@ function makeTextFromObservations(observations, timezone, localizedMessages) {
     return wrapSpeakMessage(text);
 }
 
+function listItems(values, concatWord) {
+    if (values.length === 1) {
+        return values[0];
+    }
+
+    const joinComma = values.length > 2 ? ',' : ''
+    return values.map((value, index) =>
+        index === values.length - 1 ? ` ${concatWord} ${value}.` : ` ${value}`)
+        .join(joinComma)
+}
+
 function wrapSpeakMessage(message) {
     return `<speak>${message}</speak>`
 }
@@ -48,4 +59,6 @@ function wrapSpeakMessage(message) {
 module.exports = {
     makeTextFromObservations,
     getLocalizedStrings,
+    listItems,
+    wrapSpeakMessage,
 }

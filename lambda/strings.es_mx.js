@@ -1,6 +1,7 @@
 const {timingEvent} = require("./fhir/timing");
 const fhirTiming = require("./fhir/timing");
 const {DateTime} = require("luxon");
+const {listItems, wrapSpeakMessage} = require("strings")
 
 const responses = {
     WELCOME: "Hola, puedes preguntarme tus medicamentos para mañana o puedo crear recordatorios",
@@ -27,6 +28,7 @@ const responses = {
     HIGH_GLUCOSE: "Tu nivel de azúcar en sangre es más alto de lo recomendado. Considera consultar con tu médico.",
     PERMISSIONS_REQUIRED: "Sin permisos, no puedo crear recordatorios para tus medicamentos.",
     DATE_PREPOSITION: "El",
+    CONCAT_WORD: "y",
 }
 
 function getMedicationReminderText(value, unit, medication, time) {
@@ -67,10 +69,6 @@ function getServiceSsmlReminderText(action, time) {
 function timingString(timing) {
     const regex = new RegExp('^[0-2][0-9]');
     return regex.test(timing) ? `a las <say-as interpret-as="time">${timing}</say-as>` : timingToText(timing);
-}
-
-function wrapSpeakMessage(message) {
-    return `<speak>${message}</speak>`
 }
 
 function getStartDatePrompt(missingDate) {
@@ -173,7 +171,7 @@ function makeMedicationText(medicationData) {
         return timings.map(time =>
             `${dose.value} ${unitsToStrings(dose.unit, +dose.value > 1)} ${preposition} ${time}`);
     }).flat(1);
-    const doseText = listItems(doseTextArray);
+    const doseText = listItems(doseTextArray, responses.CONCAT_WORD);
     return `Toma ${medicationData.medication}, ${doseText}`;
 }
 
@@ -190,7 +188,7 @@ function makeServiceText(serviceData) {
     const timingTextFunction = serviceHasTime ? getHoursAndMinutesFromString : timingToText;
     const preposition = serviceHasTime ? 'a las ' : '';
     const timings = serviceData.timings.map(time => timingTextFunction(time));
-    return `${serviceData.action} ${preposition} ${listItems(timings)}`;
+    return `${serviceData.action} ${preposition} ${listItems(timings, responses.CONCAT_WORD)}`;
 }
 
 function timingToText(timing) {
@@ -222,18 +220,6 @@ function timingToText(timing) {
         default:
             return '';
     }
-}
-
-// todo add a "concat" word parameter
-function listItems(values) {
-    if (values.length === 1) {
-        return values[0];
-    }
-
-    const joinComma = values.length > 2 ? ',' : ''
-    return values.map((value, index) =>
-        index === values.length - 1 ? ` and ${value}.` : ` ${value}`)
-        .join(joinComma)
 }
 
 function unitsToStrings(unit, isPlural) {

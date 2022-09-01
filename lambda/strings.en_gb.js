@@ -1,6 +1,7 @@
 const {timingEvent} = require("./fhir/timing");
 const fhirTiming = require("./fhir/timing");
 const {DateTime} = require("luxon");
+const {listItems, wrapSpeakMessage} = require("strings")
 
 const responses = {
     WELCOME: "Welcome, I can set up reminders or tell you your medications for tomorrow. Which would you like to try?",
@@ -27,6 +28,7 @@ const responses = {
     HIGH_GLUCOSE: 'Your blood glucose level is higher than the recommended value. Please consider consulting to your GP or to a health provider.',
     PERMISSIONS_REQUIRED: "Without permissions, I can't set a reminder.",
     DATE_PREPOSITION: "On",
+    CONCAT_WORD: "and",
 }
 
 function getMedicationReminderText(value, unit, medication, time) {
@@ -67,10 +69,6 @@ function getServiceSsmlReminderText(action, time) {
 function timingString(timing) {
     const regex = new RegExp('^[0-2][0-9]');
     return regex.test(timing) ? `at <say-as interpret-as="time">${timing}</say-as>` : timingToText(timing);
-}
-
-function wrapSpeakMessage(message) {
-    return `<speak>${message}</speak>`
 }
 
 function getStartDatePrompt(missingDate) {
@@ -173,7 +171,7 @@ function makeMedicationText(medicationData) {
         return timings.map(time =>
             `${dose.value} ${unitsToStrings(dose.unit, +dose.value > 1)} ${preposition} ${time}`);
     }).flat(1);
-    const doseText = listItems(doseTextArray);
+    const doseText = listItems(doseTextArray, responses.CONCAT_WORD);
     return `Take ${medicationData.medication}, ${doseText}`;
 }
 
@@ -190,7 +188,7 @@ function makeServiceText(serviceData) {
     const timingTextFunction = serviceHasTime ? getHoursAndMinutesFromString: timingToText;
     const preposition = serviceHasTime ? 'at ' : '';
     const timings = serviceData.timings.map(time => timingTextFunction(time));
-    return `Do a ${serviceData.action} ${preposition} ${listItems(timings)}`;
+    return `Do a ${serviceData.action} ${preposition} ${listItems(timings, responses.CONCAT_WORD)}`;
 }
 
 function timingToText(timing) {
@@ -222,17 +220,6 @@ function timingToText(timing) {
         default:
             return '';
     }
-}
-
-function listItems(values) {
-    if (values.length === 1) {
-        return values[0];
-    }
-
-    const joinComma = values.length > 2 ? ',' : ''
-    return values.map((value, index) =>
-        index === values.length - 1 ? ` and ${value}.` : ` ${value}`)
-        .join(joinComma)
 }
 
 function unitsToStrings(unit, isPlural) {
