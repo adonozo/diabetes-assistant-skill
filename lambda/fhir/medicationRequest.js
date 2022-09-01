@@ -1,5 +1,4 @@
 const fhirTiming = require("./timing");
-const strings = require("./../strings");
 const {DateTime} = require("luxon");
 
 /**
@@ -37,9 +36,9 @@ function getMedicationFromDosageId(dosageId, requests) {
     return result;
 }
 
-function getTextForMedicationRequests(requests, patient, timezone) {
+function getTextForMedicationRequests(requests, patient, timezone, localizedMessages) {
     return requests.map(request => getMedicationText(request, patient, timezone))
-        .map(data => strings.makeMedicationText(data))
+        .map(data => localizedMessages.makeMedicationText(data))
         .join('. ');
 }
 

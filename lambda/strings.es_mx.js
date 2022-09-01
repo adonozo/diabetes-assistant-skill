@@ -1,7 +1,6 @@
 const {timingEvent} = require("./fhir/timing");
 const fhirTiming = require("./fhir/timing");
 const {DateTime} = require("luxon");
-const strings = require("strings");
 
 const responses = {
     WELCOME: "Hola, puedes preguntarme tus medicamentos para mañana o puedo crear recordatorios",
@@ -27,6 +26,7 @@ const responses = {
     LOW_GLUCOSE: "Tu nivel de azúcar en sangre es más bajo de lo recomendado. Considera consultar con tu médico.",
     HIGH_GLUCOSE: "Tu nivel de azúcar en sangre es más alto de lo recomendado. Considera consultar con tu médico.",
     PERMISSIONS_REQUIRED: "Sin permisos, no puedo crear recordatorios para tus medicamentos.",
+    DATE_PREPOSITION: "El",
 }
 
 function getMedicationReminderText(value, unit, medication, time) {
@@ -45,7 +45,7 @@ function getSuggestedTimeText(meal) {
 
 function getMedicationSsmlReminderText(value, unit, medication, time) {
     const message = `Toma ${value} ${unit} de ${medication} ${timingString(time)}`;
-    return strings.wrapSpeakMessage(message);
+    return wrapSpeakMessage(message);
 }
 
 function getServiceReminderText(action, time) {
@@ -56,7 +56,7 @@ function getServiceReminderText(action, time) {
 
 function getServiceSsmlReminderText(action, time) {
     const message = `${action} ${timingString(time)}`
-    return strings.wrapSpeakMessage(message);
+    return wrapSpeakMessage(message);
 }
 
 /**
@@ -67,6 +67,10 @@ function getServiceSsmlReminderText(action, time) {
 function timingString(timing) {
     const regex = new RegExp('^[0-2][0-9]');
     return regex.test(timing) ? `a las <say-as interpret-as="time">${timing}</say-as>` : timingToText(timing);
+}
+
+function wrapSpeakMessage(message) {
+    return `<speak>${message}</speak>`
 }
 
 function getStartDatePrompt(missingDate) {
@@ -82,37 +86,13 @@ function getStartDatePrompt(missingDate) {
     return '';
 }
 
-function makeTextFromObservations(observations, timezone) {
-    const dateMap = new Map();
-    observations.forEach(observation => {
-        const date = DateTime.fromISO(observation.issued).setZone(timezone);
-        // TODO remove date proposition
-        const dayKey = getTextForDay(observation.issued, timezone, 'On');
-        const time = getHoursAndMinutes(date);
-        const observationValue = {time: time, value: observation.valueQuantity.value, timing: observation.extension[0]?.valueCode};
-        if (dateMap.has(dayKey)) {
-            dateMap.get(dayKey).push(observationValue);
-        } else {
-            dateMap.set(dayKey, [observationValue]);
-        }
-    });
-
-    let text = '';
-    dateMap.forEach((value, day) => {
-        const textForDay = makeTextForObservationDay(day, value)
-        text = text + textForDay + '. ';
-    })
-
-    return string.wrapSpeakMessage(text);
-}
-
 /**
  *
  * @param day {string}
  * @param observationsValues {{time: string, value: string, timing: string}[]}
  */
 function makeTextForObservationDay(day, observationsValues) {
-    let text = `${day}, you had a blood glucose level of`;
+    let text = `${day}, tu nivel de azúcar en sangre fue`;
     if (observationsValues.length === 1) {
         const observation = observationsValues[0];
         const time = getTimingOrTime(observation);
@@ -123,7 +103,7 @@ function makeTextForObservationDay(day, observationsValues) {
     const values = observationsValues.map((value, index) => {
         const time = getTimingOrTime(value);
         if (index === observationsValues.length - 1) {
-            return ` and ${value.value} ${time}.`;
+            return ` y ${value.value} ${time}.`;
         }
 
         return ` ${value.value} ${time}`;
@@ -167,13 +147,12 @@ function getTextForDay(date, timezone, datePreposition) {
     const yesterday = today.minus({days: 1});
     const tomorrow = today.plus({days: 1});
     const referenceDate = DateTime.fromISO(date).setZone(timezone);
-    // Todo extract to enum
     if (today.toISODate() === referenceDate.toISODate()) {
-        return 'today';
+        return 'hoy';
     } else if (yesterday.toISODate() === referenceDate.toISODate()) {
-        return 'yesterday';
+        return 'ayer';
     } else if (tomorrow.toISODate() === referenceDate.toISODate()) {
-        return 'tomorrow';
+        return 'mañana';
     }
 
     const month = referenceDate.month < 10 ? `0${referenceDate.month}` : referenceDate.month;
@@ -189,12 +168,17 @@ function makeMedicationText(medicationData) {
     const doseTextArray = medicationData.dose.map(dose => {
         const doseHasTime = dose.time.length > 0 && regex.test(dose.time[0]);
         const timingTextFunction = doseHasTime ? getHoursAndMinutesFromString: timingToText;
-        const preposition = doseHasTime ? 'at ' : '';
+        const preposition = doseHasTime ? 'a las' : '';
         const timings = dose.time.map(time => timingTextFunction(time));
-        return timings.map(time => `${dose.value} ${unitsToStrings(dose.unit, +dose.value > 1)} ${preposition} ${time}`);
+        return timings.map(time =>
+            `${dose.value} ${unitsToStrings(dose.unit, +dose.value > 1)} ${preposition} ${time}`);
     }).flat(1);
     const doseText = listItems(doseTextArray);
-    return `Take ${medicationData.medication}, ${doseText}`;
+    return `Toma ${medicationData.medication}, ${doseText}`;
+}
+
+function getNoRecordsTextForDay(date, userTimezone) {
+    return `${responses.NO_RECORDS_FOUND} para ${getTextForDay(date, userTimezone, '')}`;
 }
 
 /**
@@ -203,10 +187,10 @@ function makeMedicationText(medicationData) {
 function makeServiceText(serviceData) {
     const regex = new RegExp('^[0-2][0-9]');
     const serviceHasTime = serviceData.timings.length > 0 && regex.test(serviceData.timings[0]);
-    const timingTextFunction = serviceHasTime ? getHoursAndMinutesFromString: timingToText;
-    const preposition = serviceHasTime ? 'at ' : '';
+    const timingTextFunction = serviceHasTime ? getHoursAndMinutesFromString : timingToText;
+    const preposition = serviceHasTime ? 'a las ' : '';
     const timings = serviceData.timings.map(time => timingTextFunction(time));
-    return `Do a ${serviceData.action} ${preposition} ${listItems(timings)}`;
+    return `${serviceData.action} ${preposition} ${listItems(timings)}`;
 }
 
 function timingToText(timing) {
@@ -270,4 +254,12 @@ module.exports = {
     getServiceReminderText,
     getServiceSsmlReminderText,
     getStartDatePrompt,
+    getTextForDay,
+    makeMedicationText,
+    getNoRecordsTextForDay,
+    makeServiceText,
+    getConfirmationDateText,
+    getSuggestedTimeText,
+    getHoursAndMinutes,
+    makeTextForObservationDay,
 }

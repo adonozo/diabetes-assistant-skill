@@ -10,7 +10,6 @@ const helper = require("./helper");
 const patients = require("./api/patients");
 const fhirTiming = require("./fhir/timing");
 const fhirObservation = require("./fhir/observation");
-const fhirServiceRequest = require("./fhir/serviceRequest");
 const luxon = require("luxon");
 const {DateTime} = require("luxon");
 
@@ -54,10 +53,11 @@ const MedicationForDateIntentHandler = {
 
         let speakOutput
         if (medications.length === 0) {
-            speakOutput = `${localizedMessages.responses.NO_RECORDS_FOUND} for ${localizedMessages.getTextForDay(date, userTimezone, '')}`;
+            speakOutput = localizedMessages.getNoRecordsTextForDay(date, userTimezone);
         } else {
-            const medicationText = fhirMedicationRequest.getTextForMedicationRequests(medications, self, userTimezone);
-            speakOutput = `${localizedMessages.getTextForDay(date, userTimezone, 'On')}, ${medicationText}`;
+            const medicationText = fhirMedicationRequest.getTextForMedicationRequests(medications, self, userTimezone, localizedMessages);
+            const datePreposition = localizedMessages.responses.DATE_PREPOSITION;
+            speakOutput = `${localizedMessages.getTextForDay(date, userTimezone, datePreposition)}, ${medicationText}`;
         }
 
         return handlerInput.responseBuilder
@@ -302,9 +302,10 @@ const RegisterGlucoseLevelIntentInProgressWithValueHandler = {
             return requestAccountLink(handlerInput);
         }
 
+        const localizedMessages = getLocalizedStrings(handlerInput);
         const self = await patients.getSelf(userInfo.username);
         const meal = helper.getSuggestedTiming(self);
-        const message = strings.getSuggestedTimeText(meal);
+        const message = localizedMessages.getSuggestedTimeText(meal);
         return handlerInput.responseBuilder
             .speak(message)
             .reprompt(message)
@@ -677,23 +678,23 @@ const switchContextToStartDate = (handlerInput, missingDate, userTimeZone, local
 }
 
 const getAskGlucoseResponse = (handlerInput, bundle, timezone) => {
+    const localizedMessages = getLocalizedStrings(handlerInput);
     if (!bundle.entry || bundle.entry.length === 0) {
-        const localizedMessages = getLocalizedStrings(handlerInput);
         return handlerInput.responseBuilder
             .speak(localizedMessages.responses.NO_GLUCOSE_RECORDS_FOUND)
             .getResponse();
     }
 
     const observations = fhirObservation.getObservationsFromBundle(bundle);
-    const message = strings.makeTextFromObservations(observations, timezone);
+    const message = strings.makeTextFromObservations(observations, timezone, localizedMessages);
     return handlerInput.responseBuilder
         .speak(message)
         .getResponse();
 }
 
 const getStartDateConfirmedResponse = (session, healthRequest, handlerInput) => {
-    let speakOutput = strings.getConfirmationDateText(healthRequest);
     const localizedMessages = getLocalizedStrings(handlerInput);
+    let speakOutput = localizedMessages.getConfirmationDateText(healthRequest);
 
     let reprompt = localizedMessages.responses.HELP;
     if (session[helper.sessionValues.medicationReminderIntent]) {

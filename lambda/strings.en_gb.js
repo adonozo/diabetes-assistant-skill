@@ -26,6 +26,7 @@ const responses = {
     LOW_GLUCOSE: 'Your blood glucose level is lower than the recommended value. Please consider consulting to your GP or to a health provider.',
     HIGH_GLUCOSE: 'Your blood glucose level is higher than the recommended value. Please consider consulting to your GP or to a health provider.',
     PERMISSIONS_REQUIRED: "Without permissions, I can't set a reminder.",
+    DATE_PREPOSITION: "On",
 }
 
 function getMedicationReminderText(value, unit, medication, time) {
@@ -83,148 +84,6 @@ function getStartDatePrompt(missingDate) {
     }
 
     return '';
-}
-
-function getMedicationTextData(request, patient, timezone, textProcessor) {
-    const medicationData = [];
-    const medication = request.medicationReference.display;
-    request.dosageInstruction.forEach(dosage => {
-        const {start, end} = fhirTiming.getDatesFromTiming(dosage.timing, patient, dosage.id);
-        const {value, unit} = getMedicationValues(dosage);
-        if (dosage.timing.repeat.when && Array.isArray(dosage.timing.repeat.when) && dosage.timing.repeat.when.length > 0) {
-            dosage.timing.repeat.when.forEach(timing => {
-                const patientDate = patient.exactEventTimes[timing];
-                const dateTime = DateTime.fromISO(patientDate).setZone(timezone); // Date already in UTC
-                const processedText = textProcessor({
-                    value: value,
-                    unit: unit,
-                    medication: medication,
-                    timing: timing,
-                    dateTime: dateTime,
-                    start: start,
-                    end: end,
-                    frequency: dosage.timing.repeat.frequency,
-                    dayOfWeek: dosage.timing.repeat.dayOfWeek
-                })
-                medicationData.push(processedText)
-            });
-        } else if (dosage.timing.repeat.timeOfDay && Array.isArray(dosage.timing.repeat.timeOfDay) && dosage.timing.repeat.timeOfDay.length > 0) {
-            dosage.timing.repeat.timeOfDay.forEach(time => {  // Timing is in local time
-                const date = DateTime.utc();
-                const dateTime = DateTime.fromISO(`${date.toISODate()}T${time}Z`);
-                const processedText = textProcessor({
-                    value: value,
-                    unit: unit,
-                    medication: medication,
-                    timing: time,
-                    dateTime: dateTime,
-                    start: start,
-                    end: end,
-                    frequency: dosage.timing.repeat.frequency,
-                    dayOfWeek: dosage.timing.repeat.dayOfWeek
-                })
-                medicationData.push(processedText)
-            });
-        } else if (dosage.timing.repeat.frequency && dosage.timing.repeat.frequency > 1) {
-            const patientDate = patient.resourceStartDate[dosage.id]; // This is in UTC
-            const dateTime = DateTime.fromISO(patientDate).setZone(timezone);
-            const processedText = textProcessor({
-                value: value,
-                unit: unit,
-                medication: medication,
-                timing: dateTime.toISOTime({ suppressSeconds: true, includeOffset: false }),
-                dateTime: dateTime,
-                start: start,
-                end: end,
-                frequency: dosage.timing.repeat.frequency,
-                dayOfWeek: dosage.timing.repeat.dayOfWeek
-            })
-            medicationData.push(processedText)
-        }
-    });
-
-    return medicationData;
-}
-
-function getServiceTextData(request, patient, timezone, textProcessor) {
-    const serviceData = [];
-    const action = request.code.coding[0].display;
-
-    if (!request.occurrenceTiming) {
-        return serviceData;
-    }
-
-    const {start, end} = fhirTiming.getDatesFromTiming(request.occurrenceTiming, patient, request.id);
-    const repeat = request.occurrenceTiming.repeat;
-    if (repeat.when && Array.isArray(repeat.when) && repeat.when.length > 0) {
-        repeat.when.forEach(timing => {
-            const patientDate = patient.exactEventTimes[timing];
-            const dateTime = DateTime.fromISO(patientDate).setZone(timezone);
-            const processedText = textProcessor({
-                action: action,
-                timing: timing,
-                dateTime: dateTime,
-                start: start,
-                end: end,
-                frequency: repeat.frequency,
-                dayOfWeek: repeat.dayOfWeek
-            })
-            serviceData.push(processedText)
-        });
-    } else if (repeat.timeOfDay && Array.isArray(repeat.timeOfDay) && repeat.timeOfDay.length > 0) {
-        repeat.timeOfDay.forEach(timing => {  // Timing is in local time (hh:mm)
-            const date = DateTime.utc();
-            const dateTime = DateTime.fromISO(`${date.toISODate()}T${timing}Z`);
-            const processedText = textProcessor({
-                action: action,
-                timing: timing,
-                dateTime: dateTime, // RRULE uses local time, should not convert to UTC
-                start: start,
-                end: end,
-                frequency: repeat.frequency,
-                dayOfWeek: repeat.dayOfWeek
-            })
-            serviceData.push(processedText)
-        });
-    } else if (repeat.frequency && repeat.frequency > 1) {
-        const patientDate = patient.resourceStartDate[dosage.id]; // This is in UTC
-        const dateTime = DateTime.fromISO(patientDate).setZone(timezone);
-        const processedText = textProcessor({
-            action: action,
-            timing: dateTime.toISOTime({ suppressSeconds: true, includeOffset: false }),
-            dateTime: dateTime,
-            start: start,
-            end: end,
-            frequency: repeat.frequency,
-            dayOfWeek: repeat.dayOfWeek
-        })
-        serviceData.push(processedText)
-    }
-
-    return serviceData;
-}
-
-function makeTextFromObservations(observations, timezone) {
-    const dateMap = new Map();
-    observations.forEach(observation => {
-        const date = DateTime.fromISO(observation.issued).setZone(timezone);
-        const dayKey = getTextForDay(observation.issued, timezone, 'On');
-        const time = getHoursAndMinutes(date);
-        const observationValue = {time: time, value: observation.valueQuantity.value, timing: observation.extension[0]?.valueCode};
-        if (dateMap.has(dayKey)) {
-            dateMap.get(dayKey).push(observationValue);
-        } else {
-            dateMap.set(dayKey, [observationValue]);
-        }
-    });
-
-    let text = '';
-    dateMap.forEach((value, day) => {
-        const textForDay = makeTextForObservationDay(day, value)
-        text = text + textForDay + '. ';
-    })
-
-    return wrapSpeakMessage(text);
 }
 
 /**
@@ -301,15 +160,6 @@ function getTextForDay(date, timezone, datePreposition) {
     return `${datePreposition} <say-as interpret-as="date">????${month}${day}</say-as>`;
 }
 
-function getMedicationValues(dosage) {
-    const doseValue = dosage.doseAndRate[0].doseQuantity.value;
-    const doseUnit = dosage.doseAndRate[0].doseQuantity.unit;
-    return {
-        value: doseValue,
-        unit: doseUnit
-    }
-}
-
 /**
  * @param medicationData {{medication: string, dose: [{value: string, unit: string, time: [string]}]}}
  */
@@ -318,12 +168,17 @@ function makeMedicationText(medicationData) {
     const doseTextArray = medicationData.dose.map(dose => {
         const doseHasTime = dose.time.length > 0 && regex.test(dose.time[0]);
         const timingTextFunction = doseHasTime ? getHoursAndMinutesFromString: timingToText;
-        const preposition = doseHasTime ? 'at ' : '';
+        const preposition = doseHasTime ? 'at' : '';
         const timings = dose.time.map(time => timingTextFunction(time));
-        return timings.map(time => `${dose.value} ${unitsToStrings(dose.unit, +dose.value > 1)} ${preposition} ${time}`);
+        return timings.map(time =>
+            `${dose.value} ${unitsToStrings(dose.unit, +dose.value > 1)} ${preposition} ${time}`);
     }).flat(1);
     const doseText = listItems(doseTextArray);
     return `Take ${medicationData.medication}, ${doseText}`;
+}
+
+function getNoRecordsTextForDay(date, userTimezone) {
+    return `${responses.NO_RECORDS_FOUND} for ${getTextForDay(date, userTimezone, '')}`;
 }
 
 /**
@@ -398,4 +253,12 @@ module.exports = {
     getServiceReminderText,
     getServiceSsmlReminderText,
     getStartDatePrompt,
+    getTextForDay,
+    makeMedicationText,
+    getNoRecordsTextForDay,
+    makeServiceText,
+    getConfirmationDateText,
+    getSuggestedTimeText,
+    getHoursAndMinutes,
+    makeTextForObservationDay,
 }

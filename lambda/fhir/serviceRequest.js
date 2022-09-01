@@ -1,10 +1,9 @@
-const strings = require("../strings");
 const fhirTiming = require("./timing");
 const {DateTime} = require("luxon");
 
-function getTextForServiceRequests(requests, patient, timezone) {
+function getTextForServiceRequests(requests, patient, timezone, localizedMessages) {
     return requests.map(request => getServiceText(request, patient, timezone))
-        .map(data => strings.makeServiceText(data))
+        .map(data => localizedMessages.makeServiceText(data))
         .join('. ');
 }
 
