@@ -1,5 +1,4 @@
 const {timingEvent} = require("./fhir/timing");
-const fhirTiming = require("./fhir/timing");
 const {DateTime} = require("luxon");
 const {listItems, wrapSpeakMessage} = require("strings")
 
@@ -41,7 +40,8 @@ function getConfirmationDateText(healthRequest) {
     return `Has configurado la fecha de inicio para ${healthRequest}.`;
 }
 
-function getSuggestedTimeText(meal) {
+function getSuggestedTimeText(mealCode) {
+    const meal = getMealSuggestion(mealCode);
     return `¿Esta medida es antes de ${meal}, después de ${meal}, o ninguno?`
 }
 
@@ -116,7 +116,7 @@ function getTimingOrTime(observationValue) {
         return `a las ${observationValue.time}`;
     }
 
-    return fhirTiming.timingCodeToString(observationValue.timing);
+    return timingToText(observationValue.timing);
 }
 
 /**
@@ -222,6 +222,68 @@ function timingToText(timing) {
     }
 }
 
+function stringToTimingCode(value) {
+    switch (value) {
+        case 'almuerzo':
+            return 'CD';
+        case "antes del almuerzo":
+            return 'ACD';
+        case "después del almuerzo":
+        case "despues del almuerzo":
+            return 'PCD'
+        case 'desayuno':
+            return 'CM';
+        case 'antes del desayuno':
+            return 'ACM';
+        case 'después del desayuno':
+        case 'despues del desayuno':
+            return 'PCM';
+        case 'cena':
+            return 'CV'
+        case 'antes de la cena':
+            return 'ACV';
+        case 'después de la cena':
+        case 'despues de la cena':
+            return 'PCV';
+        case 'antes de comer':
+            return 'AC'
+        case 'después de comer':
+        case 'despues de comer':
+            return 'PC'
+        default:
+            return 'EXACT'
+    }
+}
+
+function getMealSuggestion(timingCode) {
+    switch (timingCode) {
+        case 'CM':
+            return 'del desayuno'
+        case 'CD':
+            return 'del almuerzo'
+        case 'CV':
+            return 'del la cena'
+        case 'C':
+        default:
+            return 'de comer'
+    }
+}
+
+/**
+ * To get exact code translations, for intent's timingEvent type
+ * @param timingCode
+ */
+function codeToString(timingCode) {
+    switch (timingCode) {
+        case 'CM':
+            return 'desayuno'
+        case 'CD':
+            return 'almuerzo'
+        case 'CV':
+            return 'cena'
+    }
+}
+
 function unitsToStrings(unit, isPlural) {
     switch (unit.toLowerCase()) {
         case 'u':
@@ -248,4 +310,6 @@ module.exports = {
     getSuggestedTimeText,
     getHoursAndMinutes,
     makeTextForObservationDay,
+    stringToTimingCode,
+    codeToString,
 }

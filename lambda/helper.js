@@ -1,7 +1,5 @@
-const luxon = require("luxon");
-const {DateTime} = require("luxon");
+const {DateTime, Settings} = require("luxon");
 const fhirTiming = require("./fhir/timing");
-const strings = require("./strings");
 const fhirPatient = require("./fhir/patient");
 
 const minBloodGlucoseValue = 4;
@@ -144,7 +142,7 @@ async function getTimezoneOrDefault(handlerInput) {
     const upsServiceClient = serviceClientFactory.getUpsServiceClient();
     let userTimeZone = await upsServiceClient.getSystemTimeZone(deviceId);
     if (!userTimeZone) {
-        userTimeZone = luxon.Settings.defaultZone;
+        userTimeZone = Settings.defaultZone;
     }
 
     return userTimeZone;
@@ -199,7 +197,7 @@ function getDelegatedSetStartDateWithTimeIntent(healthRequestName, time) {
 
 function utcDateFromLocalDate(date, timezone) {
     const time = DateTime.now().setZone(timezone);
-    const utcDate = luxon.DateTime.fromISO(`${date}T${time.toISOTime()}`, {zone: timezone}).toUTC();
+    const utcDate = DateTime.fromISO(`${date}T${time.toISOTime()}`, {zone: timezone}).toUTC();
     return utcDate.toISO();
 }
 
@@ -251,7 +249,7 @@ function getBloodGlucoseAlert(value, stringTiming, localizedMessages) {
         return localizedMessages.responses.LOW_GLUCOSE;
     }
 
-    const timing = fhirTiming.stringToTimingCode(stringTiming);
+    const timing = localizedMessages.stringToTimingCode(stringTiming);
     if ((timing === fhirTiming.timingEvent.ACM && value > maxFastingGlucoseValue)
         || value > maxAfterMealGlucoseValue) {
         return localizedMessages.responses.HIGH_GLUCOSE;

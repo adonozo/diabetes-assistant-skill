@@ -10,7 +10,6 @@ const helper = require("./helper");
 const patients = require("./api/patients");
 const fhirTiming = require("./fhir/timing");
 const fhirObservation = require("./fhir/observation");
-const luxon = require("luxon");
 const {DateTime} = require("luxon");
 
 const LaunchRequestHandler = {
@@ -203,10 +202,10 @@ const SetTimingCompletedIntentHandler = {
         const timing = currentIntent.slots.event.value;
         const time = currentIntent.slots.time.value;
         const userTimeZone = await helper.getTimezoneOrDefault(handlerInput);
-        const dateTime = luxon.DateTime.fromISO(`${DateTime.now().toISODate()}T${time}`, {zone: userTimeZone});
+        const dateTime = DateTime.fromISO(`${DateTime.now().toISODate()}T${time}`, {zone: userTimeZone});
 
         await patients.updateTiming(userInfo.username, {
-            timing: fhirTiming.stringToTimingCode(timing),
+            timing: localizedMessages.stringToTimingCode(timing),
             dateTime: dateTime.toUTC().toISO()
         })
 
@@ -256,7 +255,7 @@ const SetStartDateCompletedIntentHandler = {
         const time = currentIntent.slots.healthRequestTime.value;
         const healthRequest = currentIntent.slots.healthRequest.value;
         const userTimeZone = await helper.getTimezoneOrDefault(handlerInput);
-        const dateTime = luxon.DateTime.fromISO(`${date}T${time}`, {zone: userTimeZone});
+        const dateTime = DateTime.fromISO(`${date}T${time}`, {zone: userTimeZone});
         await patients.setStartDate(userInfo.username, missingDate.id, { startDate: dateTime.toUTC().toISO() });
         const {speakOutput, reprompt} = getStartDateConfirmedResponse(session, healthRequest, handlerInput);
         delete session[helper.sessionValues.requestMissingDate];
@@ -304,8 +303,8 @@ const RegisterGlucoseLevelIntentInProgressWithValueHandler = {
 
         const localizedMessages = getLocalizedStrings(handlerInput);
         const self = await patients.getSelf(userInfo.username);
-        const meal = helper.getSuggestedTiming(self);
-        const message = localizedMessages.getSuggestedTimeText(meal);
+        const mealCode = helper.getSuggestedTiming(self);
+        const message = localizedMessages.getSuggestedTimeText(mealCode);
         return handlerInput.responseBuilder
             .speak(message)
             .reprompt(message)
@@ -338,7 +337,7 @@ const RegisterGlucoseLevelIntentHandler = {
         }
 
         const self = await patients.getSelf(userInfo.username);
-        const observation = fhirObservation.createObservationObject(self, +value, timing);
+        const observation = fhirObservation.createObservationObject(self, +value, timing, localizedMessages);
         await patients.saveBloodGlucoseLevel(userInfo.username, observation);
         const response = localizedMessages.responses.BLOOD_GLUCOSE_SUCCESS;
         const alert = helper.getBloodGlucoseAlert(value, timing, localizedMessages);
@@ -364,11 +363,12 @@ const AskGlucoseLevelIntentDateAndTimingHandler = {
             return requestAccountLink(handlerInput);
         }
 
+        const localizedMessages = getLocalizedStrings(handlerInput);
         const timezone = await helper.getTimezoneOrDefault(handlerInput);
         const date = handlerInput.requestEnvelope.request.intent.slots.date.value;
         const timing = handlerInput.requestEnvelope.request.intent.slots.timing.value;
 
-        const timingCode = fhirTiming.stringToTimingCode(timing);
+        const timingCode = localizedMessages.stringToTimingCode(timing);
         const utcDate = helper.utcDateFromLocalDate(date, timezone);
         const bundle = await patients.getObservationsOnDate(userInfo.username, utcDate, timingCode);
         return getAskGlucoseResponse(handlerInput, bundle, timezone);
@@ -604,7 +604,7 @@ exports.handler = Alexa.SkillBuilders.custom()
         AskGlucoseLevelIntentDateHandler,
         AskGlucoseLevelIntentTimeHandler,
         AskGlucoseLevelIntentTimingHandler,
-        IntentReflectorHandler, // make sure IntentReflectorHandler is last so it doesn't override your custom intent handlers
+        IntentReflectorHandler, // make sure IntentReflectorHandler is last, so it doesn't override your custom intent handlers
         ) 
     .addErrorHandlers(
         ErrorHandler,
@@ -643,7 +643,9 @@ const switchContextToTiming = (handlerInput, timing) => {
     const localizedMessages = getLocalizedStrings(handlerInput);
     const attributesManager = handlerInput.attributesManager;
     const session = attributesManager.getSessionAttributes();
-    const nextTiming = fhirTiming.relatedTimingCodeToString(timing);
+    const nextTimingCode = fhirTiming.relatedTimingCodeToString(timing);
+    const nextTiming = localizedMessages.codeToString(nextTimingCode)
+
     const intent = handlerInput.requestEnvelope.request.intent;
     session[intent.name] = intent;
     attributesManager.setSessionAttributes(session);

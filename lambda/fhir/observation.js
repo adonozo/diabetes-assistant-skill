@@ -1,5 +1,4 @@
 const {DateTime} = require("luxon");
-const fhirTiming = require("./timing")
 const fhirPatient = require("./patient")
 
 const observationBase = {
@@ -48,11 +47,11 @@ const observationBase = {
     ]
 }
 
-function createObservationObject(patient, level, timing) {
+function createObservationObject(patient, level, timing, localizedMessages) {
     const subject = fhirPatient.getPatientSubject(patient);
     const date = DateTime.utc().toISO();
     const observation = JSON.parse(JSON.stringify(observationBase));
-    const observationTiming = fhirTiming.stringToTimingCode(timing)
+    const observationTiming = localizedMessages.stringToTimingCode(timing)
     observation.valueQuantity.value = level;
     observation.subject = subject;
     observation.performer[0] = subject;
