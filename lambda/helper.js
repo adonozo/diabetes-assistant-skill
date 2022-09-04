@@ -265,6 +265,19 @@ function wrapSpeakMessage(message) {
     return `<speak>${message}</speak>`
 }
 
+function getExtension(resource, extensionUrl) {
+    if (!resource.extension || !Array.isArray(resource.extension)) {
+        return undefined;
+    }
+
+    const extension = resource.extension.find(ext => ext.url === extensionUrl);
+    if (!extension) {
+        return undefined;
+    }
+
+    return extension;
+}
+
 module.exports = {
     logMessage,
     getMissingDates,
@@ -282,4 +295,5 @@ module.exports = {
     sessionValues,
     listItems,
     wrapSpeakMessage,
+    getExtension,
 }

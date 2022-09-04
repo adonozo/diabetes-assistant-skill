@@ -1,5 +1,8 @@
 const fhirTiming = require("./timing");
 const {DateTime} = require("luxon");
+const helper = require("../helper");
+
+const SERVICE_REQUEST_START_DATE = 'http://diabetes-assistant.com/fhir/StructureDefinition/ServiceRequestStartDate';
 
 function getTextForServiceRequests(requests, patient, timezone, localizedMessages) {
     return requests.map(request => getServiceText(request, patient, timezone))
@@ -98,7 +101,18 @@ function getServiceTextData({
     return serviceData;
 }
 
+function getServiceRequestStartDate(serviceRequest) {
+    const startDateExtension = helper.getExtension(serviceRequest, SERVICE_REQUEST_START_DATE);
+    const date = fhirTiming.tryParseDate(startDateExtension.valueDateTime);
+    if (date) {
+        return date;
+    }
+
+    return undefined;
+}
+
 module.exports = {
     getTextForServiceRequests,
-    getServiceTextData
+    getServiceTextData,
+    getServiceRequestStartDate,
 }
