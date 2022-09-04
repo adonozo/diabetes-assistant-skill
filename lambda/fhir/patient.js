@@ -1,22 +1,22 @@
 const fhirTiming = require('./timing')
 
-const DOSAGE_EXTENSION = 'http://diabetes-assistant.com/fhir/StructureDefinition/DosageStartDate'
+const TIMING_PREFERENCES = 'http://diabetes-assistant.com/fhir/StructureDefinition/TimingPreference'
 
 function getTimingPreferences(patient) {
-    if (!patient.extension || Array.isArray(patient.extension)) {
+    if (!patient.extension || !Array.isArray(patient.extension)) {
         return undefined;
     }
 
     const preferences = new Map();
-    const dosageExtension = patient.extension.find(ext => ext.url === DOSAGE_EXTENSION);
-    if (!dosageExtension) {
+    const timingExtension = patient.extension.find(ext => ext.url === TIMING_PREFERENCES);
+    if (!timingExtension) {
         return undefined;
     }
 
-    dosageExtension.extension.map(ext => {
-        const date = fhirTiming.tryParseDate(ext.value);
+    timingExtension.extension.map(ext => {
+        const date = fhirTiming.tryParseDate(ext.valueDateTime);
         if (date) {
-            preferences.set(ext.url, ext.value);
+            preferences.set(ext.url, ext.valueDateTime);
         }
     });
 

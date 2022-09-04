@@ -22,7 +22,7 @@ const sessionValues = {
 /**
  * Checks if there are missing timings, i.e., breakfast, lunch, dinner in medication or service requests.
  * @param patient The patient
- * @param requests {[]} The active medication request
+ * @param requests {[]} The active medication or service request
  * @returns {Set<string>}
  */
 function getActiveMissingTimings(patient, requests) {
@@ -36,22 +36,14 @@ function getActiveMissingTimings(patient, requests) {
         }
     });
 
-    Object.keys(patient.exactEventTimes).forEach(timing => timings.delete(timing));
-    return timings;
-}
+    const timingPreferences = fhirPatient.getTimingPreferences(patient);
+    if (!timingPreferences) {
+        return timings;
+    }
 
-/**
- * Checks if there are missing timings, i.e., breakfast, lunch, dinner
- * @param patient The patient
- * @param medicationRequests {[]} The active medication request
- * @returns {Set<string>}
- */
-function getMissingTimings(patient, medicationRequests) {
-    const timings = new Set();
-    medicationRequests.forEach(request =>
-        request.dosageInstruction.forEach(instruction =>
-            instruction.timing?.repeat?.when?.forEach(timing => timings.add(timing))));
-    Object.keys(patient.exactEventTimes).forEach(timing => timings.delete(timing));
+    timingPreferences.forEach((datetime, timing) => {
+        timings.delete(timing)
+    })
     return timings;
 }
 
@@ -258,9 +250,23 @@ function getBloodGlucoseAlert(value, stringTiming, localizedMessages) {
     return '';
 }
 
+function listItems(values, concatWord) {
+    if (values.length === 1) {
+        return values[0];
+    }
+
+    const joinComma = values.length > 2 ? ',' : ''
+    return values.map((value, index) =>
+        index === values.length - 1 ? ` ${concatWord} ${value}.` : ` ${value}`)
+        .join(joinComma)
+}
+
+function wrapSpeakMessage(message) {
+    return `<speak>${message}</speak>`
+}
+
 module.exports = {
     logMessage,
-    getMissingTimings,
     getMissingDates,
     getTimezoneOrDefault,
     getDelegatedSetTimingIntent,
@@ -273,5 +279,7 @@ module.exports = {
     getSuggestedTiming,
     getDelegatedSetStartDateWithTimeIntent,
     getBloodGlucoseAlert,
-    sessionValues
+    sessionValues,
+    listItems,
+    wrapSpeakMessage,
 }

@@ -87,7 +87,7 @@ const MedicationReminderIntentHandler = {
         // Check if timing setup is needed.
         const medicationBundle = await medicationRequests.getActiveMedicationRequests(self.id);
         const requests = fhirMedicationRequest.requestListFromBundle(medicationBundle);
-        const timingValidations = helper.getMissingTimings(self, requests);
+        const timingValidations = helper.getActiveMissingTimings(self, requests);
         if (timingValidations.size > 0) {
             return switchContextToTiming(handlerInput, timingValidations.values().next().value);
         }

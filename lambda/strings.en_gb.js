@@ -1,6 +1,6 @@
 const {timingEvent} = require("./fhir/timing");
 const {DateTime} = require("luxon");
-const {listItems, wrapSpeakMessage} = require("strings")
+const helpers = require("helper");
 
 const responses = {
     WELCOME: "Welcome, I can set up reminders or tell you your medications for tomorrow. Which would you like to try?",
@@ -47,7 +47,7 @@ function getSuggestedTimeText(mealCode) {
 
 function getMedicationSsmlReminderText(value, unit, medication, time) {
     const message = `Take ${value} ${unit} of ${medication} ${timingString(time)}`;
-    return wrapSpeakMessage(message);
+    return helpers.wrapSpeakMessage(message);
 }
 
 function getServiceReminderText(action, time) {
@@ -58,7 +58,7 @@ function getServiceReminderText(action, time) {
 
 function getServiceSsmlReminderText(action, time) {
     const message = `${action} ${timingString(time)}`
-    return wrapSpeakMessage(message);
+    return helpers.wrapSpeakMessage(message);
 }
 
 /**
@@ -171,7 +171,7 @@ function makeMedicationText(medicationData) {
         return timings.map(time =>
             `${dose.value} ${unitsToStrings(dose.unit, +dose.value > 1)} ${preposition} ${time}`);
     }).flat(1);
-    const doseText = listItems(doseTextArray, responses.CONCAT_WORD);
+    const doseText = helpers.listItems(doseTextArray, responses.CONCAT_WORD);
     return `Take ${medicationData.medication}, ${doseText}`;
 }
 
@@ -188,7 +188,7 @@ function makeServiceText(serviceData) {
     const timingTextFunction = serviceHasTime ? getHoursAndMinutesFromString: timingToText;
     const preposition = serviceHasTime ? 'at ' : '';
     const timings = serviceData.timings.map(time => timingTextFunction(time));
-    return `Do a ${serviceData.action} ${preposition} ${listItems(timings, responses.CONCAT_WORD)}`;
+    return `Do a ${serviceData.action} ${preposition} ${helpers.listItems(timings, responses.CONCAT_WORD)}`;
 }
 
 function timingToText(timing) {
@@ -272,11 +272,11 @@ function getMealSuggestion(timingCode) {
 function codeToString(timingCode) {
     switch (timingCode) {
         case 'CM':
-            return 'desayuno'
+            return 'breakfast'
         case 'CD':
-            return 'almuerzo'
+            return 'lunch'
         case 'CV':
-            return 'cena'
+            return 'dinner'
     }
 }
 
