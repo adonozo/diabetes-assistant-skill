@@ -10,13 +10,15 @@
         {
           "name": "AMAZON.HelpIntent",
           "samples": [
-            "help"
+            "ayuda"
           ]
         },
         {
           "name": "AMAZON.StopIntent",
           "samples": [
-            "stop"
+            "alto",
+            "detente",
+            "basta"
           ]
         },
         {
@@ -32,27 +34,31 @@
             }
           ],
           "samples": [
-            "What medicines I took {treatmentDate}",
-            "Which pills I took {treatmentDate}",
-            "What is the plan for {treatmentDate}",
-            "What medicines I will take {treatmentDate}",
-            "Medicines for {treatmentDate}",
-            "Medicines on {treatmentDate}",
-            "My medication for {treatmentDate}",
-            "My medication {treatmentDate}",
-            "medications for {treatmentDate}",
-            "medications {treatmentDate}"
+            "Qué medicamentos tengo que tomar {treatmentDate}",
+            "Qué medicamentos tomé {treatmentDate}",
+            "Qué medicinas tomé {treatmentDate}",
+            "Cuál es el plan para {treatmentDate}",
+            "Que medicamentos tomaré {treatmentDate}",
+            "Medicamentos para el {treatmentDate}",
+            "Medicamentos el {treatmentDate}",
+            "Medicamentos {treatmentDate}",
+            "Mi medicación para {treatmentDate}",
+            "Mi medicación {treatmentDate}",
+            "Mi medicación el {treatmentDate}",
+            "Mis pastillas {treatmentDate}"
           ]
         },
         {
           "name": "MedicationReminderIntent",
           "slots": [],
           "samples": [
-            "Remind me to take my medications",
-            "Remind me my medications",
-            "Please remind me to take my medications",
-            "Remind me to take my pills",
-            "Please remind me my medications"
+            "Recuérdame tomar mis medicamentos",
+            "Recuérdame tomar mis medicinas",
+            "Recuérdame mis medicinas",
+            "Recuérdame mis medicamentos",
+            "Házme recuerdo de tomar mis medicinas",
+            "Házme recuerdo de tomar mis medicamentos",
+            "Recuérdame tomar mis pastillas"
           ]
         },
         {
@@ -62,11 +68,12 @@
               "name": "event",
               "type": "timingEvent",
               "samples": [
-                "it is for {event}",
-                "The time is for {event}",
-                "I want to set a time for {event}",
-                "I mean {event}",
-                "is for {event}",
+                "es para {event}",
+                "la hora es para {event}",
+                "Quiero fijar el tiempo para {event}",
+                "Quiero fijar la hora para {event}",
+                "Quiero fijar la hora para {event}",
+                "para {event}",
                 "{event}"
               ]
             },
@@ -74,24 +81,28 @@
               "name": "time",
               "type": "AMAZON.TIME",
               "samples": [
-                "when it's {time}",
+                "cuando sean las {time}",
+                "cuando sea la {time}",
                 "{time}",
-                "at {time}"
+                "a las {time}",
+                "a {time}"
               ]
             }
           ],
           "samples": [
-            "Set {event} time",
-            "Set my {event} time",
-            "Update my {event} time",
-            "Update {event} at {time}",
-            "Set {event} at {time}",
-            "I take {event} at {time}",
-            "My {event} is at {time}",
-            "I take it at {time}",
-            "I have {event} at {time}",
-            "I have it at {time}",
-            "I eat {event} at {time}"
+            "Fija la hora para {event}",
+            "Actualiza la hora para {event}",
+            "Tomo {event} a las {time}",
+            "Tomo {event} a la {time}",
+            "Tengo mi {event} a la {time}",
+            "Mi {event} es a las {time}",
+            "Mi {event} es a la {time}",
+            "Lo tomo a las {time}",
+            "Lo tomo a la {time}",
+            "Como el {event} a las {time}",
+            "Como el {event} a la {time}",
+            "{event} a las {time}",
+            "{event} a la {time}"
           ]
         },
         {
@@ -101,53 +112,67 @@
               "name": "healthRequest",
               "type": "healthRequestName",
               "samples": [
-                "Start date for {healthRequest}",
-                "Initial date for {healthRequest}"
+                "Fecha de inicio para {healthRequest}",
+                "Inicia la fecha de {healthRequest}",
+                "Inicia {healthRequest}",
+                "Inicio de {healthRequest}"
               ]
             },
             {
               "name": "date",
               "type": "AMAZON.DATE",
               "samples": [
-                "I'll start it on {date}",
-                "on {date}",
+                "Voy a empezarlo el {date}",
+                "Voy a empezarlo {date}",
+                "Lo empezaré en {date}",
+                "el {date}",
                 "{date}",
-                "maybe {date}",
-                "I'll start it on {date} at {healthRequestTime}",
-                "on {date} at {healthRequestTime}",
-                "{date} at {healthRequestTime}",
-                "maybe {date} at {healthRequestTime}"
+                "tal vez {date}",
+                "probablemente {date}",
+                "Lo empezaré {date} a las {healthRequestTime}",
+                "Lo empezaré {date} a la {healthRequestTime}",
+                "Iniciaré {date} a la {healthRequestTime}",
+                "Iniciaré {date} a las {healthRequestTime}",
+                "Empezaré {date} a las {healthRequestTime}",
+                "Empezaré {date} a la {healthRequestTime}",
+                "El {date} a las {healthRequestTime}",
+                "El {date} a la {healthRequestTime}",
+                "{date} a las {healthRequestTime}",
+                "{date} a la {healthRequestTime}",
+                "quizás {date} a las {healthRequestTime}",
+                "quizás {date} a la {healthRequestTime}"
               ]
             },
             {
               "name": "healthRequestTime",
               "type": "AMAZON.TIME",
               "samples": [
-                "at {healthRequestTime}",
+                "a las {healthRequestTime}",
+                "a la {healthRequestTime}",
                 "{healthRequestTime}",
-                "around {healthRequestTime}"
+                "cerca a las {healthRequestTime}",
+                "cerca a la {healthRequestTime}"
               ]
             }
           ],
           "samples": [
-            "I'll start taking {healthRequest} on {date}",
-            "I'll start taking {healthRequest} {date}",
-            "Set the start date for {healthRequest}",
-            "{healthRequest} start date",
-            "start date for {healthRequest}"
+            "Empezaré {healthRequest} {date}",
+            "Empezaré {healthRequest} el {date}",
+            "Fija la fecha de inicio para {healthRequest}",
+            "Fecha de inicio para {healthRequest}",
+            "Inicio para {healthRequest}",
+            "Día de inicio para {healthRequest}"
           ]
         },
         {
           "name": "CreateRemindersIntent",
           "slots": [],
           "samples": [
-            "Create reminders",
-            "Set up reminders",
-            "Set reminders",
-            "Make reminders",
-            "I want you create reminders",
-            "I want you to setup reminders",
-            "Please create reminders"
+            "Crea recordatorios",
+            "Recuérdame",
+            "Pon alarmas",
+            "Pon recordatorios",
+            "Haz recordatorios"
           ]
         },
         {
@@ -157,11 +182,13 @@
               "name": "level",
               "type": "customDecimal",
               "samples": [
-                "The level is {level}",
+                "El nivel es {level}",
+                "Mi nivel es {level}",
                 "{level}",
-                "My blood glucose is {level}",
-                "blood glucose {level}",
-                "blood glucose is {level}"
+                "Mi glucosa en sangre es {level}",
+                "Mi glucosa es {level}",
+                "Mi nivel de azúcar es {level}",
+                "Mi nivel de azúcar en sangre es {level}"
               ]
             },
             {
@@ -169,8 +196,8 @@
               "type": "measureEvent",
               "samples": [
                 "{glucoseTiming}",
-                "at {glucoseTiming}",
-                "on {glucoseTiming}"
+                "a las {glucoseTiming}",
+                "a la {glucoseTiming}"
               ]
             }
           ],
@@ -224,77 +251,100 @@
             }
           ],
           "samples": [
-            "What was my glucose level {date}",
-            "What was my glucose level on {date}",
-            "What was my blood glucose {date}",
-            "What was my blood glucose on {date}",
-            "What was my blood glucose at {time}",
-            "What was my blood glucose this {time}",
-            "What was my glucose level at {time}",
-            "What was my glucose level this {time}",
-            "What was my glucose level {date} at {time}",
-            "What was my blood glucose {date} at {time}",
-            "What was my glucose {date} at {time}",
-            "What was my glucose {date}",
-            "What was my glucose on {date}",
-            "What was my glucose at {time}",
-            "What was my glucose this {time}",
-            "What was my glucose level at {timing}",
-            "What was my blood glucose at {timing}",
-            "What was my glucose level {date} at {timing}",
-            "What was my blood glucose {date} at {timing}",
-            "What was my glucose {date} at {timing}",
-            "What was my glucose at {timing}",
-            "Did I measured my glucose level {date}",
-            "Did I measured my glucose level at {timing}",
-            "Did I measured my glucose level {date} {time}",
-            "Did I measured my glucose level {date} at {timing}",
-            "Did I measured my glucose {date}",
-            "Did I measured my glucose at {timing}",
-            "Did I measured my glucose {date} {time}",
-            "Did I measured my glucose {date} at {timing}",
-            "Did I measured my blood glucose {date}",
-            "Did I measured my blood glucose at {timing}",
-            "Did I measured my blood glucose {date} {time}",
-            "Did I measured my blood glucose {date} at {timing}",
-            "my glucose level {date}",
-            "my glucose level on {date}",
-            "my glucose level {date} {time}",
-            "my blood glucose {date}",
-            "my blood glucose on {date}",
-            "my blood glucose {date} {time}",
-            "my blood glucose at {time}",
-            "my blood glucose this {time}",
-            "my glucose level at {time}",
-            "my glucose level this {time}",
-            "my glucose level {date} at {time}",
-            "my blood glucose {date} at {time}",
-            "my glucose {date} at {time}",
-            "my glucose {date}",
-            "my glucose on {date}",
-            "my glucose {date} {time}",
-            "my glucose at {time}",
-            "my glucose this {time}",
-            "my glucose level at {timing}",
-            "my blood glucose at {timing}",
-            "my glucose level {date} at {timing}",
-            "my blood glucose {date} at {timing}",
-            "my glucose {date} at {timing}",
-            "my glucose at {timing}",
-            "What was my blood sugar {date}",
-            "What was my blood sugar on {date}",
-            "What was my blood sugar at {time}",
-            "What was my blood sugar this {time}",
-            "Did I measured my blood sugar {date}",
-            "Did I measured my blood sugar at {timing}",
-            "Did I measured my blood sugar {date} {time}",
-            "Did I measured my blood sugar {date} at {timing}",
-            "my blood sugar {date}",
-            "my blood sugar on {date}",
-            "my blood sugar {date} {time}",
-            "my blood sugar at {time}",
-            "my blood sugar this {time}",
-            "my blood sugar at {timing}"
+            "Cuál era mi nivel de glucosa {date}",
+            "Cuál era mi nivel de glucosa el {date}",
+            "Cuál era mi nivel de azúcar {date}",
+            "Cuál era mi nivel de azúcar el {date}",
+            "Cuál era mi nivel de glucosa en sangre el {date}",
+            "Cuál era mi nivel de glucosa en sangre {date}",
+            "Cuál era mi nivel de azúcar en sangre {date}",
+            "Cuál era mi nivel de azúcar en sangre el {date}",
+            "Cuál era mi nivel de azúcar en sangre a las {time}",
+            "Cuál era mi nivel de azúcar en sangre a la {time}",
+            "Cuál era mi nivel de glucosa en sangre este {time}",
+            "Cuál era mi nivel de glucosa a las {time}",
+            "Cuál era mi nivel de glucosa a la {time}",
+            "Cuál era mi nivel de azúcar a la {time}",
+            "Cuál era mi nivel de azúcar a las {time}",
+            "Cuál era mi nivel de glucosa {date} a las {time}",
+            "Cuál era mi nivel de glucosa {date} a la {time}",
+            "Cuál era mi nivel de azúcar {date} a las {time}",
+            "Cuál era mi nivel de azúcar {date} a la {time}",
+            "Cuál era mi nivel de azúcar en sangre {date} a la {time}",
+            "Cuál era mi nivel de azúcar en sangre {date} a las {time}",
+            "Cuál era mi nivel de glucosa {date}",
+            "Cuál era mi nivel de glucosa a las {date}",
+            "Cuál era mi nivel de glucosa a la {date}",
+            "Cuál era mi nivel de azúcar {date}",
+            "Cuál era mi nivel de azúcar a las {date}",
+            "Cuál era mi nivel de azúcar a la {date}",
+            "Cuál era mi nivel de azúcar esta {date}",
+            "Cuál era mi nivel de glucosa en el {date}",
+            "Cuál era mi nivel de glucosa en sangre en el {date}",
+            "Cuál era mi nivel de glucosa en sangre durante el {date}",
+            "Cuál era mi nivel de azúcar en el {date}",
+            "Cuál era mi nivel de azúcar durante el {date}",
+            "Cuál era mi nivel de azúcar en sangre en el {date}",
+            "Cuál era mi nivel de azúcar en sangre durante el {date}",
+            "Cuál era mi nivel de azúcar en sangre durante el {date}",
+            "Cuál era mi azúcar en sangre durante el {date}",
+            "Cuál era mi azúcar durante {date}",
+            "Cuál era mi azúcar el {date}",
+            "Cuál era mi glucosa el {date}",
+            "Cuál era mi glucosa en sangre durante {date}",
+            "Cuál era mi glucosa durante el {date}",
+            "Cuál era mi glucosa {date} a las {timing}",
+            "Cuál era mi glucosa {date} a la {timing}",
+            "Cuál era mi azúcar {date} a las {timing}",
+            "Cuál era mi azúcar {date} a la {timing}",
+            "Cuál era mi azúcar {date} en el {timing}",
+            "Cuál era mi glucosa {date} en el {timing}",
+            "Cuál era mi glucosa {date} durante el {timing}",
+            "Cuál era mi glucosa en el {timing}",
+            "Cuál era mi azúcar en el {timing}",
+            "Medí mi azúcar el {date}",
+            "Medí mi nivel azúcar el {date}",
+            "Medí mi azúcar {date}",
+            "Medí mi glucosa {date}",
+            "Medí mi glucosa en sangre {date}",
+            "Medí mi glucosa el {date}",
+            "Medí mi glucosa en sangre el {date}",
+            "Medí mi glucosa a las {time}",
+            "Medí mi glucosa a la {time}",
+            "Medí mi azúcar a las {time}",
+            "Medí mi azúcar a la {time}",
+            "Medí mi azúcar en el {timing}",
+            "Medí mi glucosa en el {timing}",
+            "Medí mi glucosa el {date} a las {time}",
+            "Medí mi azúcar el {date} a las {time}",
+            "Medí mi azúcar {date} en el {timing}",
+            "Medí mi glucosa {date} en el {timing}",
+            "Mi glucosa {date}",
+            "Mi glucosa el {date}",
+            "Mi nivel de glucosa {date}",
+            "Mi nivel de glucosa el {date}",
+            "Mi nivel de glucosa el {date} a las {time}",
+            "Mi nivel de glucosa {date} a las {time}",
+            "Mi azúcar {date}",
+            "Mi azúcar el {date}",
+            "Mi azúcar el {date} a las {time}",
+            "Mi azúcar {date} a las {time}",
+            "Mi nivel de glucosa en sangre {date}",
+            "Mi nivel de glucosa en sangre el {date}",
+            "Mi nivel de glucosa en sangre el {date} a las {time}",
+            "Mi nivel de glucosa en sangre {date} a las {time}",
+            "Mi glucosa a las {time}",
+            "Mi glucosa esta {time}",
+            "Mi azúcar a las {time}",
+            "Mi azúcar esta {time}",
+            "Mi glucosa el {date} a las {time}",
+            "Mi glucosa {date} a las {time}",
+            "mi glucosa en el {timing}",
+            "mi nivel de glucosa {timing}",
+            "mi azúcar en el {timing}",
+            "mi nivel de azúcar en el {timing}",
+            "mi glucosa {date} en el {timing}",
+            "mi azúcar {date} en el {timing}"
           ]
         }
       ],
@@ -304,17 +354,17 @@
           "values": [
             {
               "name": {
-                "value": "breakfast"
+                "value": "desayuno"
               }
             },
             {
               "name": {
-                "value": "lunch"
+                "value": "almuerzo"
               }
             },
             {
               "name": {
-                "value": "dinner"
+                "value": "cena"
               }
             }
           ]
@@ -324,52 +374,52 @@
           "values": [
             {
               "name": {
-                "value": "before breakfast"
+                "value": "antes del desayuno"
               }
             },
             {
               "name": {
-                "value": "after breakfast"
+                "value": "después del desayuno"
               }
             },
             {
               "name": {
-                "value": "before lunch"
+                "value": "antes del almuerzo"
               }
             },
             {
               "name": {
-                "value": "after lunch"
+                "value": "después del almuerzo"
               }
             },
             {
               "name": {
-                "value": "before dinner"
+                "value": "antes de la cena"
               }
             },
             {
               "name": {
-                "value": "after dinner"
+                "value": "después de la cena"
               }
             },
             {
               "name": {
-                "value": "before meal"
+                "value": "antes de comer"
               }
             },
             {
               "name": {
-                "value": "after meal"
+                "value": "después de comer"
               }
             },
             {
               "name": {
-                "value": "none"
+                "value": "ninguno"
               }
             },
             {
               "name": {
-                "value": "any"
+                "value": "cualquiera"
               }
             }
           ]
@@ -379,12 +429,12 @@
           "values": [
             {
               "name": {
-                "value": "Glucose measurement"
+                "value": "Medición de glucosa"
               }
             },
             {
               "name": {
-                "value": "Blood Glucose measurement"
+                "value": "Medición de glucosa en sangre"
               }
             }
           ]
@@ -823,11 +873,11 @@
         "variations": [
           {
             "type": "SSML",
-            "value": "<speak>I heard <say-as interpret-as=\"time\">{time}</say-as>, is that correct?</speak>"
+            "value": "<speak>Escuché <say-as interpret-as=\"time\">{time}</say-as>, ¿es correcto?</speak>"
           },
           {
             "type": "SSML",
-            "value": "<speak>Is <say-as interpret-as=\"time\">{time}</say-as> correct?</speak>"
+            "value": "<speak>¿Es <say-as interpret-as=\"time\">{time}</say-as> correcto?</speak>"
           }
         ]
       },
@@ -836,7 +886,7 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "What time do you have {event}?"
+            "value": "¿A qué hora tienes el {event}?"
           }
         ]
       },
@@ -845,11 +895,11 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "The time {time} is for breakfast, lunch, or dinner?"
+            "value": "La hora {time} ¿es para el desayuno, almuerzo, o cena?"
           },
           {
             "type": "PlainText",
-            "value": "Do you want to set a time for breakfast, lunch, or dinner?"
+            "value": "¿Quieres fijar la hora para el desayuno, almuerzo o cena?"
           }
         ]
       },
@@ -858,7 +908,7 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "On which day are you starting or have you started it?"
+            "value": "¿Qué día has empezado o empezarás?"
           }
         ]
       },
@@ -867,11 +917,11 @@
         "variations": [
           {
             "type": "SSML",
-            "value": "<speak>I heard <say-as interpret-as=\"time\">{healthRequestTime}</say-as>, is that correct?</speak>"
+            "value": "<speak>Escuché <say-as interpret-as=\"time\">{healthRequestTime}</say-as>, ¿es correcto?</speak>"
           },
           {
             "type": "SSML",
-            "value": "<speak>Is <say-as interpret-as=\"time\">{healthRequestTime}</say-as> correct?</speak>"
+            "value": "<speak>¿Es <say-as interpret-as=\"time\">{healthRequestTime}</say-as> correcto?</speak>"
           }
         ]
       },
@@ -880,11 +930,7 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "At what time are you taking it?"
-          },
-          {
-            "type": "PlainText",
-            "value": "At what time are your starting or have you started taking it?"
+            "value": "¿A qué hora?"
           }
         ]
       },
@@ -893,11 +939,11 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "I heard {level}, is that correct?"
+            "value": "Escuché {level}, ¿es correcto?"
           },
           {
             "type": "PlainText",
-            "value": "Is {level} correct?"
+            "value": "¿Es {level} correcto?"
           }
         ]
       },
@@ -906,11 +952,15 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "What is your blood glucose level?"
+            "value": "¿Cuál es tu nivel de glucosa?"
           },
           {
             "type": "PlainText",
-            "value": "What value you have for your blood glucose level?"
+            "value": "¿Qué valor tienes para tu nivel de azúcar?"
+          },
+          {
+            "type": "PlainText",
+            "value": "¿Qué valor tienes para tu nivel de glucosa?"
           }
         ]
       },
@@ -919,7 +969,7 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "Is this measure before a meal, after a meal, or none?"
+            "value": "Esta medida es ¿antes de una comida, después, o ninguno?"
           }
         ]
       },
@@ -928,11 +978,11 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "At what moment in the day?"
+            "value": "¿En qué hora del día?"
           },
           {
             "type": "PlainText",
-            "value": "At what time in the day?"
+            "value": "¿A qué hora?"
           }
         ]
       },
@@ -941,11 +991,7 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "When?"
-          },
-          {
-            "type": "PlainText",
-            "value": "Is it for breakfast, lunch, dinner...?"
+            "value": "¿Es para el desayuno, almuerzo, cena...?"
           }
         ]
       },
@@ -954,11 +1000,11 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "On which day?"
+            "value": "¿En qué día?"
           },
           {
             "type": "PlainText",
-            "value": "For which day?"
+            "value": "¿Para qué día?"
           }
         ]
       }

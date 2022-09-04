@@ -48,83 +48,24 @@ const numericTiming = {
 }
 
 /**
- *
  * @param value {string}
  */
 function relatedTimingCodeToString(value) {
     switch (value) {
-        case "ACD":
-        case "CD":
-        case "PCD":
-            return 'lunch';
-        case "ACM":
-        case "CM":
-        case "PCM":
-            return 'breakfast';
-        case "ACV":
-        case "CV":
-        case "PCV":
-            return 'dinner';
+        case timingEvent.ACD:
+        case timingEvent.CD:
+        case timingEvent.PCD:
+            return timingEvent.CD;
+        case timingEvent.ACM:
+        case timingEvent.CM:
+        case timingEvent.PCM:
+            return timingEvent.CM;
+        case timingEvent.ACV:
+        case timingEvent.CV:
+        case timingEvent.PCV:
+            return timingEvent.CV;
         default:
-            return 'a meal';
-    }
-}
-
-function stringToTimingCode(value) {
-    switch (value) {
-        case 'lunch':
-            return 'CD';
-        case "before lunch":
-            return 'ACD';
-        case "after lunch":
-            return 'PCD'
-        case 'breakfast':
-            return 'CM';
-        case 'before breakfast':
-            return 'ACM';
-        case 'after breakfast':
-            return 'PCM';
-        case 'dinner':
-            return 'CV'
-        case 'before dinner':
-            return 'ACV';
-        case 'after dinner':
-            return 'PCV';
-        case 'before meal':
-            return 'AC'
-        case 'after meal':
-            return 'PC'
-        default:
-            return 'EXACT'
-    }
-}
-
-function timingCodeToString(value) {
-    switch (value) {
-        case 'CD':
-            return 'at lunch';
-        case "ACD":
-            return 'before lunch';
-        case "PCD":
-            return 'after lunch';
-        case 'CM':
-            return 'at breakfast';
-        case 'ACM':
-            return 'before breakfast';
-        case 'PCM':
-            return 'after breakfast';
-        case 'CV':
-            return 'at dinner';
-        case 'ACV':
-            return 'before dinner';
-        case 'PCV':
-            return 'after dinner';
-        case 'AC':
-            return 'before meal';
-        case 'PC':
-            return 'after meal';
-        default:
-            return ''
+            return timingEvent.C;
     }
 }
 
@@ -227,9 +168,7 @@ module.exports = {
     numericTiming,
     compareWhen,
     relatedTimingCodeToString,
-    stringToTimingCode,
     alexaTimingToFhirTiming,
-    timingCodeToString,
     getDatesFromTiming,
     getTimesFromTimingWithFrequency,
     dayToRruleDay,

@@ -1,7 +1,5 @@
-const luxon = require("luxon");
-const {DateTime} = require("luxon");
+const {DateTime, Settings} = require("luxon");
 const fhirTiming = require("./fhir/timing");
-const strings = require("./strings");
 const fhirPatient = require("./fhir/patient");
 
 const minBloodGlucoseValue = 4;
@@ -24,7 +22,7 @@ const sessionValues = {
 /**
  * Checks if there are missing timings, i.e., breakfast, lunch, dinner in medication or service requests.
  * @param patient The patient
- * @param requests {[]} The active medication request
+ * @param requests {[]} The active medication or service request
  * @returns {Set<string>}
  */
 function getActiveMissingTimings(patient, requests) {
@@ -38,22 +36,14 @@ function getActiveMissingTimings(patient, requests) {
         }
     });
 
-    Object.keys(patient.exactEventTimes).forEach(timing => timings.delete(timing));
-    return timings;
-}
+    const timingPreferences = fhirPatient.getTimingPreferences(patient);
+    if (!timingPreferences) {
+        return timings;
+    }
 
-/**
- * Checks if there are missing timings, i.e., breakfast, lunch, dinner
- * @param patient The patient
- * @param medicationRequests {[]} The active medication request
- * @returns {Set<string>}
- */
-function getMissingTimings(patient, medicationRequests) {
-    const timings = new Set();
-    medicationRequests.forEach(request =>
-        request.dosageInstruction.forEach(instruction =>
-            instruction.timing?.repeat?.when?.forEach(timing => timings.add(timing))));
-    Object.keys(patient.exactEventTimes).forEach(timing => timings.delete(timing));
+    timingPreferences.forEach((datetime, timing) => {
+        timings.delete(timing)
+    })
     return timings;
 }
 
@@ -144,7 +134,7 @@ async function getTimezoneOrDefault(handlerInput) {
     const upsServiceClient = serviceClientFactory.getUpsServiceClient();
     let userTimeZone = await upsServiceClient.getSystemTimeZone(deviceId);
     if (!userTimeZone) {
-        userTimeZone = luxon.Settings.defaultZone;
+        userTimeZone = Settings.defaultZone;
     }
 
     return userTimeZone;
@@ -199,7 +189,7 @@ function getDelegatedSetStartDateWithTimeIntent(healthRequestName, time) {
 
 function utcDateFromLocalDate(date, timezone) {
     const time = DateTime.now().setZone(timezone);
-    const utcDate = luxon.DateTime.fromISO(`${date}T${time.toISOTime()}`, {zone: timezone}).toUTC();
+    const utcDate = DateTime.fromISO(`${date}T${time.toISOTime()}`, {zone: timezone}).toUTC();
     return utcDate.toISO();
 }
 
@@ -246,23 +236,37 @@ function getDaysDifference(start, end) {
     return Math.abs(days);
 }
 
-function getBloodGlucoseAlert(value, stringTiming) {
+function getBloodGlucoseAlert(value, stringTiming, localizedMessages) {
     if (value < minBloodGlucoseValue) {
-        return strings.responses.enGb.LOW_GLUCOSE;
+        return localizedMessages.responses.LOW_GLUCOSE;
     }
 
-    const timing = fhirTiming.stringToTimingCode(stringTiming);
+    const timing = localizedMessages.stringToTimingCode(stringTiming);
     if ((timing === fhirTiming.timingEvent.ACM && value > maxFastingGlucoseValue)
         || value > maxAfterMealGlucoseValue) {
-        return strings.responses.enGb.HIGH_GLUCOSE;
+        return localizedMessages.responses.HIGH_GLUCOSE;
     }
 
     return '';
 }
 
+function listItems(values, concatWord) {
+    if (values.length === 1) {
+        return values[0];
+    }
+
+    const joinComma = values.length > 2 ? ',' : ''
+    return values.map((value, index) =>
+        index === values.length - 1 ? ` ${concatWord} ${value}.` : ` ${value}`)
+        .join(joinComma)
+}
+
+function wrapSpeakMessage(message) {
+    return `<speak>${message}</speak>`
+}
+
 module.exports = {
     logMessage,
-    getMissingTimings,
     getMissingDates,
     getTimezoneOrDefault,
     getDelegatedSetTimingIntent,
@@ -275,5 +279,7 @@ module.exports = {
     getSuggestedTiming,
     getDelegatedSetStartDateWithTimeIntent,
     getBloodGlucoseAlert,
-    sessionValues
+    sessionValues,
+    listItems,
+    wrapSpeakMessage,
 }

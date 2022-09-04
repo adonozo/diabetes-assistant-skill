@@ -1,5 +1,5 @@
 const fhirTiming = require("./timing");
-const strings = require("./../strings");
+const {DateTime} = require("luxon");
 
 /**
  * Gets the list of medication requests from a bundle.
@@ -36,9 +36,9 @@ function getMedicationFromDosageId(dosageId, requests) {
     return result;
 }
 
-function getTextForMedicationRequests(requests, patient, timezone) {
+function getTextForMedicationRequests(requests, patient, timezone, localizedMessages) {
     return requests.map(request => getMedicationText(request, patient, timezone))
-        .map(data => strings.makeMedicationText(data))
+        .map(data => localizedMessages.makeMedicationText(data))
         .join('. ');
 }
 
@@ -49,7 +49,7 @@ function getMedicationText(request, patient, timezone) {
     };
     medicationData.medication = request.medicationReference.display;
     request.dosageInstruction.forEach(dosage => {
-        const {value, unit} = strings.getMedicationValues(dosage);
+        const {value, unit} = getMedicationValues(dosage);
         let time = [];
         if (dosage.timing.repeat.when && Array.isArray(dosage.timing.repeat.when)) {
             time = dosage.timing.repeat.when.sort(fhirTiming.compareWhen);
@@ -67,8 +67,88 @@ function getMedicationText(request, patient, timezone) {
     return medicationData;
 }
 
+function getMedicationTextData({
+    request,
+    patient,
+    timezone,
+    textProcessor,
+    localizedMessages
+}) {
+    const medicationData = [];
+    const medication = request.medicationReference.display;
+    request.dosageInstruction.forEach(dosage => {
+        const {start, end} = fhirTiming.getDatesFromTiming(dosage.timing, patient, dosage.id);
+        const {value, unit} = getMedicationValues(dosage);
+        if (dosage.timing.repeat.when && Array.isArray(dosage.timing.repeat.when) && dosage.timing.repeat.when.length > 0) {
+            dosage.timing.repeat.when.forEach(timing => {
+                const patientDate = patient.exactEventTimes[timing];
+                const dateTime = DateTime.fromISO(patientDate).setZone(timezone); // Date already in UTC
+                const processedText = textProcessor({
+                    value: value,
+                    unit: unit,
+                    medication: medication,
+                    timing: timing,
+                    dateTime: dateTime,
+                    start: start,
+                    end: end,
+                    frequency: dosage.timing.repeat.frequency,
+                    dayOfWeek: dosage.timing.repeat.dayOfWeek,
+                    localizedMessages: localizedMessages
+                })
+                medicationData.push(processedText)
+            });
+        } else if (dosage.timing.repeat.timeOfDay && Array.isArray(dosage.timing.repeat.timeOfDay) && dosage.timing.repeat.timeOfDay.length > 0) {
+            dosage.timing.repeat.timeOfDay.forEach(time => {  // Timing is in local time
+                const date = DateTime.utc();
+                const dateTime = DateTime.fromISO(`${date.toISODate()}T${time}Z`);
+                const processedText = textProcessor({
+                    value: value,
+                    unit: unit,
+                    medication: medication,
+                    timing: time,
+                    dateTime: dateTime,
+                    start: start,
+                    end: end,
+                    frequency: dosage.timing.repeat.frequency,
+                    dayOfWeek: dosage.timing.repeat.dayOfWeek,
+                    localizedMessages: localizedMessages
+                })
+                medicationData.push(processedText)
+            });
+        } else if (dosage.timing.repeat.frequency && dosage.timing.repeat.frequency > 1) {
+            const patientDate = patient.resourceStartDate[dosage.id]; // This is in UTC
+            const dateTime = DateTime.fromISO(patientDate).setZone(timezone);
+            const processedText = textProcessor({
+                value: value,
+                unit: unit,
+                medication: medication,
+                timing: dateTime.toISOTime({ suppressSeconds: true, includeOffset: false }),
+                dateTime: dateTime,
+                start: start,
+                end: end,
+                frequency: dosage.timing.repeat.frequency,
+                dayOfWeek: dosage.timing.repeat.dayOfWeek,
+                localizedMessages: localizedMessages
+            })
+            medicationData.push(processedText)
+        }
+    });
+
+    return medicationData;
+}
+
+function getMedicationValues(dosage) {
+    const doseValue = dosage.doseAndRate[0].doseQuantity.value;
+    const doseUnit = dosage.doseAndRate[0].doseQuantity.unit;
+    return {
+        value: doseValue,
+        unit: doseUnit
+    }
+}
+
 module.exports = {
     requestListFromBundle,
     getMedicationFromDosageId,
-    getTextForMedicationRequests
+    getTextForMedicationRequests,
+    getMedicationTextData,
 }

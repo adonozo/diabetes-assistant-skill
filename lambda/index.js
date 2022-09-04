@@ -5,13 +5,11 @@ const auth = require('./auth');
 const medicationRequests = require("./api/medicationRequest");
 const carePlan = require("./api/carePlan")
 const fhirMedicationRequest = require("./fhir/medicationRequest");
-const fhirCarePlain = require("./fhir/carePlan");
+const fhirCarePlan = require("./fhir/carePlan");
 const helper = require("./helper");
 const patients = require("./api/patients");
 const fhirTiming = require("./fhir/timing");
 const fhirObservation = require("./fhir/observation");
-const fhirServiceRequest = require("./fhir/serviceRequest");
-const luxon = require("luxon");
 const {DateTime} = require("luxon");
 
 const LaunchRequestHandler = {
@@ -19,7 +17,8 @@ const LaunchRequestHandler = {
         return Alexa.getRequestType(handlerInput.requestEnvelope) === 'LaunchRequest';
     },
     handle(handlerInput) {
-        const speakOutput = strings.responses.enGb.WELCOME;
+        const localizedMessages = getLocalizedStrings(handlerInput);
+        const speakOutput = localizedMessages.responses.WELCOME;
         return handlerInput.responseBuilder
             .speak(speakOutput)
             .reprompt(speakOutput)
@@ -38,24 +37,26 @@ const MedicationForDateIntentHandler = {
             return requestAccountLink(handlerInput);
         }
 
+        const localizedMessages = getLocalizedStrings(handlerInput);
         const self = await patients.getSelf(userInfo.username);
         const date = handlerInput.requestEnvelope.request.intent.slots.treatmentDate.value;
         const userTimezone = await helper.getTimezoneOrDefault(handlerInput);
         const medicationRequest = await patients.getMedicationRequests(userInfo.username, date,
             fhirTiming.timingEvent.ALL_DAY, userTimezone);
-        const medications = fhirCarePlain.medicationsFromBundle(medicationRequest);
+        const medications = fhirCarePlan.medicationsFromBundle(medicationRequest);
         // Check missing dates in requests
         const missingDate = helper.getActiveMissingDate(self, medications);
         if (missingDate) {
-            return switchContextToStartDate(handlerInput, missingDate, userTimezone);
+            return switchContextToStartDate(handlerInput, missingDate, userTimezone, localizedMessages);
         }
 
         let speakOutput
         if (medications.length === 0) {
-            speakOutput = `${strings.responses.enGb.NO_RECORDS_FOUND} for ${strings.getTextForDay(date, userTimezone, '')}`;
+            speakOutput = localizedMessages.getNoRecordsTextForDay(date, userTimezone);
         } else {
-            const medicationText = fhirMedicationRequest.getTextForMedicationRequests(medications, self, userTimezone);
-            speakOutput = `${strings.getTextForDay(date, userTimezone, 'On')}, ${medicationText}`;
+            const medicationText = fhirMedicationRequest.getTextForMedicationRequests(medications, self, userTimezone, localizedMessages);
+            const datePreposition = localizedMessages.responses.DATE_PREPOSITION;
+            speakOutput = `${localizedMessages.getTextForDay(date, userTimezone, datePreposition)}, ${medicationText}`;
         }
 
         return handlerInput.responseBuilder
@@ -63,45 +64,6 @@ const MedicationForDateIntentHandler = {
             .getResponse();
     }
 };
-
-const CarePlanIntentHandler = {
-    canHandle(handlerInput) {
-        return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
-            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'CarePlanIntent';
-    },
-    async handle(handlerInput) {
-        let userInfo = await getValidatedUser(handlerInput);
-        if (!userInfo) {
-            return requestAccountLink(handlerInput);
-        }
-
-        const date = handlerInput.requestEnvelope.request.intent.slots.carePlanDate.value;
-        const self = await patients.getSelf(userInfo.username);
-        const userTimezone = await helper.getTimezoneOrDefault(handlerInput);
-        const requestsBundle = await patients.getMedicationRequestsForDate(userInfo.username, date, "carePlan",
-            fhirTiming.timingEvent.ALL_DAY, userTimezone);
-        // Check missing dates in requests
-        const missingDate = helper.getActiveMissingDate(self, fhirCarePlain.requestListFromBundle(requestsBundle));
-        if (missingDate) {
-            return switchContextToStartDate(handlerInput, missingDate, userTimezone);
-        }
-
-        let speakOutput
-        const medications = fhirCarePlain.medicationsFromBundle(requestsBundle);
-        const services = fhirCarePlain.serviceRequestsFromBundle(requestsBundle);
-        if (medications.length === 0 && services.length === 0) {
-            speakOutput = `${strings.responses.enGb.NO_RECORDS_FOUND} for ${strings.getTextForDay(date, userTimezone, '')}`;
-        } else {
-            const medicationText = fhirMedicationRequest.getTextForMedicationRequests(medications, self, userTimezone);
-            const servicesText = fhirServiceRequest.getTextForServiceRequests(services, self, userTimezone);
-            speakOutput = `${strings.getTextForDay(date, userTimezone, 'On')}, ${medicationText} ${servicesText}`;
-        }
-
-        return handlerInput.responseBuilder
-            .speak(speakOutput)
-            .getResponse();
-    }
-}
 
 const MedicationReminderIntentHandler = {
     canHandle(handlerInput) {
@@ -120,11 +82,12 @@ const MedicationReminderIntentHandler = {
         }
 
         const self = await patients.getSelf(userInfo.username);
+        const localizedMessages = getLocalizedStrings(handlerInput);
 
         // Check if timing setup is needed.
         const medicationBundle = await medicationRequests.getActiveMedicationRequests(self.id);
         const requests = fhirMedicationRequest.requestListFromBundle(medicationBundle);
-        const timingValidations = helper.getMissingTimings(self, requests);
+        const timingValidations = helper.getActiveMissingTimings(self, requests);
         if (timingValidations.size > 0) {
             return switchContextToTiming(handlerInput, timingValidations.values().next().value);
         }
@@ -133,18 +96,22 @@ const MedicationReminderIntentHandler = {
         const missingDate = helper.getActiveMissingDate(self, requests);
         if (missingDate) {
             const userTimezone = await helper.getTimezoneOrDefault(handlerInput);
-            return switchContextToStartDate(handlerInput, missingDate, userTimezone);
+            return switchContextToStartDate(handlerInput, missingDate, userTimezone, localizedMessages);
         }
 
         // Create reminders
         const userTimeZone = await helper.getTimezoneOrDefault(handlerInput);
-        const medicationReminders = reminders.getRemindersForMedicationRequests(requests, self, userTimeZone)
+        const medicationReminders = reminders.getRemindersForMedicationRequests({
+            requests,
+            patient: self,
+            timezone: userTimeZone,
+            localizedMessages})
         const remindersApiClient = handlerInput.serviceClientFactory.getReminderManagementServiceClient();
         for (const reminder of medicationReminders) {
             await remindersApiClient.createReminder(reminder);
         }
 
-        const speakOutput = strings.responses.enGb.SUCCESSFUL_REMINDERS;
+        const speakOutput = localizedMessages.responses.SUCCESSFUL_REMINDERS;
         return handlerInput.responseBuilder
             .speak(speakOutput)
             .getResponse();
@@ -168,10 +135,11 @@ const CreateRemindersIntentHandler = {
         }
 
         const self = await patients.getSelf(userInfo.username);
+        const localizedMessages = getLocalizedStrings(handlerInput);
 
         // Check if timing setup is needed.
         const requestBundle = await carePlan.getActiveCarePlan(userInfo.username);
-        const requests = fhirCarePlain.requestListFromBundle(requestBundle);
+        const requests = fhirCarePlan.requestListFromBundle(requestBundle);
         const timingValidations = helper.getActiveMissingTimings(self, requests);
         if (timingValidations.size > 0) {
             return switchContextToTiming(handlerInput, timingValidations.values().next().value);
@@ -181,18 +149,22 @@ const CreateRemindersIntentHandler = {
         const missingDate = helper.getActiveMissingDate(self, requests);
         if (missingDate) {
             const userTimezone = await helper.getTimezoneOrDefault(handlerInput);
-            return switchContextToStartDate(handlerInput, missingDate, userTimezone);
+            return switchContextToStartDate(handlerInput, missingDate, userTimezone, localizedMessages);
         }
 
         // Create reminders
         const userTimeZone = await helper.getTimezoneOrDefault(handlerInput);
-        const requestReminders = reminders.getRemindersForRequests(requests, self, userTimeZone);
+        const requestReminders = reminders.getRemindersForRequests({
+            requests,
+            patient: self,
+            timezone: userTimeZone,
+            localizedMessages});
         const remindersApiClient = handlerInput.serviceClientFactory.getReminderManagementServiceClient();
         for (const reminder of requestReminders) {
             await remindersApiClient.createReminder(reminder);
         }
 
-        const speakOutput = strings.responses.enGb.SUCCESSFUL_REMINDERS;
+        const speakOutput = localizedMessages.responses.SUCCESSFUL_REMINDERS;
         return handlerInput.responseBuilder
             .speak(speakOutput)
             .getResponse();
@@ -225,25 +197,26 @@ const SetTimingCompletedIntentHandler = {
             return requestAccountLink(handlerInput);
         }
 
+        const localizedMessages = getLocalizedStrings(handlerInput);
         const currentIntent = handlerInput.requestEnvelope.request.intent;
         const timing = currentIntent.slots.event.value;
         const time = currentIntent.slots.time.value;
         const userTimeZone = await helper.getTimezoneOrDefault(handlerInput);
-        const dateTime = luxon.DateTime.fromISO(`${DateTime.now().toISODate()}T${time}`, {zone: userTimeZone});
+        const dateTime = DateTime.fromISO(`${DateTime.now().toISODate()}T${time}`, {zone: userTimeZone});
 
         await patients.updateTiming(userInfo.username, {
-            timing: fhirTiming.stringToTimingCode(timing),
+            timing: localizedMessages.stringToTimingCode(timing),
             dateTime: dateTime.toUTC().toISO()
         })
 
         const session = handlerInput.attributesManager.getSessionAttributes();
-        let speakOutput = `${strings.responses.enGb.UPDATED_TIMING} ${timing}.`;
-        let reprompt = strings.responses.enGb.HELP;
+        let speakOutput = `${localizedMessages.responses.UPDATED_TIMING} ${timing}.`;
+        let reprompt = localizedMessages.responses.HELP;
         if (session[helper.sessionValues.medicationReminderIntent]) {
-            reprompt = strings.responses.enGb.MEDICATIONS_REMINDERS_SETUP;
+            reprompt = localizedMessages.responses.MEDICATIONS_REMINDERS_SETUP;
             speakOutput = `${speakOutput} ${reprompt}`;
         } else if (session[helper.sessionValues.createRemindersIntent]) {
-            reprompt = strings.responses.enGb.REQUESTS_REMINDERS_SETUP;
+            reprompt = localizedMessages.responses.REQUESTS_REMINDERS_SETUP;
             speakOutput = `${speakOutput} ${reprompt}`;
         }
 
@@ -266,13 +239,14 @@ const SetStartDateCompletedIntentHandler = {
             return requestAccountLink(handlerInput);
         }
 
+        const localizedMessages = getLocalizedStrings(handlerInput);
         const attributesManager = handlerInput.attributesManager;
         const session = attributesManager.getSessionAttributes();
         const missingDate = session[helper.sessionValues.requestMissingDate];
         if (!missingDate) {
             return handlerInput.responseBuilder
-                .speak(strings.responses.enGb.ERROR)
-                .reprompt(strings.responses.enGb.ERROR)
+                .speak(localizedMessages.responses.ERROR)
+                .reprompt(localizedMessages.responses.ERROR)
                 .getResponse();
         }
 
@@ -281,9 +255,9 @@ const SetStartDateCompletedIntentHandler = {
         const time = currentIntent.slots.healthRequestTime.value;
         const healthRequest = currentIntent.slots.healthRequest.value;
         const userTimeZone = await helper.getTimezoneOrDefault(handlerInput);
-        const dateTime = luxon.DateTime.fromISO(`${date}T${time}`, {zone: userTimeZone});
+        const dateTime = DateTime.fromISO(`${date}T${time}`, {zone: userTimeZone});
         await patients.setStartDate(userInfo.username, missingDate.id, { startDate: dateTime.toUTC().toISO() });
-        const {speakOutput, reprompt} = getStartDateConfirmedResponse(session, `You have set the start date for ${healthRequest}.`);
+        const {speakOutput, reprompt} = getStartDateConfirmedResponse(session, healthRequest, handlerInput);
         delete session[helper.sessionValues.requestMissingDate];
         attributesManager.setSessionAttributes(session);
 
@@ -327,9 +301,10 @@ const RegisterGlucoseLevelIntentInProgressWithValueHandler = {
             return requestAccountLink(handlerInput);
         }
 
+        const localizedMessages = getLocalizedStrings(handlerInput);
         const self = await patients.getSelf(userInfo.username);
-        const meal = helper.getSuggestedTiming(self);
-        const message = `Is this measure before ${meal}, after ${meal}, or none?`
+        const mealCode = helper.getSuggestedTiming(self);
+        const message = localizedMessages.getSuggestedTimeText(mealCode);
         return handlerInput.responseBuilder
             .speak(message)
             .reprompt(message)
@@ -350,21 +325,22 @@ const RegisterGlucoseLevelIntentHandler = {
             return requestAccountLink(handlerInput);
         }
 
+        const localizedMessages = getLocalizedStrings(handlerInput);
         const currentIntent = handlerInput.requestEnvelope.request.intent;
         const value = currentIntent.slots.level.value;
         const timing = currentIntent.slots.glucoseTiming.value
         if (isNaN(+value) || +value <= 0 || +value > 20) {
             return handlerInput.responseBuilder
-                .speak(strings.responses.enGb.INVALID_BLOOD_GLUCOSE)
-                .reprompt(strings.responses.enGb.INVALID_BLOOD_GLUCOSE_REPROMPT)
+                .speak(localizedMessages.responses.INVALID_BLOOD_GLUCOSE)
+                .reprompt(localizedMessages.responses.INVALID_BLOOD_GLUCOSE_REPROMPT)
                 .getResponse();
         }
 
         const self = await patients.getSelf(userInfo.username);
-        const observation = fhirObservation.createObservationObject(self, +value, timing);
+        const observation = fhirObservation.createObservationObject(self, +value, timing, localizedMessages);
         await patients.saveBloodGlucoseLevel(userInfo.username, observation);
-        const response = strings.responses.enGb.BLOOD_GLUCOSE_SUCCESS;
-        const alert = helper.getBloodGlucoseAlert(value, timing);
+        const response = localizedMessages.responses.BLOOD_GLUCOSE_SUCCESS;
+        const alert = helper.getBloodGlucoseAlert(value, timing, localizedMessages);
 
         return handlerInput.responseBuilder
             .speak(`${response} ${alert}`)
@@ -387,11 +363,12 @@ const AskGlucoseLevelIntentDateAndTimingHandler = {
             return requestAccountLink(handlerInput);
         }
 
+        const localizedMessages = getLocalizedStrings(handlerInput);
         const timezone = await helper.getTimezoneOrDefault(handlerInput);
         const date = handlerInput.requestEnvelope.request.intent.slots.date.value;
         const timing = handlerInput.requestEnvelope.request.intent.slots.timing.value;
 
-        const timingCode = fhirTiming.stringToTimingCode(timing);
+        const timingCode = localizedMessages.stringToTimingCode(timing);
         const utcDate = helper.utcDateFromLocalDate(date, timezone);
         const bundle = await patients.getObservationsOnDate(userInfo.username, utcDate, timingCode);
         return getAskGlucoseResponse(handlerInput, bundle, timezone);
@@ -503,23 +480,23 @@ const ConnectionsResponseHandler = {
     },
     handle(handlerInput) {
         const { permissions } = handlerInput.requestEnvelope.context.System.user;
-        const status = handlerInput.requestEnvelope.request.payload.status;
-
         if (!permissions) {
             return requestReminderPermission(handlerInput);
         }
 
+        const status = handlerInput.requestEnvelope.request.payload.status;
+        const localizedMessages = getLocalizedStrings(handlerInput);
         switch (status) {
             case "DENIED":
             case "NOT_ANSWERED":
                 return handlerInput.responseBuilder
-                    .speak("Without permissions, I can't set a reminder.")
+                    .speak(localizedMessages.responses.PERMISSIONS_REQUIRED)
                     .getResponse();
             case "ACCEPTED":
             default:
                 return handlerInput.responseBuilder
-                    .speak(strings.responses.enGb.SUCCESSFUL_REMINDER_PERMISSION)
-                    .reprompt(strings.responses.enGb.SUCCESSFUL_REMINDER_PERMISSION_REPROMPT)
+                    .speak(localizedMessages.responses.SUCCESSFUL_REMINDER_PERMISSION)
+                    .reprompt(localizedMessages.responses.SUCCESSFUL_REMINDER_PERMISSION_REPROMPT)
                     .getResponse();
         }
     }
@@ -531,7 +508,8 @@ const HelpIntentHandler = {
             && Alexa.getIntentName(handlerInput.requestEnvelope) === 'AMAZON.HelpIntent';
     },
     handle(handlerInput) {
-        const speakOutput = strings.responses.enGb.HELP;
+        const localizedMessages = getLocalizedStrings(handlerInput);
+        const speakOutput = localizedMessages.responses.HELP;
 
         return handlerInput.responseBuilder
             .speak(speakOutput)
@@ -547,7 +525,8 @@ const CancelAndStopIntentHandler = {
                 || Alexa.getIntentName(handlerInput.requestEnvelope) === 'AMAZON.StopIntent');
     },
     handle(handlerInput) {
-        const speakOutput = strings.responses.enGb.STOP;
+        const localizedMessages = getLocalizedStrings(handlerInput);
+        const speakOutput = localizedMessages.responses.STOP;
         return handlerInput.responseBuilder
             .speak(speakOutput)
             .getResponse();
@@ -592,7 +571,8 @@ const ErrorHandler = {
     },
     handle(handlerInput, error) {
         console.log(`~~~~ Error handled: ${error.stack}`);
-        const speakOutput = strings.responses.enGb.ERROR;
+        const localizedMessages = getLocalizedStrings(handlerInput);
+        const speakOutput = localizedMessages.responses.ERROR;
 
         return handlerInput.responseBuilder
             .speak(speakOutput)
@@ -607,7 +587,6 @@ exports.handler = Alexa.SkillBuilders.custom()
     .addRequestHandlers(
         LaunchRequestHandler,
         MedicationForDateIntentHandler,
-        CarePlanIntentHandler,
         MedicationReminderIntentHandler,
         ConnectionsResponseHandler,
         HelpIntentHandler,
@@ -625,7 +604,7 @@ exports.handler = Alexa.SkillBuilders.custom()
         AskGlucoseLevelIntentDateHandler,
         AskGlucoseLevelIntentTimeHandler,
         AskGlucoseLevelIntentTimingHandler,
-        IntentReflectorHandler, // make sure IntentReflectorHandler is last so it doesn't override your custom intent handlers
+        IntentReflectorHandler, // make sure IntentReflectorHandler is last, so it doesn't override your custom intent handlers
         ) 
     .addErrorHandlers(
         ErrorHandler,
@@ -644,31 +623,40 @@ const getValidatedUser = async (handlerInput) => {
     return userInfo;
 }
 
-const requestAccountLink = (handlerInput) => handlerInput.responseBuilder
-        .speak(strings.responses.enGb.ACCOUNT_LINK)
+const requestAccountLink = (handlerInput) => {
+    const localizedMessages = getLocalizedStrings(handlerInput);
+    return handlerInput.responseBuilder
+        .speak(localizedMessages.responses.ACCOUNT_LINK)
         .withLinkAccountCard()
         .getResponse();
+}
 
-const requestReminderPermission = (handlerInput) => handlerInput.responseBuilder
-    .speak(strings.responses.enGb.REMINDER_PERMISSIONS)
-    .addDirective(reminders.reminderDirective)
-    .getResponse();
+const requestReminderPermission = (handlerInput) => {
+    const localizedMessages = getLocalizedStrings(handlerInput);
+    return handlerInput.responseBuilder
+        .speak(localizedMessages.responses.REMINDER_PERMISSIONS)
+        .addDirective(reminders.reminderDirective)
+        .getResponse();
+}
 
 const switchContextToTiming = (handlerInput, timing) => {
+    const localizedMessages = getLocalizedStrings(handlerInput);
     const attributesManager = handlerInput.attributesManager;
     const session = attributesManager.getSessionAttributes();
-    const nextTiming = fhirTiming.relatedTimingCodeToString(timing);
+    const nextTimingCode = fhirTiming.relatedTimingCodeToString(timing);
+    const nextTiming = localizedMessages.codeToString(nextTimingCode)
+
     const intent = handlerInput.requestEnvelope.request.intent;
     session[intent.name] = intent;
     attributesManager.setSessionAttributes(session);
 
     return handlerInput.responseBuilder
         .addDelegateDirective(helper.getDelegatedSetTimingIntent(nextTiming))
-        .speak(strings.responses.enGb.SETUP_TIMINGS)
+        .speak(localizedMessages.responses.SETUP_TIMINGS)
         .getResponse()
 };
 
-const switchContextToStartDate = (handlerInput, missingDate, userTimeZone) => {
+const switchContextToStartDate = (handlerInput, missingDate, userTimeZone, localizedMessages) => {
     const attributesManager = handlerInput.attributesManager;
     const session = attributesManager.getSessionAttributes();
     const intent = handlerInput.requestEnvelope.request.intent;
@@ -684,7 +672,7 @@ const switchContextToStartDate = (handlerInput, missingDate, userTimeZone) => {
         delegatedIntent= helper.getDelegatedSetStartDateWithTimeIntent(missingDate.name, time);
     }
 
-    const requiredSetup = strings.getStartDatePrompt(missingDate);
+    const requiredSetup = localizedMessages.getStartDatePrompt(missingDate);
     return handlerInput.responseBuilder
         .addDelegateDirective(delegatedIntent)
         .speak(requiredSetup)
@@ -692,29 +680,37 @@ const switchContextToStartDate = (handlerInput, missingDate, userTimeZone) => {
 }
 
 const getAskGlucoseResponse = (handlerInput, bundle, timezone) => {
+    const localizedMessages = getLocalizedStrings(handlerInput);
     if (!bundle.entry || bundle.entry.length === 0) {
         return handlerInput.responseBuilder
-            .speak(strings.responses.enGb.NO_GLUCOSE_RECORDS_FOUND)
+            .speak(localizedMessages.responses.NO_GLUCOSE_RECORDS_FOUND)
             .getResponse();
     }
 
     const observations = fhirObservation.getObservationsFromBundle(bundle);
-    const message = strings.makeTextFromObservations(observations, timezone);
+    const message = strings.makeTextFromObservations(observations, timezone, localizedMessages);
     return handlerInput.responseBuilder
         .speak(message)
         .getResponse();
 }
 
-const getStartDateConfirmedResponse = (session, speakOutput) => {
-    let reprompt = strings.responses.enGb.HELP;
+const getStartDateConfirmedResponse = (session, healthRequest, handlerInput) => {
+    const localizedMessages = getLocalizedStrings(handlerInput);
+    let speakOutput = localizedMessages.getConfirmationDateText(healthRequest);
+
+    let reprompt = localizedMessages.responses.HELP;
     if (session[helper.sessionValues.medicationReminderIntent]) {
-        reprompt = strings.responses.enGb.MEDICATIONS_REMINDERS_SETUP;
+        reprompt = localizedMessages.responses.MEDICATIONS_REMINDERS_SETUP;
     } else if (session[helper.sessionValues.createRemindersIntent]) {
-        reprompt = strings.responses.enGb.REQUESTS_REMINDERS_SETUP;
+        reprompt = localizedMessages.responses.REQUESTS_REMINDERS_SETUP;
     } else if (session[helper.sessionValues.carePlanIntent] || session[helper.sessionValues.medicationForDateIntent]) {
-        reprompt = strings.responses.enGb.QUERY_SETUP;
+        reprompt = localizedMessages.responses.QUERY_SETUP;
     }
 
     speakOutput = `${speakOutput} ${reprompt}`;
     return {speakOutput, reprompt}
+}
+
+const getLocalizedStrings = (handlerInput) => {
+    return strings.getLocalizedStrings(handlerInput.requestEnvelope.request.locale);
 }
