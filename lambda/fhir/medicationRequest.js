@@ -1,5 +1,7 @@
 const fhirTiming = require("./timing");
 const {DateTime} = require("luxon");
+const fhirDosage = require("./dosage");
+const fhirPatient = require("./patient");
 
 /**
  * Gets the list of medication requests from a bundle.
@@ -56,8 +58,8 @@ function getMedicationText(request, patient, timezone) {
         } else if (dosage.timing.repeat.timeOfDay && Array.isArray(dosage.timing.repeat.timeOfDay)) {
             time = dosage.timing.repeat.timeOfDay.sort();
         } else if (dosage.timing.repeat.frequency > 1) {
-            const date = patient.resourceStartDate[dosage.id];
-            time = fhirTiming.getTimesFromTimingWithFrequency(dosage.timing.repeat.frequency, date, timezone)
+            const startDate = fhirDosage.getDosageStartDate(dosage.id);
+            time = fhirTiming.getTimesFromTimingWithFrequency(dosage.timing.repeat.frequency, startDate, timezone)
                 .sort();
         }
 
@@ -77,11 +79,12 @@ function getMedicationTextData({
     const medicationData = [];
     const medication = request.medicationReference.display;
     request.dosageInstruction.forEach(dosage => {
-        const {start, end} = fhirTiming.getDatesFromTiming(dosage.timing, patient, dosage.id);
+        const {start, end} = fhirTiming.getDatesFromTiming(dosage.timing, fhirDosage.getDosageStartDate, dosage);
         const {value, unit} = getMedicationValues(dosage);
         if (dosage.timing.repeat.when && Array.isArray(dosage.timing.repeat.when) && dosage.timing.repeat.when.length > 0) {
             dosage.timing.repeat.when.forEach(timing => {
-                const patientDate = patient.exactEventTimes[timing];
+                const timingPreferences = fhirPatient.getTimingPreferences(patient);
+                const patientDate = timingPreferences.get(timing);
                 const dateTime = DateTime.fromISO(patientDate).setZone(timezone); // Date already in UTC
                 const processedText = textProcessor({
                     value: value,
@@ -116,8 +119,8 @@ function getMedicationTextData({
                 medicationData.push(processedText)
             });
         } else if (dosage.timing.repeat.frequency && dosage.timing.repeat.frequency > 1) {
-            const patientDate = patient.resourceStartDate[dosage.id]; // This is in UTC
-            const dateTime = DateTime.fromISO(patientDate).setZone(timezone);
+            const startDate = fhirDosage.getDosageStartDate(dosage); // This is in UTC
+            const dateTime = DateTime.fromISO(startDate).setZone(timezone);
             const processedText = textProcessor({
                 value: value,
                 unit: unit,

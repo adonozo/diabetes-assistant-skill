@@ -1,6 +1,7 @@
 const fhirTiming = require("./timing");
 const {DateTime} = require("luxon");
-const helper = require("../helper");
+const fhir = require("./fhir");
+const fhirPatient = require("./patient");
 
 const SERVICE_REQUEST_START_DATE = 'http://diabetes-assistant.com/fhir/StructureDefinition/ServiceRequestStartDate';
 
@@ -26,8 +27,8 @@ function getServiceText(request, patient, timezone) {
     } else if (repeat.timeOfDay && Array.isArray(repeat.timeOfDay)) {
         serviceData.timings = repeat.timeOfDay.sort();
     } else if (repeat.frequency > 1) {
-        const date = patient.resourceStartDate[request.id];
-        serviceData.timings = fhirTiming.getTimesFromTimingWithFrequency(repeat.frequency, date, timezone)
+        const startDate = getServiceRequestStartDate(request);
+        serviceData.timings = fhirTiming.getTimesFromTimingWithFrequency(repeat.frequency, startDate, timezone)
             .sort();
     }
 
@@ -48,11 +49,12 @@ function getServiceTextData({
         return serviceData;
     }
 
-    const {start, end} = fhirTiming.getDatesFromTiming(request.occurrenceTiming, patient, request.id);
+    const {start, end} = fhirTiming.getDatesFromTiming(request.occurrenceTiming, getServiceRequestStartDate, request);
     const repeat = request.occurrenceTiming.repeat;
     if (repeat.when && Array.isArray(repeat.when) && repeat.when.length > 0) {
         repeat.when.forEach(timing => {
-            const patientDate = patient.exactEventTimes[timing];
+            const timingPreferences = fhirPatient.getTimingPreferences(patient);
+            const patientDate = timingPreferences.get(timing);
             const dateTime = DateTime.fromISO(patientDate).setZone(timezone);
             const processedText = textProcessor({
                 action: action,
@@ -83,8 +85,8 @@ function getServiceTextData({
             serviceData.push(processedText)
         });
     } else if (repeat.frequency && repeat.frequency > 1) {
-        const patientDate = patient.resourceStartDate[dosage.id]; // This is in UTC
-        const dateTime = DateTime.fromISO(patientDate).setZone(timezone);
+        const startDate = getServiceRequestStartDate(request); // This is in UTC
+        const dateTime = DateTime.fromISO(startDate).setZone(timezone);
         const processedText = textProcessor({
             action: action,
             timing: dateTime.toISOTime({ suppressSeconds: true, includeOffset: false }),
@@ -102,7 +104,11 @@ function getServiceTextData({
 }
 
 function getServiceRequestStartDate(serviceRequest) {
-    const startDateExtension = helper.getExtension(serviceRequest, SERVICE_REQUEST_START_DATE);
+    const startDateExtension = fhir.getExtension(serviceRequest, SERVICE_REQUEST_START_DATE);
+    if (!startDateExtension) {
+        return undefined;
+    }
+
     const date = fhirTiming.tryParseDate(startDateExtension.valueDateTime);
     if (date) {
         return date;
