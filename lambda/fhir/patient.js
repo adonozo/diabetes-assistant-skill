@@ -1,10 +1,10 @@
 const fhirTiming = require('./timing')
-const helper = require("../helper")
+const fhir = require("./fhir");
 
 const TIMING_PREFERENCES = 'http://diabetes-assistant.com/fhir/StructureDefinition/TimingPreference'
 
 function getTimingPreferences(patient) {
-    const timingExtension = helper.getExtension(patient, TIMING_PREFERENCES);
+    const timingExtension = fhir.getExtension(patient, TIMING_PREFERENCES);
     const preferences = new Map();
     timingExtension.extension.map(ext => {
         const date = fhirTiming.tryParseDate(ext.valueDateTime);
