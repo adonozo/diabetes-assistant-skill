@@ -2,6 +2,8 @@ const {timingEvent} = require("./fhir/timing");
 const {DateTime} = require("luxon");
 const helpers = require("helper");
 
+const locale = 'es-MX'
+
 const responses = {
     WELCOME: "Hola, puedes preguntarme tus medicamentos para mañana o puedo crear recordatorios",
     REMINDER_PERMISSIONS: "Necesito permisos para crear recordatorios",
@@ -312,4 +314,5 @@ module.exports = {
     makeTextForObservationDay,
     stringToTimingCode,
     codeToString,
+    locale,
 }

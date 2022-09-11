@@ -2,19 +2,14 @@ const {DateTime} = require("luxon");
 const enGb = require("strings.en_gb");
 const esMx = require("strings.es_mx");
 
-const locales = {
-    enGb: "en-GB",
-    esMx: "es-MX"
-}
-
 function getLocalizedStrings(locale) {
     switch (locale) {
-        case locales.enGb:
+        case enGb.locale:
             return enGb;
-        case locales.esMx:
+        case esMx.locale:
             return esMx;
         default:
-            throw "Locale not supported.";
+            throw 'Locale not supported.';
     }
 }
 
