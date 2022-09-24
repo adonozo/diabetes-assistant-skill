@@ -1,7 +1,7 @@
 {
   "interactionModel": {
     "languageModel": {
-      "invocationName": "diabetes assistant",
+      "invocationName": "asistente de diabetes",
       "intents": [
         {
           "name": "AMAZON.CancelIntent",
@@ -202,23 +202,34 @@
             }
           ],
           "samples": [
-            "Note my glucose level",
-            "Note my blood glucose level",
-            "Note my blood glucose",
-            "Save my glucose level",
-            "Save my blood glucose level",
-            "Take note of my blood glucose level",
-            "Take note of my glucose level",
-            "My glucose level is {level}",
-            "My glucose is {level}",
-            "My blood glucose is {level}",
-            "Note that my glucose level is {level}",
-            "Note that my glucose is {level}",
-            "Note that my blood glucose is {level}",
-            "I have {level} for my glucose level",
-            "I read {level} for my blood glucose",
-            "I have {level} for my blood glucose",
-            "I read {level} for my glucose"
+            "Guarda mi nivel de glucosa",
+            "Guarda mi nivel de glucosa en sangre",
+            "Guarda mi glucosa en sangre",
+            "Guarda mi nivel de azúcar en sangre",
+            "Registra mi nivel de glucosa",
+            "Registra mi nivel de glucosa en sangre",
+            "Registra mi glucosa en sangre",
+            "Registra mi nivel de azúcar en sangre",
+            "Anota mi nivel de glucosa",
+            "Anota mi nivel de glucosa en sangre",
+            "Anota mi glucosa en sangre",
+            "Anota mi nivel de azúcar en sangre",
+            "Anota mi nivel de azúcar",
+            "Toma nota de mi nivel de glucosa",
+            "Toma nota de mi nivel de glucosa en sangre",
+            "Toma nota de mi glucosa en sangre",
+            "Toma nota de mi nivel de azúcar en sangre",
+            "Mi nivel de glucosa es {level}",
+            "Mi glucosa es {level}",
+            "Mi glucosa en sangre es {level}",
+            "Mi nivel de azúcar en sangre es {level}",
+            "Mi nivel de azúcar es {level}",
+            "Anota que mi nivel de glucosa es {level}",
+            "Anota que mi nivel de glucosa en sangre es {level}",
+            "Anota que mi glucosa en sangre es {level}",
+            "Anota que mi nivel de azúcar es {level}",
+            "Leí {level} en mi nivel de azúcar",
+            "Leí {level} para mi glucosa"
           ]
         },
         {
@@ -229,8 +240,9 @@
               "type": "AMAZON.TIME",
               "samples": [
                 "{time}",
-                "at {time}",
-                "around {time}"
+                "a las {time}",
+                "a la {time}",
+                "alrededor de {time}"
               ]
             },
             {
@@ -238,7 +250,9 @@
               "type": "timingEvent",
               "samples": [
                 "{timing}",
-                "at {timing}"
+                "en {timing}",
+                "en el {timing}",
+                "en la {timing}"
               ]
             },
             {
@@ -246,7 +260,7 @@
               "type": "AMAZON.DATE",
               "samples": [
                 "{date}",
-                "on {date}"
+                "el {date}"
               ]
             }
           ],
@@ -302,23 +316,6 @@
             "Cuál era mi glucosa {date} durante el {timing}",
             "Cuál era mi glucosa en el {timing}",
             "Cuál era mi azúcar en el {timing}",
-            "Medí mi azúcar el {date}",
-            "Medí mi nivel azúcar el {date}",
-            "Medí mi azúcar {date}",
-            "Medí mi glucosa {date}",
-            "Medí mi glucosa en sangre {date}",
-            "Medí mi glucosa el {date}",
-            "Medí mi glucosa en sangre el {date}",
-            "Medí mi glucosa a las {time}",
-            "Medí mi glucosa a la {time}",
-            "Medí mi azúcar a las {time}",
-            "Medí mi azúcar a la {time}",
-            "Medí mi azúcar en el {timing}",
-            "Medí mi glucosa en el {timing}",
-            "Medí mi glucosa el {date} a las {time}",
-            "Medí mi azúcar el {date} a las {time}",
-            "Medí mi azúcar {date} en el {timing}",
-            "Medí mi glucosa {date} en el {timing}",
             "Mi glucosa {date}",
             "Mi glucosa el {date}",
             "Mi nivel de glucosa {date}",

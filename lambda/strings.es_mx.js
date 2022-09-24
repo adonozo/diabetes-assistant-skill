@@ -30,6 +30,7 @@ const responses = {
     PERMISSIONS_REQUIRED: "Sin permisos, no puedo crear recordatorios para tus medicamentos.",
     DATE_PREPOSITION: "El",
     CONCAT_WORD: "y",
+    REMINDER_NOT_CREATED: "Lo siento, no pude crear los recordatorios. Intenta nuevamente.",
 }
 
 function getMedicationReminderText(value, unit, medication, time) {

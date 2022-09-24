@@ -45,7 +45,7 @@ const MedicationForDateIntentHandler = {
             fhirTiming.timingEvent.ALL_DAY, userTimezone);
         const medications = fhirCarePlan.medicationsFromBundle(medicationRequest);
         // Check missing dates in requests
-        const missingDate = helper.getActiveMissingDate(self, medications);
+        const missingDate = helper.getActiveMissingStartDate(self, medications);
         if (missingDate) {
             return switchContextToStartDate(handlerInput, missingDate, userTimezone, localizedMessages);
         }
@@ -93,7 +93,7 @@ const MedicationReminderIntentHandler = {
         }
 
         // Check if start date setup is needed.
-        const missingDate = helper.getActiveMissingDate(self, requests);
+        const missingDate = helper.getActiveMissingStartDate(self, requests);
         if (missingDate) {
             const userTimezone = await helper.getTimezoneOrDefault(handlerInput);
             return switchContextToStartDate(handlerInput, missingDate, userTimezone, localizedMessages);
@@ -146,7 +146,7 @@ const CreateRemindersIntentHandler = {
         }
 
         // Check if start date setup is needed.
-        const missingDate = helper.getActiveMissingDate(self, requests);
+        const missingDate = helper.getActiveMissingStartDate(self, requests);
         if (missingDate) {
             const userTimezone = await helper.getTimezoneOrDefault(handlerInput);
             return switchContextToStartDate(handlerInput, missingDate, userTimezone, localizedMessages);
@@ -160,11 +160,16 @@ const CreateRemindersIntentHandler = {
             timezone: userTimeZone,
             localizedMessages});
         const remindersApiClient = handlerInput.serviceClientFactory.getReminderManagementServiceClient();
+        let speakOutput = localizedMessages.responses.SUCCESSFUL_REMINDERS;
+
         for (const reminder of requestReminders) {
-            await remindersApiClient.createReminder(reminder);
+            try {
+                await remindersApiClient.createReminder(reminder);
+            } catch (e) {
+                speakOutput = localizedMessages.responses.REMINDER_NOT_CREATED;
+            }
         }
 
-        const speakOutput = localizedMessages.responses.SUCCESSFUL_REMINDERS;
         return handlerInput.responseBuilder
             .speak(speakOutput)
             .getResponse();
