@@ -332,9 +332,9 @@ const RegisterGlucoseLevelIntentHandler = {
 
         const localizedMessages = getLocalizedStrings(handlerInput);
         const currentIntent = handlerInput.requestEnvelope.request.intent;
-        const value = currentIntent.slots.level.value;
+        const value = +currentIntent.slots.level.value;
         const timing = currentIntent.slots.glucoseTiming.value
-        if (isNaN(+value) || +value <= 0 || +value > 20) {
+        if (isNaN(value) || value <= 0 || value > 20) {
             return handlerInput.responseBuilder
                 .speak(localizedMessages.responses.INVALID_BLOOD_GLUCOSE)
                 .reprompt(localizedMessages.responses.INVALID_BLOOD_GLUCOSE_REPROMPT)
@@ -342,7 +342,7 @@ const RegisterGlucoseLevelIntentHandler = {
         }
 
         const self = await patients.getSelf(userInfo.username);
-        const observation = fhirObservation.createObservationObject(self, +value, timing, localizedMessages);
+        const observation = fhirObservation.createObservationObject(self, value, timing, localizedMessages);
         await patients.saveBloodGlucoseLevel(userInfo.username, observation);
         const response = localizedMessages.responses.BLOOD_GLUCOSE_SUCCESS;
         const alert = helper.getBloodGlucoseAlert(value, timing, localizedMessages);

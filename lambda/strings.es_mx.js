@@ -45,7 +45,7 @@ function getConfirmationDateText(healthRequest) {
 
 function getSuggestedTimeText(mealCode) {
     const meal = getMealSuggestion(mealCode);
-    return `¿Esta medida es antes de ${meal}, después de ${meal}, o ninguno?`
+    return `¿Esta medida es antes ${meal}, después ${meal}, o ninguno?`
 }
 
 function getMedicationSsmlReminderText(value, unit, medication, time) {
