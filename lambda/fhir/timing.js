@@ -84,22 +84,22 @@ function alexaTimingToFhirTiming(alexaTiming) {
     }
 }
 
-function getDatesFromTiming(timing, patient, resourceId) {
+function getDatesFromTiming(timing, getStartDate, resource) {
     if (timing.repeat.boundsPeriod) {
         const startDate = DateTime.fromISO(timing.repeat.boundsPeriod.start);
         const endDate = DateTime.fromISO(timing.repeat.boundsPeriod.end)
             .plus({days: 1}); // Adds 1 to include the end date.
         return {
-            start: startDate,
-            end: endDate
+            start: startDate.toUTC(),
+            end: endDate.toUTC()
         }
     } else if (timing.repeat.boundsDuration) {
-        const start = patient.resourceStartDate[resourceId];
+        const start = getStartDate(resource);
         const startDate = DateTime.fromISO(start, {zone: 'utc'});
         const endDate = startDate.plus({days: timing.repeat.boundsDuration.value + 1})
         return {
-            start: startDate,
-            end: endDate
+            start: startDate.toUTC(),
+            end: endDate.toUTC()
         }
     }
 

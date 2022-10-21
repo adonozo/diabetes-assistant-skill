@@ -2,6 +2,8 @@ const {timingEvent} = require("./fhir/timing");
 const {DateTime} = require("luxon");
 const helpers = require("helper");
 
+const locale = 'en-GB'
+
 const responses = {
     WELCOME: "Welcome, I can set up reminders or tell you your medications for tomorrow. Which would you like to try?",
     REMINDER_PERMISSIONS: "I need permission to access your reminders.",
@@ -28,6 +30,7 @@ const responses = {
     PERMISSIONS_REQUIRED: "Without permissions, I can't set a reminder.",
     DATE_PREPOSITION: "On",
     CONCAT_WORD: "and",
+    REMINDER_NOT_CREATED: "Sorry, I couldn't create the reminders. Please try again.",
 }
 
 function getMedicationReminderText(value, unit, medication, time) {
@@ -308,4 +311,5 @@ module.exports = {
     makeTextForObservationDay,
     stringToTimingCode,
     codeToString,
+    locale,
 }

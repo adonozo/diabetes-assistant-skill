@@ -1,6 +1,8 @@
 const {DateTime, Settings} = require("luxon");
 const fhirTiming = require("./fhir/timing");
 const fhirPatient = require("./fhir/patient");
+const fhirDosage = require("./fhir/dosage");
+const fhirServiceRequest = require("./fhir/serviceRequest");
 
 const minBloodGlucoseValue = 4;
 const maxFastingGlucoseValue = 7;
@@ -53,13 +55,15 @@ function getActiveMissingTimings(patient, requests) {
  * @param requests {[]} The active medication request
  * @returns {{type: string, id: string, name: string, duration: string, frequency: number} | undefined}
  */
-function getActiveMissingDate(patient, requests) {
+function getActiveMissingStartDate(patient, requests) {
     for (const request of requests) {
         if (request.resourceType === 'MedicationRequest') {
             for (const instruction of request.dosageInstruction) {
+                const startDate = fhirDosage.getDosageStartDate(instruction);
                 if (instruction.timing?.repeat?.boundsDuration
                     && !isNaN(instruction.timing?.repeat?.boundsDuration.value)
-                    && !patient.resourceStartDate[instruction.id]) {
+                    && !startDate
+                ) {
                     return {
                         type: 'MedicationRequest',
                         id: instruction.id,
@@ -69,7 +73,8 @@ function getActiveMissingDate(patient, requests) {
                     }
                 } else if (instruction.timing?.repeat?.boundsPeriod
                     && instruction.timing?.repeat?.frequency > 1
-                    && !patient.resourceStartDate[instruction.id]) {
+                    && !startDate
+                ) {
                     const duration = getDaysDifference(instruction.timing.repeat.boundsPeriod.start, instruction.timing.repeat.boundsPeriod.end);
                     return {
                         type: 'MedicationRequest',
@@ -81,9 +86,11 @@ function getActiveMissingDate(patient, requests) {
                 }
             }
         } else if (request.resourceType === 'ServiceRequest') {
+            const startDate = fhirServiceRequest.getServiceRequestStartDate(request);
             if (request.occurrenceTiming?.repeat?.boundsDuration
                 && !isNaN(request.occurrenceTiming?.repeat?.boundsDuration.value)
-                && !patient.resourceStartDate[request.id]) {
+                && !startDate
+            ) {
                 return {
                     type: 'ServiceRequest',
                     id: request.id,
@@ -93,7 +100,8 @@ function getActiveMissingDate(patient, requests) {
                 };
             } else if (request.occurrenceTiming?.repeat?.boundsPeriod
                 && request.occurrenceTiming?.repeat?.frequency > 1
-                && !patient.resourceStartDate[request.id]) {
+                && !startDate
+            ) {
                 const duration = getDaysDifference(request.occurrenceTiming.repeat.boundsPeriod.start, request.occurrenceTiming.repeat.boundsPeriod.end);
                 return {
                     type: 'ServiceRequest',
@@ -118,13 +126,15 @@ function getActiveMissingDate(patient, requests) {
 function getMissingDates(patient, medicationRequests) {
     const dates = new Set();
     medicationRequests.forEach(request =>
-        request.dosageInstruction.forEach(instruction =>
-        {
-            if (instruction.timing?.repeat?.boundsDuration && !isNaN(instruction.timing?.repeat?.boundsDuration.value)) {
+        request.dosageInstruction.forEach(instruction => {
+            const startDate = fhirDosage.getDosageStartDate(instruction);
+            if (instruction.timing?.repeat?.boundsDuration
+                && !isNaN(instruction.timing?.repeat?.boundsDuration.value)
+                && !startDate
+            ) {
                 dates.add(instruction.id)
             }
         }));
-    Object.keys(patient.resourceStartDate).forEach(date => dates.delete(date));
     return dates;
 }
 
@@ -272,7 +282,7 @@ module.exports = {
     getDelegatedSetTimingIntent,
     getDelegatedSetStartDateIntent,
     getActiveMissingTimings,
-    getActiveMissingDate,
+    getActiveMissingStartDate,
     utcDateFromLocalDate,
     utcTimeFromLocalTime,
     utcDateTimeFromLocalDateAndTime,

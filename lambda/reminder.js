@@ -17,10 +17,10 @@ const reminderDirective = {
 
 // Dates in ISO 8601 format: 2019-09-22T19:00:00.000
 const absoluteReminderRequest = {
+    requestTime: "",
     trigger: {
         type: "SCHEDULED_ABSOLUTE",
         timeZoneId : "",
-        scheduledTime: "",
         recurrence: {
             startDateTime: "",
             endDateTime: "",
@@ -32,11 +32,13 @@ const absoluteReminderRequest = {
     },
     alertInfo: {
         spokenInfo: {
-            content: [{
-                locale: "en-GB",
-                text: "",
-                ssml: "<speak></speak>"
-            }]
+            content: [
+                {
+                    locale: "",
+                    text: "",
+                    ssml: "<speak></speak>"
+                }
+            ]
         }
     },
     pushNotification: {
@@ -65,7 +67,7 @@ function getRemindersForRequests({
             timezone,
             localizedMessages
         })
-    ];
+    ]
 }
 
 function getRemindersForMedicationRequests({
@@ -74,7 +76,7 @@ function getRemindersForMedicationRequests({
    timezone,
    localizedMessages
 }) {
-    const currentDateTime = DateTime.utc().toISO();
+    const currentDateTime = DateTime.utc();
     return requests.map(request => fhirMedicationRequest.getMedicationTextData({
         request,
         patient,
@@ -83,14 +85,21 @@ function getRemindersForMedicationRequests({
         localizedMessages
     }))
         .flat(1)
+        .filter(data => data.end > currentDateTime)
+        .map(data => {
+            data.start = data.start < currentDateTime ? currentDateTime : data.start;
+            data.start = data.start.toISO({extendedZone: false, includeOffset: false});
+            data.end = data.end.toISO({extendedZone: false, includeOffset: false});
+            return data;
+        })
         .map(data => createAbsoluteReminder({
-            scheduledTime: currentDateTime,
             startDateTime: data.start,
             endDateTime: data.end,
             text: data.text,
             ssml: data.ssml,
             recurrenceRules: data.rule,
-            timezone: timezone
+            timezone: timezone,
+            locale: data.locale
         }));
 }
 
@@ -100,7 +109,7 @@ function getRemindersForServiceRequests({
     timezone,
     localizedMessages
 }) {
-    const currentDateTime = DateTime.utc().toISO();
+    const currentDateTime = DateTime.utc();
     return requests.map(request => fhirServiceRequest.getServiceTextData({
         request,
         patient,
@@ -109,14 +118,21 @@ function getRemindersForServiceRequests({
         localizedMessages
     }))
         .flat(1)
+        .filter(data => data.end > currentDateTime)
+        .map(data => {
+            data.start = data.start < currentDateTime ? currentDateTime : data.start;
+            data.start = data.start.toISO({extendedZone: false, includeOffset: false});
+            data.end = data.end.toISO({extendedZone: false, includeOffset: false});
+            return data;
+        })
         .map(data => createAbsoluteReminder({
-            scheduledTime: currentDateTime,
             startDateTime: data.start,
             endDateTime: data.end,
             text: data.text,
             ssml: data.ssml,
             recurrenceRules: data.rule,
-            timezone: timezone
+            timezone: timezone,
+            locale: data.locale
         }));
 }
 
@@ -140,8 +156,9 @@ function getBaseMedicationReminder({
         text: text,
         ssml: ssml,
         rule: rule,
-        start: start.toISO(),
-        end: end.toISO()
+        start: start,
+        end: end,
+        locale: localizedMessages.locale
     };
 }
 
@@ -162,8 +179,9 @@ function getBaseServiceReminder({
         text: text,
         ssml: ssml,
         rule: rule,
-        start: start.toISO(),
-        end: end.toISO()
+        start: start,
+        end: end,
+        locale: localizedMessages.locale
     };
 }
 
@@ -222,16 +240,18 @@ function createAbsoluteReminder({
     recurrenceRules,
     text,
     ssml,
-    timezone
+    timezone,
+    locale
 }) {
     const request = JSON.parse(JSON.stringify(absoluteReminderRequest));
-    request.trigger.scheduledTime = scheduledTime;
+    request.requestTime = scheduledTime;
     request.trigger.timeZoneId = timezone;
     request.trigger.recurrence.startDateTime = startDateTime;
     request.trigger.recurrence.endDateTime = endDateTime;
     request.trigger.recurrence.recurrenceRules = recurrenceRules;
     request.alertInfo.spokenInfo.content[0].text = text;
     request.alertInfo.spokenInfo.content[0].ssml = ssml;
+    request.alertInfo.spokenInfo.content[0].locale = locale;
     return request;
 }
 

@@ -45,7 +45,7 @@ const MedicationForDateIntentHandler = {
             fhirTiming.timingEvent.ALL_DAY, userTimezone);
         const medications = fhirCarePlan.medicationsFromBundle(medicationRequest);
         // Check missing dates in requests
-        const missingDate = helper.getActiveMissingDate(self, medications);
+        const missingDate = helper.getActiveMissingStartDate(self, medications);
         if (missingDate) {
             return switchContextToStartDate(handlerInput, missingDate, userTimezone, localizedMessages);
         }
@@ -93,7 +93,7 @@ const MedicationReminderIntentHandler = {
         }
 
         // Check if start date setup is needed.
-        const missingDate = helper.getActiveMissingDate(self, requests);
+        const missingDate = helper.getActiveMissingStartDate(self, requests);
         if (missingDate) {
             const userTimezone = await helper.getTimezoneOrDefault(handlerInput);
             return switchContextToStartDate(handlerInput, missingDate, userTimezone, localizedMessages);
@@ -146,7 +146,7 @@ const CreateRemindersIntentHandler = {
         }
 
         // Check if start date setup is needed.
-        const missingDate = helper.getActiveMissingDate(self, requests);
+        const missingDate = helper.getActiveMissingStartDate(self, requests);
         if (missingDate) {
             const userTimezone = await helper.getTimezoneOrDefault(handlerInput);
             return switchContextToStartDate(handlerInput, missingDate, userTimezone, localizedMessages);
@@ -160,11 +160,16 @@ const CreateRemindersIntentHandler = {
             timezone: userTimeZone,
             localizedMessages});
         const remindersApiClient = handlerInput.serviceClientFactory.getReminderManagementServiceClient();
+        let speakOutput = localizedMessages.responses.SUCCESSFUL_REMINDERS;
+
         for (const reminder of requestReminders) {
-            await remindersApiClient.createReminder(reminder);
+            try {
+                await remindersApiClient.createReminder(reminder);
+            } catch (e) {
+                speakOutput = localizedMessages.responses.REMINDER_NOT_CREATED;
+            }
         }
 
-        const speakOutput = localizedMessages.responses.SUCCESSFUL_REMINDERS;
         return handlerInput.responseBuilder
             .speak(speakOutput)
             .getResponse();
@@ -327,9 +332,9 @@ const RegisterGlucoseLevelIntentHandler = {
 
         const localizedMessages = getLocalizedStrings(handlerInput);
         const currentIntent = handlerInput.requestEnvelope.request.intent;
-        const value = currentIntent.slots.level.value;
+        const value = +currentIntent.slots.level.value;
         const timing = currentIntent.slots.glucoseTiming.value
-        if (isNaN(+value) || +value <= 0 || +value > 20) {
+        if (isNaN(value) || value <= 0 || value > 20) {
             return handlerInput.responseBuilder
                 .speak(localizedMessages.responses.INVALID_BLOOD_GLUCOSE)
                 .reprompt(localizedMessages.responses.INVALID_BLOOD_GLUCOSE_REPROMPT)
@@ -337,7 +342,7 @@ const RegisterGlucoseLevelIntentHandler = {
         }
 
         const self = await patients.getSelf(userInfo.username);
-        const observation = fhirObservation.createObservationObject(self, +value, timing, localizedMessages);
+        const observation = fhirObservation.createObservationObject(self, value, timing, localizedMessages);
         await patients.saveBloodGlucoseLevel(userInfo.username, observation);
         const response = localizedMessages.responses.BLOOD_GLUCOSE_SUCCESS;
         const alert = helper.getBloodGlucoseAlert(value, timing, localizedMessages);

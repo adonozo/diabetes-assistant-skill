@@ -1,7 +1,7 @@
 {
   "interactionModel": {
     "languageModel": {
-      "invocationName": "diabetes assistant",
+      "invocationName": "asistente de diabetes",
       "intents": [
         {
           "name": "AMAZON.CancelIntent",
@@ -202,23 +202,34 @@
             }
           ],
           "samples": [
-            "Note my glucose level",
-            "Note my blood glucose level",
-            "Note my blood glucose",
-            "Save my glucose level",
-            "Save my blood glucose level",
-            "Take note of my blood glucose level",
-            "Take note of my glucose level",
-            "My glucose level is {level}",
-            "My glucose is {level}",
-            "My blood glucose is {level}",
-            "Note that my glucose level is {level}",
-            "Note that my glucose is {level}",
-            "Note that my blood glucose is {level}",
-            "I have {level} for my glucose level",
-            "I read {level} for my blood glucose",
-            "I have {level} for my blood glucose",
-            "I read {level} for my glucose"
+            "Guarda mi nivel de glucosa",
+            "Guarda mi nivel de glucosa en sangre",
+            "Guarda mi glucosa en sangre",
+            "Guarda mi nivel de azúcar en sangre",
+            "Registra mi nivel de glucosa",
+            "Registra mi nivel de glucosa en sangre",
+            "Registra mi glucosa en sangre",
+            "Registra mi nivel de azúcar en sangre",
+            "Anota mi nivel de glucosa",
+            "Anota mi nivel de glucosa en sangre",
+            "Anota mi glucosa en sangre",
+            "Anota mi nivel de azúcar en sangre",
+            "Anota mi nivel de azúcar",
+            "Toma nota de mi nivel de glucosa",
+            "Toma nota de mi nivel de glucosa en sangre",
+            "Toma nota de mi glucosa en sangre",
+            "Toma nota de mi nivel de azúcar en sangre",
+            "Mi nivel de glucosa es {level}",
+            "Mi glucosa es {level}",
+            "Mi glucosa en sangre es {level}",
+            "Mi nivel de azúcar en sangre es {level}",
+            "Mi nivel de azúcar es {level}",
+            "Anota que mi nivel de glucosa es {level}",
+            "Anota que mi nivel de glucosa en sangre es {level}",
+            "Anota que mi glucosa en sangre es {level}",
+            "Anota que mi nivel de azúcar es {level}",
+            "Leí {level} en mi nivel de azúcar",
+            "Leí {level} para mi glucosa"
           ]
         },
         {
@@ -229,8 +240,9 @@
               "type": "AMAZON.TIME",
               "samples": [
                 "{time}",
-                "at {time}",
-                "around {time}"
+                "a las {time}",
+                "a la {time}",
+                "alrededor de {time}"
               ]
             },
             {
@@ -238,7 +250,9 @@
               "type": "timingEvent",
               "samples": [
                 "{timing}",
-                "at {timing}"
+                "en {timing}",
+                "en el {timing}",
+                "en la {timing}"
               ]
             },
             {
@@ -246,7 +260,7 @@
               "type": "AMAZON.DATE",
               "samples": [
                 "{date}",
-                "on {date}"
+                "el {date}"
               ]
             }
           ],
@@ -302,23 +316,6 @@
             "Cuál era mi glucosa {date} durante el {timing}",
             "Cuál era mi glucosa en el {timing}",
             "Cuál era mi azúcar en el {timing}",
-            "Medí mi azúcar el {date}",
-            "Medí mi nivel azúcar el {date}",
-            "Medí mi azúcar {date}",
-            "Medí mi glucosa {date}",
-            "Medí mi glucosa en sangre {date}",
-            "Medí mi glucosa el {date}",
-            "Medí mi glucosa en sangre el {date}",
-            "Medí mi glucosa a las {time}",
-            "Medí mi glucosa a la {time}",
-            "Medí mi azúcar a las {time}",
-            "Medí mi azúcar a la {time}",
-            "Medí mi azúcar en el {timing}",
-            "Medí mi glucosa en el {timing}",
-            "Medí mi glucosa el {date} a las {time}",
-            "Medí mi azúcar el {date} a las {time}",
-            "Medí mi azúcar {date} en el {timing}",
-            "Medí mi glucosa {date} en el {timing}",
             "Mi glucosa {date}",
             "Mi glucosa el {date}",
             "Mi nivel de glucosa {date}",
@@ -444,302 +441,302 @@
           "values": [
             {
               "name": {
-                "value": "3.0"
+                "value": "tres"
               }
             },
             {
               "name": {
-                "value": "3.1"
+                "value": "tres punto uno"
               }
             },
             {
               "name": {
-                "value": "3.2"
+                "value": "tres punto dos"
               }
             },
             {
               "name": {
-                "value": "3.3"
+                "value": "tres punto tres"
               }
             },
             {
               "name": {
-                "value": "3.4"
+                "value": "tres punto cuatro"
               }
             },
             {
               "name": {
-                "value": "3.5"
+                "value": "tres punto cinco"
               }
             },
             {
               "name": {
-                "value": "3.6"
+                "value": "tres punto seis"
               }
             },
             {
               "name": {
-                "value": "3.7"
+                "value": "tres punto siete"
               }
             },
             {
               "name": {
-                "value": "3.8"
+                "value": "tres punto ocho"
               }
             },
             {
               "name": {
-                "value": "3.9"
+                "value": "tres punto nueve"
               }
             },
             {
               "name": {
-                "value": "4.0"
+                "value": "cuatro"
               }
             },
             {
               "name": {
-                "value": "4.1"
+                "value": "cuatro punto uno"
               }
             },
             {
               "name": {
-                "value": "4.2"
+                "value": "cuatro punto dos"
               }
             },
             {
               "name": {
-                "value": "4.3"
+                "value": "cuatro punto tres"
               }
             },
             {
               "name": {
-                "value": "4.4"
+                "value": "cuatro punto cuatro"
               }
             },
             {
               "name": {
-                "value": "4.5"
+                "value": "cuatro punto cinco"
               }
             },
             {
               "name": {
-                "value": "4.6"
+                "value": "cuatro punto seis"
               }
             },
             {
               "name": {
-                "value": "4.7"
+                "value": "cuatro punto siete"
               }
             },
             {
               "name": {
-                "value": "4.8"
+                "value": "cuatro punto ocho"
               }
             },
             {
               "name": {
-                "value": "4.9"
+                "value": "cuatro punto nueve"
               }
             },
             {
               "name": {
-                "value": "5.0"
+                "value": "cinco"
               }
             },
             {
               "name": {
-                "value": "5.1"
+                "value": "cinco punto uno"
               }
             },
             {
               "name": {
-                "value": "5.2"
+                "value": "cinco punto dos"
               }
             },
             {
               "name": {
-                "value": "5.3"
+                "value": "cinco punto tres"
               }
             },
             {
               "name": {
-                "value": "5.4"
+                "value": "cinco punto cuatro"
               }
             },
             {
               "name": {
-                "value": "5.5"
+                "value": "cinco punto cinco"
               }
             },
             {
               "name": {
-                "value": "5.6"
+                "value": "cinco punto seis"
               }
             },
             {
               "name": {
-                "value": "5.7"
+                "value": "cinco punto siete"
               }
             },
             {
               "name": {
-                "value": "5.8"
+                "value": "cinco punto ocho"
               }
             },
             {
               "name": {
-                "value": "5.9"
+                "value": "cinco punto nueve"
               }
             },
             {
               "name": {
-                "value": "6.0"
+                "value": "seis"
               }
             },
             {
               "name": {
-                "value": "6.1"
+                "value": "seis punto uno"
               }
             },
             {
               "name": {
-                "value": "6.2"
+                "value": "seis punto dos"
               }
             },
             {
               "name": {
-                "value": "6.3"
+                "value": "seis punto tres"
               }
             },
             {
               "name": {
-                "value": "6.4"
+                "value": "seis punto cuatro"
               }
             },
             {
               "name": {
-                "value": "6.5"
+                "value": "seis punto cinco"
               }
             },
             {
               "name": {
-                "value": "6.6"
+                "value": "seis punto seis"
               }
             },
             {
               "name": {
-                "value": "6.7"
+                "value": "seis punto siete"
               }
             },
             {
               "name": {
-                "value": "6.8"
+                "value": "seis punto ocho"
               }
             },
             {
               "name": {
-                "value": "6.9"
+                "value": "seis punto nueve"
               }
             },
             {
               "name": {
-                "value": "7.0"
+                "value": "siete"
               }
             },
             {
               "name": {
-                "value": "7.1"
+                "value": "siete punto uno"
               }
             },
             {
               "name": {
-                "value": "7.2"
+                "value": "siete punto dos"
               }
             },
             {
               "name": {
-                "value": "7.3"
+                "value": "siete punto tres"
               }
             },
             {
               "name": {
-                "value": "7.4"
+                "value": "siete punto cuatro"
               }
             },
             {
               "name": {
-                "value": "7.5"
+                "value": "siete punto cinco"
               }
             },
             {
               "name": {
-                "value": "7.6"
+                "value": "siete punto seis"
               }
             },
             {
               "name": {
-                "value": "7.7"
+                "value": "siete punto siete"
               }
             },
             {
               "name": {
-                "value": "7.8"
+                "value": "siete punto ocho"
               }
             },
             {
               "name": {
-                "value": "7.9"
+                "value": "siete punto nueve"
               }
             },
             {
               "name": {
-                "value": "8.0"
+                "value": "ocho"
               }
             },
             {
               "name": {
-                "value": "8.1"
+                "value": "ocho punto uno"
               }
             },
             {
               "name": {
-                "value": "8.2"
+                "value": "ocho punto dos"
               }
             },
             {
               "name": {
-                "value": "8.3"
+                "value": "ocho punto tres"
               }
             },
             {
               "name": {
-                "value": "8.4"
+                "value": "ocho punto cuatro"
               }
             },
             {
               "name": {
-                "value": "8.5"
+                "value": "ocho punto cinco"
               }
             },
             {
               "name": {
-                "value": "8.6"
+                "value": "ocho punto seis"
               }
             },
             {
               "name": {
-                "value": "8.7"
+                "value": "ocho punto siete"
               }
             },
             {
               "name": {
-                "value": "8.8"
+                "value": "ocho punto ocho"
               }
             },
             {
               "name": {
-                "value": "8.9"
+                "value": "ocho punto nueve"
               }
             }
           ]
