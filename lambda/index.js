@@ -8,6 +8,7 @@ const fhirMedicationRequest = require("./fhir/medicationRequest");
 const fhirCarePlan = require("./fhir/carePlan");
 const helper = require("./utils/helper");
 const timeUtil = require("./utils/time");
+const intentUtil = require("./utils/intent");
 const patients = require("./api/patients");
 const fhirTiming = require("./fhir/timing");
 const fhirObservation = require("./fhir/observation");
@@ -657,7 +658,7 @@ const switchContextToTiming = (handlerInput, timing) => {
     attributesManager.setSessionAttributes(session);
 
     return handlerInput.responseBuilder
-        .addDelegateDirective(helper.getDelegatedSetTimingIntent(nextTiming))
+        .addDelegateDirective(intentUtil.getDelegatedSetTimingIntent(nextTiming))
         .speak(localizedMessages.responses.SETUP_TIMINGS)
         .getResponse()
 };
@@ -671,11 +672,11 @@ const switchContextToStartDate = (handlerInput, missingDate, userTimeZone, local
     attributesManager.setSessionAttributes(session);
     let delegatedIntent;
     if (missingDate.frequency > 1) {
-        delegatedIntent = helper.getDelegatedSetStartDateIntent(missingDate.name);
+        delegatedIntent = intentUtil.getDelegatedSetStartDateIntent(missingDate.name);
     } else {
         const userTime = DateTime.utc().setZone(userTimeZone);
         const time = userTime.toISOTime({ suppressSeconds: true, includeOffset: false });
-        delegatedIntent= helper.getDelegatedSetStartDateWithTimeIntent(missingDate.name, time);
+        delegatedIntent= intentUtil.getDelegatedSetStartDateWithTimeIntent(missingDate.name, time);
     }
 
     const requiredSetup = localizedMessages.getStartDatePrompt(missingDate);
