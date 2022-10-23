@@ -1,61 +1,61 @@
-const {timingEvent} = require("./fhir/timing");
+const {timingEvent} = require("./../fhir/timing");
 const {DateTime} = require("luxon");
-const helpers = require("helper");
+const helpers = require("./../helper");
 
-const locale = 'es-MX'
+const locale = 'en-GB'
 
 const responses = {
-    WELCOME: "Hola, puedes preguntarme tus medicamentos para mañana o puedo crear recordatorios",
-    REMINDER_PERMISSIONS: "Necesito permisos para crear recordatorios",
-    SUCCESSFUL_REMINDER_PERMISSION: `Ahora que tengo permisos, puedo crear recordatorios. Intenta diciendo: "crea recordatorios"`,
-    SUCCESSFUL_REMINDER_PERMISSION_REPROMPT: 'Puedes intentar de nuevo diciendo: "setup reminders"',
-    REPROMPT_REMINDER_PERMISSIONS: `Dí "sí" para otorgarme permisos.`,
-    HELP: "Puedes preguntarme qué medicamentos debes tomar, registrar tu nivel de azúcar en sangre, o crear recordatorios.",
-    ERROR: "Lo siento, tuve problemas para hacer lo que pediste. Intenta de nuevo",
-    STOP: "¡Hasta pronto!",
-    ACCOUNT_LINK: "Tu cuenta no está enlazada. Primero añade tu cuenta en la applicación de Alexa en tu celular.",
-    UPDATED_TIMING: "Has actualizado el tiempo para ",
-    SUCCESSFUL_REMINDERS: "Tus recordatorios han sido creados. Mira la aplicación de Alexa en tu celular para verificar.",
-    MEDICATIONS_REMINDERS_SETUP: 'Dí "recuérdame tomar mis medicamentos" si deseas continuar creando tus recordatorios.',
-    REQUESTS_REMINDERS_SETUP: 'Dí "crea recordatorios" si deseas continuar creando tus recordatorios.',
-    SETUP_TIMINGS: "Primero necesito saber la hora para algunos eventos.",
-    INVALID_BLOOD_GLUCOSE: 'Lo siento, tuve problemas para hacer lo que pediste. Intenta de nuevo diciéndo: "Registra mi nivel de azúcar en sangre"',
-    INVALID_BLOOD_GLUCOSE_REPROMPT: 'Intenta de nuevo diciéndo: "Registra mi nivel de azúcar en sangre"',
-    BLOOD_GLUCOSE_SUCCESS: "Tu nivel de azúcar en sangre se ha registrado.",
-    NO_GLUCOSE_RECORDS_FOUND: "No encontré registros para esa fecha.",
-    NO_RECORDS_FOUND: "No encontré registros.",
-    QUERY_SETUP: "Ahora, intenta preguntarme sobre tus medicamentos para una fecha de nuevo",
-    LOW_GLUCOSE: "Tu nivel de azúcar en sangre es más bajo de lo recomendado. Considera consultar con tu médico.",
-    HIGH_GLUCOSE: "Tu nivel de azúcar en sangre es más alto de lo recomendado. Considera consultar con tu médico.",
-    PERMISSIONS_REQUIRED: "Sin permisos, no puedo crear recordatorios para tus medicamentos.",
-    DATE_PREPOSITION: "El",
-    CONCAT_WORD: "y",
-    REMINDER_NOT_CREATED: "Lo siento, no pude crear los recordatorios. Intenta nuevamente.",
+    WELCOME: "Welcome, I can set up reminders or tell you your medications for tomorrow. Which would you like to try?",
+    REMINDER_PERMISSIONS: "I need permission to access your reminders.",
+    SUCCESSFUL_REMINDER_PERMISSION: `Now that you've provided permission, you can try again by saying "setup reminders"`,
+    SUCCESSFUL_REMINDER_PERMISSION_REPROMPT: 'You can try again by saying "setup reminders"',
+    REPROMPT_REMINDER_PERMISSIONS: "Say ok if you want to grant me permission.",
+    HELP: "You can ask me your medications for today or ask me to create medication reminders.",
+    ERROR: "Sorry, I had trouble doing what you asked. Please try again.",
+    STOP: "Goodbye!",
+    ACCOUNT_LINK: "Your account is not linked. Add your account first in the Alexa app.",
+    UPDATED_TIMING: "You have updated your timing for",
+    SUCCESSFUL_REMINDERS: "Your reminders have been created, check the Alexa app to verify them.",
+    MEDICATIONS_REMINDERS_SETUP: 'Say "remind me my medications" if you want to continue setting up your reminders.',
+    REQUESTS_REMINDERS_SETUP: 'Say "setup reminders" if you want to continue setting up your reminders.',
+    SETUP_TIMINGS: "You need to set some timings first.",
+    INVALID_BLOOD_GLUCOSE: "Sorry, I had trouble doing what you asked. Try again by saying: save my blood glucose level.",
+    INVALID_BLOOD_GLUCOSE_REPROMPT: "Try again by saying: save my blood glucose level.",
+    BLOOD_GLUCOSE_SUCCESS: "Your blood glucose level was registered.",
+    NO_GLUCOSE_RECORDS_FOUND: "I didn't find records for that date",
+    NO_RECORDS_FOUND: "I didn't find records",
+    QUERY_SETUP: 'Now, try asking me about your care plan for a date again.',
+    LOW_GLUCOSE: 'Your blood glucose level is lower than the recommended value. Please consider consulting to your GP or to a health provider.',
+    HIGH_GLUCOSE: 'Your blood glucose level is higher than the recommended value. Please consider consulting to your GP or to a health provider.',
+    PERMISSIONS_REQUIRED: "Without permissions, I can't set a reminder.",
+    DATE_PREPOSITION: "On",
+    CONCAT_WORD: "and",
+    REMINDER_NOT_CREATED: "Sorry, I couldn't create the reminders. Please try again.",
 }
 
 function getMedicationReminderText(value, unit, medication, time) {
     const regex = new RegExp('^[0-2][0-9]');
-    const timing = regex.test(time) ? `a las ${time}` : timingToText(time);
-    return `Toma ${value} ${unit} de ${medication} ${timing}`;
+    const timing = regex.test(time) ? `at ${time}` : timingToText(time);
+    return `Take ${value} ${unit} of ${medication} ${timing}`;
 }
 
 function getConfirmationDateText(healthRequest) {
-    return `Has configurado la fecha de inicio para ${healthRequest}.`;
+    return `You have set the start date for ${healthRequest}.`;
 }
 
 function getSuggestedTimeText(mealCode) {
     const meal = getMealSuggestion(mealCode);
-    return `¿Esta medida es antes ${meal}, después ${meal}, o ninguno?`
+    return `Is this measure before ${meal}, after ${meal}, or none?`
 }
 
 function getMedicationSsmlReminderText(value, unit, medication, time) {
-    const message = `Toma ${value} ${unit} de ${medication} ${timingString(time)}`;
+    const message = `Take ${value} ${unit} of ${medication} ${timingString(time)}`;
     return helpers.wrapSpeakMessage(message);
 }
 
 function getServiceReminderText(action, time) {
     const regex = new RegExp('^[0-2][0-9]');
-    const timing = regex.test(time) ? `a las ${time}` : timingToText(time);
+    const timing = regex.test(time) ? `at ${time}` : timingToText(time);
     return `${action} ${timing}`;
 }
 
@@ -71,17 +71,17 @@ function getServiceSsmlReminderText(action, time) {
  */
 function timingString(timing) {
     const regex = new RegExp('^[0-2][0-9]');
-    return regex.test(timing) ? `a las <say-as interpret-as="time">${timing}</say-as>` : timingToText(timing);
+    return regex.test(timing) ? `at <say-as interpret-as="time">${timing}</say-as>` : timingToText(timing);
 }
 
 function getStartDatePrompt(missingDate) {
-    const init = 'Primero necesito algunos datos.';
+    const init = 'I need some information first.';
     if (missingDate.type === 'MedicationRequest') {
-        return `${init} Debes tomar ${missingDate.name} por ${missingDate.duration} días.`;
+        return `${init} You need to take ${missingDate.name} for ${missingDate.duration} days.`;
     }
 
     if (missingDate.type === 'ServiceRequest') {
-        return `${init} Debes ${missingDate.name} por ${missingDate.duration} días.`;
+        return `${init} Your plan includes: ${missingDate.name} for ${missingDate.duration} days.`;
     }
 
     return '';
@@ -93,7 +93,7 @@ function getStartDatePrompt(missingDate) {
  * @param observationsValues {{time: string, value: string, timing: string}[]}
  */
 function makeTextForObservationDay(day, observationsValues) {
-    let text = `${day}, tu nivel de azúcar en sangre fue`;
+    let text = `${day}, you had a blood glucose level of`;
     if (observationsValues.length === 1) {
         const observation = observationsValues[0];
         const time = getTimingOrTime(observation);
@@ -104,7 +104,7 @@ function makeTextForObservationDay(day, observationsValues) {
     const values = observationsValues.map((value, index) => {
         const time = getTimingOrTime(value);
         if (index === observationsValues.length - 1) {
-            return ` y ${value.value} ${time}.`;
+            return ` and ${value.value} ${time}.`;
         }
 
         return ` ${value.value} ${time}`;
@@ -116,7 +116,7 @@ function makeTextForObservationDay(day, observationsValues) {
 function getTimingOrTime(observationValue) {
     if (!observationValue.timing || observationValue.timing === timingEvent.EXACT)
     {
-        return `a las ${observationValue.time}`;
+        return `at ${observationValue.time}`;
     }
 
     return timingToText(observationValue.timing);
@@ -128,12 +128,12 @@ function getTimingOrTime(observationValue) {
  * @return string
  */
 function getHoursAndMinutes(date) {
-    const minutes = date.minute === 0 ? "en punto" : date.minute;
+    const minutes = date.minute === 0 ? "o'clock" : date.minute;
     return `${date.hour} ${minutes}`;
 }
 
 function getHoursAndMinutesFromString(time) {
-    const minutes = time.substring(3) === "00" ? "en punto" : time.substring(3)
+    const minutes = time.substring(3) === "00" ? "o'clock" : time.substring(3)
     return `${+time.substring(0,2)} ${minutes}`;
 }
 
@@ -149,11 +149,11 @@ function getTextForDay(date, timezone, datePreposition) {
     const tomorrow = today.plus({days: 1});
     const referenceDate = DateTime.fromISO(date).setZone(timezone);
     if (today.toISODate() === referenceDate.toISODate()) {
-        return 'hoy';
+        return 'today';
     } else if (yesterday.toISODate() === referenceDate.toISODate()) {
-        return 'ayer';
+        return 'yesterday';
     } else if (tomorrow.toISODate() === referenceDate.toISODate()) {
-        return 'mañana';
+        return 'tomorrow';
     }
 
     const month = referenceDate.month < 10 ? `0${referenceDate.month}` : referenceDate.month;
@@ -169,17 +169,17 @@ function makeMedicationText(medicationData) {
     const doseTextArray = medicationData.dose.map(dose => {
         const doseHasTime = dose.time.length > 0 && regex.test(dose.time[0]);
         const timingTextFunction = doseHasTime ? getHoursAndMinutesFromString: timingToText;
-        const preposition = doseHasTime ? 'a las' : '';
+        const preposition = doseHasTime ? 'at' : '';
         const timings = dose.time.map(time => timingTextFunction(time));
         return timings.map(time =>
             `${dose.value} ${unitsToStrings(dose.unit, +dose.value > 1)} ${preposition} ${time}`);
     }).flat(1);
     const doseText = helpers.listItems(doseTextArray, responses.CONCAT_WORD);
-    return `Toma ${medicationData.medication}, ${doseText}`;
+    return `Take ${medicationData.medication}, ${doseText}`;
 }
 
 function getNoRecordsTextForDay(date, userTimezone) {
-    return `${responses.NO_RECORDS_FOUND} para ${getTextForDay(date, userTimezone, '')}`;
+    return `${responses.NO_RECORDS_FOUND} for ${getTextForDay(date, userTimezone, '')}`;
 }
 
 /**
@@ -188,38 +188,38 @@ function getNoRecordsTextForDay(date, userTimezone) {
 function makeServiceText(serviceData) {
     const regex = new RegExp('^[0-2][0-9]');
     const serviceHasTime = serviceData.timings.length > 0 && regex.test(serviceData.timings[0]);
-    const timingTextFunction = serviceHasTime ? getHoursAndMinutesFromString : timingToText;
-    const preposition = serviceHasTime ? 'a las ' : '';
+    const timingTextFunction = serviceHasTime ? getHoursAndMinutesFromString: timingToText;
+    const preposition = serviceHasTime ? 'at ' : '';
     const timings = serviceData.timings.map(time => timingTextFunction(time));
-    return `${serviceData.action} ${preposition} ${helpers.listItems(timings, responses.CONCAT_WORD)}`;
+    return `Do a ${serviceData.action} ${preposition} ${helpers.listItems(timings, responses.CONCAT_WORD)}`;
 }
 
 function timingToText(timing) {
     switch (timing) {
         case 'ACD':
-            return 'antes del almuerzo';
+            return 'before lunch';
         case 'CD':
-            return 'en el almuerzo';
+            return 'at lunch';
         case 'PCD':
-            return 'después del almuerzo';
+            return 'after lunch';
         case 'ACM':
-            return 'antes del desayuno';
+            return 'before breakfast';
         case 'CM':
-            return 'en el desayuno';
+            return 'at breakfast';
         case 'PCM':
-            return 'antes del desayuno';
+            return 'before breakfast';
         case 'ACV':
-            return 'antes de la cena';
+            return 'before dinner';
         case 'CV':
-            return 'en la cena';
+            return 'at dinner';
         case 'PCV':
-            return 'después de la cena';
+            return 'after dinner';
         case 'AC':
-            return 'antes de comer';
+            return 'before meals';
         case 'C':
-            return 'al comer';
+            return 'with meals';
         case 'PC':
-            return 'después de comer';
+            return 'after meals';
         default:
             return '';
     }
@@ -227,31 +227,27 @@ function timingToText(timing) {
 
 function stringToTimingCode(value) {
     switch (value) {
-        case 'almuerzo':
+        case 'lunch':
             return 'CD';
-        case "antes del almuerzo":
+        case "before lunch":
             return 'ACD';
-        case "después del almuerzo":
-        case "despues del almuerzo":
+        case "after lunch":
             return 'PCD'
-        case 'desayuno':
+        case 'breakfast':
             return 'CM';
-        case 'antes del desayuno':
+        case 'before breakfast':
             return 'ACM';
-        case 'después del desayuno':
-        case 'despues del desayuno':
+        case 'after breakfast':
             return 'PCM';
-        case 'cena':
+        case 'dinner':
             return 'CV'
-        case 'antes de la cena':
+        case 'before dinner':
             return 'ACV';
-        case 'después de la cena':
-        case 'despues de la cena':
+        case 'after dinner':
             return 'PCV';
-        case 'antes de comer':
+        case 'before meal':
             return 'AC'
-        case 'después de comer':
-        case 'despues de comer':
+        case 'after meal':
             return 'PC'
         default:
             return 'EXACT'
@@ -261,14 +257,14 @@ function stringToTimingCode(value) {
 function getMealSuggestion(timingCode) {
     switch (timingCode) {
         case 'CM':
-            return 'del desayuno'
+            return 'breakfast'
         case 'CD':
-            return 'del almuerzo'
+            return 'lunch'
         case 'CV':
-            return 'del la cena'
+            return 'dinner'
         case 'C':
         default:
-            return 'de comer'
+            return 'meal'
     }
 }
 
@@ -279,20 +275,20 @@ function getMealSuggestion(timingCode) {
 function codeToString(timingCode) {
     switch (timingCode) {
         case 'CM':
-            return 'desayuno'
+            return 'breakfast'
         case 'CD':
-            return 'almuerzo'
+            return 'lunch'
         case 'CV':
-            return 'cena'
+            return 'dinner'
     }
 }
 
 function unitsToStrings(unit, isPlural) {
     switch (unit.toLowerCase()) {
         case 'u':
-            return 'unidad' + (isPlural ? 'es' : '');
+            return 'unit' + (isPlural ? 's' : '');
         case 'tab':
-            return 'tableta' + (isPlural ? 's' : '');
+            return 'tablet' + (isPlural ? 's' : '');
         default:
             return unit;
     }

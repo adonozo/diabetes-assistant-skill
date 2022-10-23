@@ -1,6 +1,6 @@
 const Alexa = require('ask-sdk-core');
 const reminders = require('./reminder');
-const strings = require('./strings');
+const strings = require('./strings/strings');
 const auth = require('./auth');
 const medicationRequests = require("./api/medicationRequest");
 const carePlan = require("./api/carePlan")
