@@ -1,8 +1,8 @@
 const {DateTime, Settings} = require("luxon");
-const fhirTiming = require("./fhir/timing");
-const fhirPatient = require("./fhir/patient");
-const fhirDosage = require("./fhir/dosage");
-const fhirServiceRequest = require("./fhir/serviceRequest");
+const fhirTiming = require("./../fhir/timing");
+const fhirPatient = require("./../fhir/patient");
+const fhirDosage = require("./../fhir/dosage");
+const fhirServiceRequest = require("./../fhir/serviceRequest");
 
 const minBloodGlucoseValue = 4;
 const maxFastingGlucoseValue = 7;
