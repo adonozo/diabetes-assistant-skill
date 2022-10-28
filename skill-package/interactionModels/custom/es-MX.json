@@ -26,7 +26,7 @@
           "samples": []
         },
         {
-          "name": "MedicationForDateIntent",
+          "name": "GetMedicationToTakeIntent",
           "slots": [
             {
               "name": "treatmentDate",
@@ -34,18 +34,26 @@
             }
           ],
           "samples": [
-            "Qué medicamentos tengo que tomar {treatmentDate}",
-            "Qué medicamentos tomé {treatmentDate}",
-            "Qué medicinas tomé {treatmentDate}",
-            "Cuál es el plan para {treatmentDate}",
+            "Qué medicamentos tenía que tomar {treatmentDate}",
+            "Qué medicinas tenía que tomar {treatmentDate}",
             "Que medicamentos tomaré {treatmentDate}",
+            "Que medicinas tomaré {treatmentDate}",
+            "Que medicamentos tengo que tomar {treatmentDate}",
+            "Que medicinas tengo que tomar {treatmentDate}",
             "Medicamentos para el {treatmentDate}",
             "Medicamentos el {treatmentDate}",
             "Medicamentos {treatmentDate}",
+            "Medicinas para el {treatmentDate}",
+            "Medicinas el {treatmentDate}",
+            "Medicinas {treatmentDate}",
             "Mi medicación para {treatmentDate}",
             "Mi medicación {treatmentDate}",
             "Mi medicación el {treatmentDate}",
-            "Mis pastillas {treatmentDate}"
+            "Cuáles eran mis medicinas {treatmentDate}",
+            "Cuáles eran mis medicamentos {treatmentDate}",
+            "Que debia tomar {treatmentDate}",
+            "Que debo tomar {treatmentDate}",
+            "Que tengo que tomar {treatmentDate}"
           ]
         },
         {

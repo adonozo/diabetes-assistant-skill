@@ -23,7 +23,7 @@ const responses = {
     INVALID_BLOOD_GLUCOSE_REPROMPT: 'Intenta de nuevo diciéndo: "Registra mi nivel de azúcar en sangre"',
     BLOOD_GLUCOSE_SUCCESS: "Tu nivel de azúcar en sangre se ha registrado.",
     NO_GLUCOSE_RECORDS_FOUND: "No encontré registros para esa fecha.",
-    NO_RECORDS_FOUND: "No encontré registros.",
+    NO_RECORDS_FOUND: "No encontré registros",
     QUERY_SETUP: "Ahora, intenta preguntarme sobre tus medicamentos para una fecha de nuevo",
     LOW_GLUCOSE: "Tu nivel de azúcar en sangre es más bajo de lo recomendado. Considera consultar con tu médico.",
     HIGH_GLUCOSE: "Tu nivel de azúcar en sangre es más alto de lo recomendado. Considera consultar con tu médico.",

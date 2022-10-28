@@ -11,10 +11,10 @@ const fhirObservation = require("./fhir/observation");
 const fhirTiming = require("./fhir/timing");
 const strings = require('./strings/strings');
 const helper = require("./utils/helper");
-const intentUtil = require("./utils/intent");
 const remindersUtil = require('./utils/reminder');
 const timeUtil = require("./utils/time");
-const reminder = require("./intents/reminderHandler");
+const reminderHandler = require("./intents/reminderHandler");
+const getMedicationToTakeHandler = require("./intents/getMedicationToTakeHandler");
 
 const LaunchRequestHandler = {
     canHandle(handlerInput) {
@@ -49,7 +49,7 @@ const MedicationReminderIntentHandler = {
         const self = await patientsApi.getSelf(userInfo.username);
         const medicationBundle = await medicationRequests.getActiveMedicationRequests(self.id);
         const requests = fhirMedicationRequest.requestListFromBundle(medicationBundle);
-        return reminder.createRequestReminders(handlerInput, self, requests);
+        return reminderHandler.createRequestReminders(handlerInput, self, requests);
     }
 }
 
@@ -72,14 +72,14 @@ const CreateRemindersIntentHandler = {
         const self = await patientsApi.getSelf(userInfo.username);
         const requestBundle = await carePlanApi.getActiveCarePlan(userInfo.username);
         const requests = fhirCarePlan.requestListFromBundle(requestBundle);
-        return reminder.createRequestReminders(handlerInput, self, requests);
+        return reminderHandler.createRequestReminders(handlerInput, self, requests);
     }
 }
 
 const MedicationForDateIntentHandler = {
     canHandle(handlerInput) {
         return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
-            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'MedicationForDateIntent';
+            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'GetMedicationToTakeIntent';
     },
     async handle(handlerInput) {
         let userInfo = await getValidatedUser(handlerInput);
@@ -87,31 +87,8 @@ const MedicationForDateIntentHandler = {
             return requestAccountLink(handlerInput);
         }
 
-        const localizedMessages = getLocalizedStrings(handlerInput);
         const self = await patientsApi.getSelf(userInfo.username);
-        const date = handlerInput.requestEnvelope.request.intent.slots.treatmentDate.value;
-        const userTimezone = await timeUtil.getTimezoneOrDefault(handlerInput);
-        const medicationRequest = await patientsApi.getMedicationRequests(userInfo.username, date,
-            fhirTiming.timingEvent.ALL_DAY, userTimezone);
-        const medications = fhirCarePlan.medicationsFromBundle(medicationRequest);
-        // Check missing dates in requests
-        const missingDate = timeUtil.getActiveMissingStartDate(self, medications);
-        if (missingDate) {
-            return switchContextToStartDate(handlerInput, missingDate, userTimezone, localizedMessages);
-        }
-
-        let speakOutput
-        if (medications.length === 0) {
-            speakOutput = localizedMessages.getNoRecordsTextForDay(date, userTimezone);
-        } else {
-            const medicationText = fhirMedicationRequest.getTextForMedicationRequests(medications, self, userTimezone, localizedMessages);
-            const datePreposition = localizedMessages.responses.DATE_PREPOSITION;
-            speakOutput = `${localizedMessages.getTextForDay(date, userTimezone, datePreposition)}, ${medicationText}`;
-        }
-
-        return handlerInput.responseBuilder
-            .speak(speakOutput)
-            .getResponse();
+        return getMedicationToTakeHandler.getMedicationsToTake(handlerInput, self);
     }
 };
 
@@ -580,29 +557,6 @@ const requestReminderPermission = (handlerInput) => {
     return handlerInput.responseBuilder
         .speak(localizedMessages.responses.REMINDER_PERMISSIONS)
         .addDirective(remindersUtil.reminderDirective)
-        .getResponse();
-}
-
-const switchContextToStartDate = (handlerInput, missingDate, userTimeZone, localizedMessages) => {
-    const attributesManager = handlerInput.attributesManager;
-    const session = attributesManager.getSessionAttributes();
-    const intent = handlerInput.requestEnvelope.request.intent;
-    session[intent.name] = intent;
-    session[helper.sessionValues.requestMissingDate] = missingDate;
-    attributesManager.setSessionAttributes(session);
-    let delegatedIntent;
-    if (missingDate.frequency > 1) {
-        delegatedIntent = intentUtil.getDelegatedSetStartDateIntent(missingDate.name);
-    } else {
-        const userTime = DateTime.utc().setZone(userTimeZone);
-        const time = userTime.toISOTime({ suppressSeconds: true, includeOffset: false });
-        delegatedIntent= intentUtil.getDelegatedSetStartDateWithTimeIntent(missingDate.name, time);
-    }
-
-    const requiredSetup = localizedMessages.getStartDatePrompt(missingDate);
-    return handlerInput.responseBuilder
-        .addDelegateDirective(delegatedIntent)
-        .speak(requiredSetup)
         .getResponse();
 }
 
