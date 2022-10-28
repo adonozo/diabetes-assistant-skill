@@ -257,6 +257,5 @@ function createAbsoluteReminder({
 
 module.exports = {
     reminderDirective,
-    getRemindersForMedicationRequests,
     getRemindersForRequests,
 }

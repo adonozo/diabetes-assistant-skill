@@ -1,3 +1,5 @@
+const strings = require("../strings/strings");
+
 function getDelegatedSetTimingIntent(timing) {
     return {
         name: 'SetTimingIntent',
@@ -45,8 +47,13 @@ function getDelegatedSetStartDateWithTimeIntent(healthRequestName, time) {
     }
 }
 
+function getLocalizedStrings (handlerInput) {
+    return strings.getLocalizedStrings(handlerInput.requestEnvelope.request.locale);
+}
+
 module.exports = {
     getDelegatedSetTimingIntent,
     getDelegatedSetStartDateIntent,
     getDelegatedSetStartDateWithTimeIntent,
+    getLocalizedStrings,
 }
