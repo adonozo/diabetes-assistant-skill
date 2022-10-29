@@ -78,8 +78,6 @@ function switchContextToStartDate(handlerInput, missingDate, userTimeZone, local
 
 module.exports = {
     getDelegatedSetTimingIntent,
-    getDelegatedSetStartDateIntent,
-    getDelegatedSetStartDateWithTimeIntent,
     getLocalizedStrings,
     switchContextToStartDate,
 }

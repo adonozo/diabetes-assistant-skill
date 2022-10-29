@@ -30,7 +30,7 @@ function getSpeakResponses(session, localizedMessages) {
     let speakOutput = `${localizedMessages.responses.UPDATED_TIMING} ${timing}.`;
     let reprompt = localizedMessages.responses.HELP;
 
-    if (session[helper.sessionValues.medicationReminderIntent]) {
+    if (session[helper.sessionValues.createMedicationReminderIntent]) {
         reprompt = localizedMessages.responses.MEDICATIONS_REMINDERS_SETUP;
         speakOutput = `${speakOutput} ${reprompt}`;
     } else if (session[helper.sessionValues.createRemindersIntent]) {

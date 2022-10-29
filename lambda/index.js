@@ -1,22 +1,22 @@
 const Alexa = require('ask-sdk-core');
 const {DateTime} = require("luxon");
-
 const auth = require('./auth');
-const medicationRequests = require("./api/medicationRequest");
+
 const carePlanApi = require("./api/carePlan")
+const medicationRequests = require("./api/medicationRequest");
 const patientsApi = require("./api/patients");
 const fhirCarePlan = require("./fhir/carePlan");
 const fhirMedicationRequest = require("./fhir/medicationRequest");
 const fhirTiming = require("./fhir/timing");
+const createReminderHandler = require("./intents/createReminderHandler");
+const getGlucoseLevelHandler = require("./intents/getGlucoseLeveIHandler");
+const getMedicationToTakeHandler = require("./intents/getMedicationToTakeHandler");
+const registerGlucoseLevelHandler = require("./intents/registerGlucoseLevelHandler");
+const setStartDateHandler = require("./intents/setStartDateHandler");
+const setTimingHandler = require("./intents/setTimingHandler");
 const strings = require('./strings/strings');
 const remindersUtil = require('./utils/reminder');
 const timeUtil = require("./utils/time");
-const createReminderHandler = require("./intents/createReminderHandler");
-const getMedicationToTakeHandler = require("./intents/getMedicationToTakeHandler");
-const setTimingHandler = require("./intents/setTimingHandler");
-const setStartDateHandler = require("./intents/setStartDateHandler");
-const registerGlucoseLevelHandler = require("./intents/registerGlucoseLevelHandler");
-const getGlucoseLevelHandler = require("./intents/getGlucoseLeveIHandler");
 
 const LaunchRequestHandler = {
     canHandle(handlerInput) {
@@ -32,10 +32,10 @@ const LaunchRequestHandler = {
     }
 };
 
-const MedicationReminderIntentHandler = {
+const CreateMedicationReminderIntentHandler = {
     canHandle(handlerInput) {
         return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
-            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'MedicationReminderIntent';
+            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'CreateMedicationReminderIntent';
     },
     async handle(handlerInput) {
         const {permissions} = handlerInput.requestEnvelope.context.System.user;
@@ -439,7 +439,7 @@ const ErrorHandler = {
 exports.handler = Alexa.SkillBuilders.custom()
     .addRequestHandlers(
         LaunchRequestHandler,
-        MedicationReminderIntentHandler,
+        CreateMedicationReminderIntentHandler,
         CreateRemindersIntentHandler,
         GetMedicationToTakeIntentHandler,
         ConnectionsResponseHandler,

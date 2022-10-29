@@ -57,7 +57,7 @@
           ]
         },
         {
-          "name": "MedicationReminderIntent",
+          "name": "CreateMedicationReminderIntent",
           "slots": [],
           "samples": [
             "Recuérdame tomar mis medicamentos",
