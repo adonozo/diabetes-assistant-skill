@@ -16,6 +16,7 @@ const timeUtil = require("./utils/time");
 const createReminderHandler = require("./intents/createReminderHandler");
 const getMedicationToTakeHandler = require("./intents/getMedicationToTakeHandler");
 const setTimingHandler = require("./intents/setTimingHandler");
+const setStartDateIntentHandler = require("./intents/setStartDateIntentHandler");
 
 const LaunchRequestHandler = {
     canHandle(handlerInput) {
@@ -135,32 +136,7 @@ const SetStartDateCompletedIntentHandler = {
             return requestAccountLink(handlerInput);
         }
 
-        const localizedMessages = getLocalizedStrings(handlerInput);
-        const attributesManager = handlerInput.attributesManager;
-        const session = attributesManager.getSessionAttributes();
-        const missingDate = session[helper.sessionValues.requestMissingDate];
-        if (!missingDate) {
-            return handlerInput.responseBuilder
-                .speak(localizedMessages.responses.ERROR)
-                .reprompt(localizedMessages.responses.ERROR)
-                .getResponse();
-        }
-
-        const currentIntent = handlerInput.requestEnvelope.request.intent;
-        const date = currentIntent.slots.date.value;
-        const time = currentIntent.slots.healthRequestTime.value;
-        const healthRequest = currentIntent.slots.healthRequest.value;
-        const userTimeZone = await timeUtil.getTimezoneOrDefault(handlerInput);
-        const dateTime = DateTime.fromISO(`${date}T${time}`, {zone: userTimeZone});
-        await patientsApi.setStartDate(userInfo.username, missingDate.id, { startDate: dateTime.toUTC().toISO() });
-        const {speakOutput, reprompt} = getStartDateConfirmedResponse(session, healthRequest, handlerInput);
-        delete session[helper.sessionValues.requestMissingDate];
-        attributesManager.setSessionAttributes(session);
-
-        return handlerInput.responseBuilder
-            .speak(speakOutput)
-            .reprompt(reprompt)
-            .getResponse();
+        return setStartDateIntentHandler.handle(handlerInput, userInfo.username);
     }
 }
 
@@ -548,23 +524,6 @@ const getAskGlucoseResponse = (handlerInput, bundle, timezone) => {
     return handlerInput.responseBuilder
         .speak(message)
         .getResponse();
-}
-
-const getStartDateConfirmedResponse = (session, healthRequest, handlerInput) => {
-    const localizedMessages = getLocalizedStrings(handlerInput);
-    let speakOutput = localizedMessages.getConfirmationDateText(healthRequest);
-
-    let reprompt = localizedMessages.responses.HELP;
-    if (session[helper.sessionValues.medicationReminderIntent]) {
-        reprompt = localizedMessages.responses.MEDICATIONS_REMINDERS_SETUP;
-    } else if (session[helper.sessionValues.createRemindersIntent]) {
-        reprompt = localizedMessages.responses.REQUESTS_REMINDERS_SETUP;
-    } else if (session[helper.sessionValues.carePlanIntent] || session[helper.sessionValues.medicationForDateIntent]) {
-        reprompt = localizedMessages.responses.QUERY_SETUP;
-    }
-
-    speakOutput = `${speakOutput} ${reprompt}`;
-    return {speakOutput, reprompt}
 }
 
 const getLocalizedStrings = (handlerInput) => {

@@ -18,8 +18,18 @@ async function handle(handlerInput, patientEmail) {
     })
 
     const session = handlerInput.attributesManager.getSessionAttributes();
+    const { speakOutput, reprompt } = getSpeakResponses(session, localizedMessages);
+
+    return handlerInput.responseBuilder
+        .speak(speakOutput)
+        .reprompt(reprompt)
+        .getResponse();
+}
+
+function getSpeakResponses(session, localizedMessages) {
     let speakOutput = `${localizedMessages.responses.UPDATED_TIMING} ${timing}.`;
     let reprompt = localizedMessages.responses.HELP;
+
     if (session[helper.sessionValues.medicationReminderIntent]) {
         reprompt = localizedMessages.responses.MEDICATIONS_REMINDERS_SETUP;
         speakOutput = `${speakOutput} ${reprompt}`;
@@ -28,10 +38,7 @@ async function handle(handlerInput, patientEmail) {
         speakOutput = `${speakOutput} ${reprompt}`;
     }
 
-    return handlerInput.responseBuilder
-        .speak(speakOutput)
-        .reprompt(reprompt)
-        .getResponse();
+    return {speakOutput, reprompt};
 }
 
 module.exports = {
