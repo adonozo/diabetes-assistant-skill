@@ -43,7 +43,7 @@ const CreateMedicationReminderIntentHandler = {
             return requestReminderPermission(handlerInput);
         }
 
-        const userInfo = await getValidatedUser(handlerInput);
+        const userInfo = await auth.getValidatedUser(handlerInput);
         if (!userInfo) {
             return requestAccountLink(handlerInput);
         }
@@ -66,7 +66,7 @@ const CreateRemindersIntentHandler = {
             return requestReminderPermission(handlerInput);
         }
 
-        const userInfo = await getValidatedUser(handlerInput);
+        const userInfo = await auth.getValidatedUser(handlerInput);
         if (!userInfo) {
             return requestAccountLink(handlerInput);
         }
@@ -84,7 +84,7 @@ const GetMedicationToTakeIntentHandler = {
             && Alexa.getIntentName(handlerInput.requestEnvelope) === 'GetMedicationToTakeIntent';
     },
     async handle(handlerInput) {
-        let userInfo = await getValidatedUser(handlerInput);
+        let userInfo = await auth.getValidatedUser(handlerInput);
         if (!userInfo) {
             return requestAccountLink(handlerInput);
         }
@@ -115,7 +115,7 @@ const SetTimingCompletedIntentHandler = {
             && Alexa.getDialogState(handlerInput.requestEnvelope) === 'COMPLETED';
     },
     async handle(handlerInput) {
-        const userInfo = await getValidatedUser(handlerInput);
+        const userInfo = await auth.getValidatedUser(handlerInput);
         if (!userInfo) {
             return requestAccountLink(handlerInput);
         }
@@ -131,7 +131,7 @@ const SetStartDateCompletedIntentHandler = {
             && Alexa.getDialogState(handlerInput.requestEnvelope) === 'COMPLETED';
     },
     async handle(handlerInput) {
-        const userInfo = await getValidatedUser(handlerInput);
+        const userInfo = await auth.getValidatedUser(handlerInput);
         if (!userInfo) {
             return requestAccountLink(handlerInput);
         }
@@ -147,7 +147,7 @@ const RegisterGlucoseLevelIntentInProgressHandler = {
             && Alexa.getDialogState(handlerInput.requestEnvelope) !== 'COMPLETED';
     },
     async handle(handlerInput) {
-        let userInfo = await getValidatedUser(handlerInput);
+        let userInfo = await auth.getValidatedUser(handlerInput);
         if (!userInfo) {
             return requestAccountLink(handlerInput);
         }
@@ -168,7 +168,7 @@ const RegisterGlucoseLevelIntentInProgressWithValueHandler = {
             && !handlerInput.requestEnvelope.request.intent.slots.glucoseTiming.value;
     },
     async handle(handlerInput) {
-        let userInfo = await getValidatedUser(handlerInput);
+        let userInfo = await auth.getValidatedUser(handlerInput);
         if (!userInfo) {
             return requestAccountLink(handlerInput);
         }
@@ -192,7 +192,7 @@ const RegisterGlucoseLevelIntentHandler = {
             && Alexa.getDialogState(handlerInput.requestEnvelope) === 'COMPLETED';
     },
     async handle(handlerInput) {
-        let userInfo = await getValidatedUser(handlerInput);
+        let userInfo = await auth.getValidatedUser(handlerInput);
         if (!userInfo) {
             return requestAccountLink(handlerInput);
         }
@@ -211,7 +211,7 @@ const GetGlucoseLevelIntentDateAndTimingHandler = {
             && handlerInput.requestEnvelope.request.intent.slots.timing.value;
     },
     async handle(handlerInput) {
-        let userInfo = await getValidatedUser(handlerInput);
+        let userInfo = await auth.getValidatedUser(handlerInput);
         if (!userInfo) {
             return requestAccountLink(handlerInput);
         }
@@ -238,7 +238,7 @@ const GetGlucoseLevelIntentDateAndTimeHandler = {
             && !handlerInput.requestEnvelope.request.intent.slots.timing.value;
     },
     async handle(handlerInput) {
-        let userInfo = await getValidatedUser(handlerInput);
+        let userInfo = await auth.getValidatedUser(handlerInput);
         if (!userInfo) {
             return requestAccountLink(handlerInput);
         }
@@ -265,7 +265,7 @@ const GetGlucoseLevelIntentDateHandler = {
             && !handlerInput.requestEnvelope.request.intent.slots.timing.value;
     },
     async handle(handlerInput) {
-        let userInfo = await getValidatedUser(handlerInput);
+        let userInfo = await auth.getValidatedUser(handlerInput);
         if (!userInfo) {
             return requestAccountLink(handlerInput);
         }
@@ -288,7 +288,7 @@ const GetGlucoseLevelIntentTimeHandler = {
             && !handlerInput.requestEnvelope.request.intent.slots.timing.value;
     },
     async handle(handlerInput) {
-        let userInfo = await getValidatedUser(handlerInput);
+        let userInfo = await auth.getValidatedUser(handlerInput);
         if (!userInfo) {
             return requestAccountLink(handlerInput);
         }
@@ -314,7 +314,7 @@ const GetGlucoseLevelIntentTimingHandler = {
             && handlerInput.requestEnvelope.request.intent.slots.timing.value;
     },
     async handle(handlerInput) {
-        let userInfo = await getValidatedUser(handlerInput);
+        let userInfo = await auth.getValidatedUser(handlerInput);
         if (!userInfo) {
             return requestAccountLink(handlerInput);
         }
@@ -464,17 +464,6 @@ exports.handler = Alexa.SkillBuilders.custom()
         )
     .withApiClient(new Alexa.DefaultApiClient())
     .lambda();
-
-const getValidatedUser = async (handlerInput) => {
-    let token = handlerInput.requestEnvelope.context.System.user.accessToken;
-    if (!token) {
-        return false;
-    }
-
-    const userInfo = await auth.validateToken(token);
-    userInfo.requestOptions = auth.getOptions(token);
-    return userInfo;
-}
 
 const requestAccountLink = (handlerInput) => {
     const localizedMessages = getLocalizedStrings(handlerInput);
