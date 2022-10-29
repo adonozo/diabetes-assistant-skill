@@ -14,9 +14,9 @@ const timeUtil = require("./utils/time");
 const createReminderHandler = require("./intents/createReminderHandler");
 const getMedicationToTakeHandler = require("./intents/getMedicationToTakeHandler");
 const setTimingHandler = require("./intents/setTimingHandler");
-const setStartDateIntentHandler = require("./intents/setStartDateIntentHandler");
-const registerGlucoseLevelIntentHandler = require("./intents/registerGlucoseLevelIntentHandler");
-const getGlucoseLevelIntentHandler = require("./intents/getGlucoseLeveIntentHandler");
+const setStartDateHandler = require("./intents/setStartDateHandler");
+const registerGlucoseLevelHandler = require("./intents/registerGlucoseLevelHandler");
+const getGlucoseLevelHandler = require("./intents/getGlucoseLeveIHandler");
 
 const LaunchRequestHandler = {
     canHandle(handlerInput) {
@@ -136,7 +136,7 @@ const SetStartDateCompletedIntentHandler = {
             return requestAccountLink(handlerInput);
         }
 
-        return setStartDateIntentHandler.handle(handlerInput, userInfo.username);
+        return setStartDateHandler.handle(handlerInput, userInfo.username);
     }
 }
 
@@ -197,7 +197,7 @@ const RegisterGlucoseLevelIntentHandler = {
             return requestAccountLink(handlerInput);
         }
 
-        return registerGlucoseLevelIntentHandler.handle(handlerInput, userInfo.username);
+        return registerGlucoseLevelHandler.handle(handlerInput, userInfo.username);
     }
 }
 
@@ -224,7 +224,7 @@ const GetGlucoseLevelIntentDateAndTimingHandler = {
         const timingCode = localizedMessages.stringToTimingCode(timing);
         const utcDate = timeUtil.utcDateFromLocalDate(date, timezone);
         const bundle = await patientsApi.getObservationsOnDate(userInfo.username, utcDate, timingCode);
-        return getGlucoseLevelIntentHandler.handle(handlerInput, bundle, timezone);
+        return getGlucoseLevelHandler.handle(handlerInput, bundle, timezone);
     }
 }
 
@@ -251,7 +251,7 @@ const GetGlucoseLevelIntentDateAndTimeHandler = {
             timeUtil.utcDateTimeFromLocalDateAndTime(date, time, timezone)
             : timeUtil.utcDateFromLocalDate(date, timezone);
         const bundle = await patientsApi.getObservationsOnDate(userInfo.username, dateTime, timing);
-        return getGlucoseLevelIntentHandler.handle(handlerInput, bundle, timezone);
+        return getGlucoseLevelHandler.handle(handlerInput, bundle, timezone);
     }
 }
 
@@ -274,7 +274,7 @@ const GetGlucoseLevelIntentDateHandler = {
         const date = handlerInput.requestEnvelope.request.intent.slots.date.value;
         const utcDate = timeUtil.utcDateFromLocalDate(date, timezone);
         const bundle = await patientsApi.getObservationsOnDate(userInfo.username, utcDate, fhirTiming.timingEvent.ALL_DAY);
-        return getGlucoseLevelIntentHandler.handle(handlerInput, bundle, timezone);
+        return getGlucoseLevelHandler.handle(handlerInput, bundle, timezone);
     }
 }
 
@@ -300,7 +300,7 @@ const GetGlucoseLevelIntentTimeHandler = {
             timeUtil.utcTimeFromLocalTime(time, timezone)
             : DateTime.utc().toISO();
         const bundle = await patientsApi.getObservationsOnDate(userInfo.username, dateTime, timing);
-        return getGlucoseLevelIntentHandler.handle(handlerInput, bundle, timezone);
+        return getGlucoseLevelHandler.handle(handlerInput, bundle, timezone);
     }
 }
 
@@ -323,7 +323,7 @@ const GetGlucoseLevelIntentTimingHandler = {
         const timing = handlerInput.requestEnvelope.request.intent.slots.timing.value;
         const date = DateTime.utc().toISO();
         const bundle = await patientsApi.getObservationsOnDate(userInfo.username, date, timing);
-        return getGlucoseLevelIntentHandler.handle(handlerInput, bundle, timezone);
+        return getGlucoseLevelHandler.handle(handlerInput, bundle, timezone);
     }
 }
 
