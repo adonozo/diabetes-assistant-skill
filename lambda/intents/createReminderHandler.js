@@ -3,7 +3,7 @@ const reminders = require("../utils/reminder");
 const fhirTiming = require("../fhir/timing");
 const intentUtil = require("../utils/intent");
 
-async function createRequestReminders(handlerInput, patient, requests) {
+async function handle(handlerInput, patient, requests) {
     const localizedMessages = intentUtil.getLocalizedStrings(handlerInput);
 
     // Check if timing setup is needed.
@@ -59,5 +59,5 @@ const switchContextToTiming = (handlerInput, timing) => {
 };
 
 module.exports = {
-    createRequestReminders
+    handle
 }

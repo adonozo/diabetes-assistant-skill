@@ -5,7 +5,7 @@ const fhirCarePlan = require("../fhir/carePlan");
 const fhirMedicationRequest = require("../fhir/medicationRequest");
 const intentUtil = require("../utils/intent");
 
-async function getMedicationsToTake(handlerInput, patient) {
+async function handle(handlerInput, patient) {
     const localizedMessages = intentUtil.getLocalizedStrings(handlerInput);
     const date = handlerInput.requestEnvelope.request.intent.slots.treatmentDate.value;
     const userTimezone = await timeUtil.getTimezoneOrDefault(handlerInput);
@@ -34,5 +34,5 @@ async function getMedicationsToTake(handlerInput, patient) {
 }
 
 module.exports = {
-    getMedicationsToTake
+    handle
 }

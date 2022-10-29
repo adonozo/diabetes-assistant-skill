@@ -13,8 +13,9 @@ const strings = require('./strings/strings');
 const helper = require("./utils/helper");
 const remindersUtil = require('./utils/reminder');
 const timeUtil = require("./utils/time");
-const reminderHandler = require("./intents/reminderHandler");
+const createReminderHandler = require("./intents/createReminderHandler");
 const getMedicationToTakeHandler = require("./intents/getMedicationToTakeHandler");
+const setTimingHandler = require("./intents/setTimingHandler");
 
 const LaunchRequestHandler = {
     canHandle(handlerInput) {
@@ -49,7 +50,7 @@ const MedicationReminderIntentHandler = {
         const self = await patientsApi.getSelf(userInfo.username);
         const medicationBundle = await medicationRequests.getActiveMedicationRequests(self.id);
         const requests = fhirMedicationRequest.requestListFromBundle(medicationBundle);
-        return reminderHandler.createRequestReminders(handlerInput, self, requests);
+        return createReminderHandler.handle(handlerInput, self, requests);
     }
 }
 
@@ -72,11 +73,11 @@ const CreateRemindersIntentHandler = {
         const self = await patientsApi.getSelf(userInfo.username);
         const requestBundle = await carePlanApi.getActiveCarePlan(userInfo.username);
         const requests = fhirCarePlan.requestListFromBundle(requestBundle);
-        return reminderHandler.createRequestReminders(handlerInput, self, requests);
+        return createReminderHandler.handle(handlerInput, self, requests);
     }
 }
 
-const MedicationForDateIntentHandler = {
+const GetMedicationToTakeIntentHandler = {
     canHandle(handlerInput) {
         return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
             && Alexa.getIntentName(handlerInput.requestEnvelope) === 'GetMedicationToTakeIntent';
@@ -88,7 +89,7 @@ const MedicationForDateIntentHandler = {
         }
 
         const self = await patientsApi.getSelf(userInfo.username);
-        return getMedicationToTakeHandler.getMedicationsToTake(handlerInput, self);
+        return getMedicationToTakeHandler.handle(handlerInput, self);
     }
 };
 
@@ -118,33 +119,7 @@ const SetTimingCompletedIntentHandler = {
             return requestAccountLink(handlerInput);
         }
 
-        const localizedMessages = getLocalizedStrings(handlerInput);
-        const currentIntent = handlerInput.requestEnvelope.request.intent;
-        const timing = currentIntent.slots.event.value;
-        const time = currentIntent.slots.time.value;
-        const userTimeZone = await timeUtil.getTimezoneOrDefault(handlerInput);
-        const dateTime = DateTime.fromISO(`${DateTime.now().toISODate()}T${time}`, {zone: userTimeZone});
-
-        await patientsApi.updateTiming(userInfo.username, {
-            timing: localizedMessages.stringToTimingCode(timing),
-            dateTime: dateTime.toUTC().toISO()
-        })
-
-        const session = handlerInput.attributesManager.getSessionAttributes();
-        let speakOutput = `${localizedMessages.responses.UPDATED_TIMING} ${timing}.`;
-        let reprompt = localizedMessages.responses.HELP;
-        if (session[helper.sessionValues.medicationReminderIntent]) {
-            reprompt = localizedMessages.responses.MEDICATIONS_REMINDERS_SETUP;
-            speakOutput = `${speakOutput} ${reprompt}`;
-        } else if (session[helper.sessionValues.createRemindersIntent]) {
-            reprompt = localizedMessages.responses.REQUESTS_REMINDERS_SETUP;
-            speakOutput = `${speakOutput} ${reprompt}`;
-        }
-
-        return handlerInput.responseBuilder
-            .speak(speakOutput)
-            .reprompt(reprompt)
-            .getResponse();
+        return setTimingHandler.handle(handlerInput, userInfo.username)
     }
 }
 
@@ -507,7 +482,7 @@ const ErrorHandler = {
 exports.handler = Alexa.SkillBuilders.custom()
     .addRequestHandlers(
         LaunchRequestHandler,
-        MedicationForDateIntentHandler,
+        GetMedicationToTakeIntentHandler,
         MedicationReminderIntentHandler,
         ConnectionsResponseHandler,
         HelpIntentHandler,
