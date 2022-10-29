@@ -7,7 +7,6 @@ const carePlanApi = require("./api/carePlan")
 const patientsApi = require("./api/patients");
 const fhirCarePlan = require("./fhir/carePlan");
 const fhirMedicationRequest = require("./fhir/medicationRequest");
-const fhirObservation = require("./fhir/observation");
 const fhirTiming = require("./fhir/timing");
 const strings = require('./strings/strings');
 const remindersUtil = require('./utils/reminder');
@@ -17,6 +16,7 @@ const getMedicationToTakeHandler = require("./intents/getMedicationToTakeHandler
 const setTimingHandler = require("./intents/setTimingHandler");
 const setStartDateIntentHandler = require("./intents/setStartDateIntentHandler");
 const registerGlucoseLevelIntentHandler = require("./intents/registerGlucoseLevelIntentHandler");
+const getGlucoseLevelIntentHandler = require("./intents/getGlucoseLeveIntentHandler");
 
 const LaunchRequestHandler = {
     canHandle(handlerInput) {
@@ -224,7 +224,7 @@ const GetGlucoseLevelIntentDateAndTimingHandler = {
         const timingCode = localizedMessages.stringToTimingCode(timing);
         const utcDate = timeUtil.utcDateFromLocalDate(date, timezone);
         const bundle = await patientsApi.getObservationsOnDate(userInfo.username, utcDate, timingCode);
-        return getAskGlucoseResponse(handlerInput, bundle, timezone);
+        return getGlucoseLevelIntentHandler.handle(handlerInput, bundle, timezone);
     }
 }
 
@@ -251,7 +251,7 @@ const GetGlucoseLevelIntentDateAndTimeHandler = {
             timeUtil.utcDateTimeFromLocalDateAndTime(date, time, timezone)
             : timeUtil.utcDateFromLocalDate(date, timezone);
         const bundle = await patientsApi.getObservationsOnDate(userInfo.username, dateTime, timing);
-        return getAskGlucoseResponse(handlerInput, bundle, timezone);
+        return getGlucoseLevelIntentHandler.handle(handlerInput, bundle, timezone);
     }
 }
 
@@ -274,7 +274,7 @@ const GetGlucoseLevelIntentDateHandler = {
         const date = handlerInput.requestEnvelope.request.intent.slots.date.value;
         const utcDate = timeUtil.utcDateFromLocalDate(date, timezone);
         const bundle = await patientsApi.getObservationsOnDate(userInfo.username, utcDate, fhirTiming.timingEvent.ALL_DAY);
-        return getAskGlucoseResponse(handlerInput, bundle, timezone);
+        return getGlucoseLevelIntentHandler.handle(handlerInput, bundle, timezone);
     }
 }
 
@@ -300,7 +300,7 @@ const GetGlucoseLevelIntentTimeHandler = {
             timeUtil.utcTimeFromLocalTime(time, timezone)
             : DateTime.utc().toISO();
         const bundle = await patientsApi.getObservationsOnDate(userInfo.username, dateTime, timing);
-        return getAskGlucoseResponse(handlerInput, bundle, timezone);
+        return getGlucoseLevelIntentHandler.handle(handlerInput, bundle, timezone);
     }
 }
 
@@ -323,7 +323,7 @@ const GetGlucoseLevelIntentTimingHandler = {
         const timing = handlerInput.requestEnvelope.request.intent.slots.timing.value;
         const date = DateTime.utc().toISO();
         const bundle = await patientsApi.getObservationsOnDate(userInfo.username, date, timing);
-        return getAskGlucoseResponse(handlerInput, bundle, timezone);
+        return getGlucoseLevelIntentHandler.handle(handlerInput, bundle, timezone);
     }
 }
 
@@ -489,21 +489,6 @@ const requestReminderPermission = (handlerInput) => {
     return handlerInput.responseBuilder
         .speak(localizedMessages.responses.REMINDER_PERMISSIONS)
         .addDirective(remindersUtil.reminderDirective)
-        .getResponse();
-}
-
-const getAskGlucoseResponse = (handlerInput, bundle, timezone) => {
-    const localizedMessages = getLocalizedStrings(handlerInput);
-    if (!bundle.entry || bundle.entry.length === 0) {
-        return handlerInput.responseBuilder
-            .speak(localizedMessages.responses.NO_GLUCOSE_RECORDS_FOUND)
-            .getResponse();
-    }
-
-    const observations = fhirObservation.getObservationsFromBundle(bundle);
-    const message = strings.makeTextFromObservations(observations, timezone, localizedMessages);
-    return handlerInput.responseBuilder
-        .speak(message)
         .getResponse();
 }
 
