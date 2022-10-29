@@ -10,13 +10,13 @@ const fhirMedicationRequest = require("./fhir/medicationRequest");
 const fhirObservation = require("./fhir/observation");
 const fhirTiming = require("./fhir/timing");
 const strings = require('./strings/strings');
-const helper = require("./utils/helper");
 const remindersUtil = require('./utils/reminder');
 const timeUtil = require("./utils/time");
 const createReminderHandler = require("./intents/createReminderHandler");
 const getMedicationToTakeHandler = require("./intents/getMedicationToTakeHandler");
 const setTimingHandler = require("./intents/setTimingHandler");
 const setStartDateIntentHandler = require("./intents/setStartDateIntentHandler");
+const registerGlucoseLevelIntentHandler = require("./intents/registerGlucoseLevelIntentHandler");
 
 const LaunchRequestHandler = {
     canHandle(handlerInput) {
@@ -197,33 +197,14 @@ const RegisterGlucoseLevelIntentHandler = {
             return requestAccountLink(handlerInput);
         }
 
-        const localizedMessages = getLocalizedStrings(handlerInput);
-        const currentIntent = handlerInput.requestEnvelope.request.intent;
-        const value = +currentIntent.slots.level.value;
-        const timing = currentIntent.slots.glucoseTiming.value
-        if (isNaN(value) || value <= 0 || value > 20) {
-            return handlerInput.responseBuilder
-                .speak(localizedMessages.responses.INVALID_BLOOD_GLUCOSE)
-                .reprompt(localizedMessages.responses.INVALID_BLOOD_GLUCOSE_REPROMPT)
-                .getResponse();
-        }
-
-        const self = await patientsApi.getSelf(userInfo.username);
-        const observation = fhirObservation.createObservationObject(self, value, timing, localizedMessages);
-        await patientsApi.saveBloodGlucoseLevel(userInfo.username, observation);
-        const response = localizedMessages.responses.BLOOD_GLUCOSE_SUCCESS;
-        const alert = helper.getBloodGlucoseAlert(value, timing, localizedMessages);
-
-        return handlerInput.responseBuilder
-            .speak(`${response} ${alert}`)
-            .getResponse();
+        return registerGlucoseLevelIntentHandler.handle(handlerInput, userInfo.username);
     }
 }
 
-const AskGlucoseLevelIntentDateAndTimingHandler = {
+const GetGlucoseLevelIntentDateAndTimingHandler = {
     canHandle(handlerInput) {
         return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
-            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'AskGlucoseLevelIntent'
+            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'GetGlucoseLevelIntent'
             && Alexa.getDialogState(handlerInput.requestEnvelope) !== 'COMPLETED'
             && handlerInput.requestEnvelope.request.intent.slots.date.value
             && !handlerInput.requestEnvelope.request.intent.slots.time.value
@@ -247,10 +228,10 @@ const AskGlucoseLevelIntentDateAndTimingHandler = {
     }
 }
 
-const AskGlucoseLevelIntentDateAndTimeHandler = {
+const GetGlucoseLevelIntentDateAndTimeHandler = {
     canHandle(handlerInput) {
         return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
-            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'AskGlucoseLevelIntent'
+            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'GetGlucoseLevelIntent'
             && Alexa.getDialogState(handlerInput.requestEnvelope) !== 'COMPLETED'
             && handlerInput.requestEnvelope.request.intent.slots.date.value
             && handlerInput.requestEnvelope.request.intent.slots.time.value
@@ -274,10 +255,10 @@ const AskGlucoseLevelIntentDateAndTimeHandler = {
     }
 }
 
-const AskGlucoseLevelIntentDateHandler = {
+const GetGlucoseLevelIntentDateHandler = {
     canHandle(handlerInput) {
         return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
-            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'AskGlucoseLevelIntent'
+            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'GetGlucoseLevelIntent'
             && Alexa.getDialogState(handlerInput.requestEnvelope) !== 'COMPLETED'
             && handlerInput.requestEnvelope.request.intent.slots.date.value
             && !handlerInput.requestEnvelope.request.intent.slots.time.value
@@ -297,10 +278,10 @@ const AskGlucoseLevelIntentDateHandler = {
     }
 }
 
-const AskGlucoseLevelIntentTimeHandler = {
+const GetGlucoseLevelIntentTimeHandler = {
     canHandle(handlerInput) {
         return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
-            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'AskGlucoseLevelIntent'
+            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'GetGlucoseLevelIntent'
             && Alexa.getDialogState(handlerInput.requestEnvelope) !== 'COMPLETED'
             && !handlerInput.requestEnvelope.request.intent.slots.date.value
             && handlerInput.requestEnvelope.request.intent.slots.time.value
@@ -323,10 +304,10 @@ const AskGlucoseLevelIntentTimeHandler = {
     }
 }
 
-const AskGlucoseLevelIntentTimingHandler = {
+const GetGlucoseLevelIntentTimingHandler = {
     canHandle(handlerInput) {
         return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
-            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'AskGlucoseLevelIntent'
+            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'GetGlucoseLevelIntent'
             && Alexa.getDialogState(handlerInput.requestEnvelope) !== 'COMPLETED'
             && !handlerInput.requestEnvelope.request.intent.slots.date.value
             && !handlerInput.requestEnvelope.request.intent.slots.time.value
@@ -458,8 +439,9 @@ const ErrorHandler = {
 exports.handler = Alexa.SkillBuilders.custom()
     .addRequestHandlers(
         LaunchRequestHandler,
-        GetMedicationToTakeIntentHandler,
         MedicationReminderIntentHandler,
+        CreateRemindersIntentHandler,
+        GetMedicationToTakeIntentHandler,
         ConnectionsResponseHandler,
         HelpIntentHandler,
         CancelAndStopIntentHandler,
@@ -467,15 +449,14 @@ exports.handler = Alexa.SkillBuilders.custom()
         SetTimingInProgressIntentHandler,
         SetTimingCompletedIntentHandler,
         SetStartDateCompletedIntentHandler,
-        CreateRemindersIntentHandler,
         RegisterGlucoseLevelIntentInProgressWithValueHandler,
         RegisterGlucoseLevelIntentInProgressHandler,
         RegisterGlucoseLevelIntentHandler,
-        AskGlucoseLevelIntentDateAndTimingHandler,
-        AskGlucoseLevelIntentDateAndTimeHandler,
-        AskGlucoseLevelIntentDateHandler,
-        AskGlucoseLevelIntentTimeHandler,
-        AskGlucoseLevelIntentTimingHandler,
+        GetGlucoseLevelIntentDateAndTimingHandler,
+        GetGlucoseLevelIntentDateAndTimeHandler,
+        GetGlucoseLevelIntentDateHandler,
+        GetGlucoseLevelIntentTimeHandler,
+        GetGlucoseLevelIntentTimingHandler,
         IntentReflectorHandler, // make sure IntentReflectorHandler is last, so it doesn't override your custom intent handlers
         ) 
     .addErrorHandlers(

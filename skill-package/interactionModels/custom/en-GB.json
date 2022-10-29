@@ -198,7 +198,7 @@
           ]
         },
         {
-          "name": "AskGlucoseLevelIntent",
+          "name": "GetGlucoseLevelIntent",
           "slots": [
             {
               "name": "time",
@@ -784,7 +784,7 @@
           ]
         },
         {
-          "name": "AskGlucoseLevelIntent",
+          "name": "GetGlucoseLevelIntent",
           "confirmationRequired": false,
           "delegationStrategy": "SKILL_RESPONSE",
           "slots": [
