@@ -10,7 +10,18 @@
             "Ask diabetes assistant about my glucose level yesterday at dinner"
           ],
           "name": "diabetes assistant",
-          "description": "The Alexa Diabetes Voice Assistant. Part of a dissertation project for the MSc Computer Science at QMUL."
+          "description": "The Alexa Diabetes Voice Assistant. Helps you keep track of your medication and blood glucose levels."
+        },
+        "es-MX": {
+          "summary": "Asistente de diabetes",
+          "examplePhrases": [
+            "Alexa abre el asistente de diabetes",
+            "Pregunta al asistente de diabetes sobre mi tratamiento",
+            "Pregunta al asistente de diabetes sobre mis niveles de azucar de anoche",
+            "Dile al asistente de diabetes que registre mi nivel de glucosa"
+          ],
+          "name": "asistente de diabetes",
+          "description": "El Asistente de Diabetes de Alexa. Te ayuda a recordarte sobre tu medicación y mantener un registro de tus niveles de glucosa en sangre."
         }
       },
       "isAvailableWorldwide": true,

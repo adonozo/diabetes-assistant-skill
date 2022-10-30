@@ -25,7 +25,7 @@ const timingEvent = {
     ALL_DAY: 'ALL_DAY'
 }
 
-const numericTiming = {
+const timingOrder = {
     MORN: 1,
     ACM: 2,
     CM: 3,
@@ -48,83 +48,24 @@ const numericTiming = {
 }
 
 /**
- *
  * @param value {string}
  */
 function relatedTimingCodeToString(value) {
     switch (value) {
-        case "ACD":
-        case "CD":
-        case "PCD":
-            return 'lunch';
-        case "ACM":
-        case "CM":
-        case "PCM":
-            return 'breakfast';
-        case "ACV":
-        case "CV":
-        case "PCV":
-            return 'dinner';
+        case timingEvent.ACD:
+        case timingEvent.CD:
+        case timingEvent.PCD:
+            return timingEvent.CD;
+        case timingEvent.ACM:
+        case timingEvent.CM:
+        case timingEvent.PCM:
+            return timingEvent.CM;
+        case timingEvent.ACV:
+        case timingEvent.CV:
+        case timingEvent.PCV:
+            return timingEvent.CV;
         default:
-            return 'a meal';
-    }
-}
-
-function stringToTimingCode(value) {
-    switch (value) {
-        case 'lunch':
-            return 'CD';
-        case "before lunch":
-            return 'ACD';
-        case "after lunch":
-            return 'PCD'
-        case 'breakfast':
-            return 'CM';
-        case 'before breakfast':
-            return 'ACM';
-        case 'after breakfast':
-            return 'PCM';
-        case 'dinner':
-            return 'CV'
-        case 'before dinner':
-            return 'ACV';
-        case 'after dinner':
-            return 'PCV';
-        case 'before meal':
-            return 'AC'
-        case 'after meal':
-            return 'PC'
-        default:
-            return 'EXACT'
-    }
-}
-
-function timingCodeToString(value) {
-    switch (value) {
-        case 'CD':
-            return 'at lunch';
-        case "ACD":
-            return 'before lunch';
-        case "PCD":
-            return 'after lunch';
-        case 'CM':
-            return 'at breakfast';
-        case 'ACM':
-            return 'before breakfast';
-        case 'PCM':
-            return 'after breakfast';
-        case 'CV':
-            return 'at dinner';
-        case 'ACV':
-            return 'before dinner';
-        case 'PCV':
-            return 'after dinner';
-        case 'AC':
-            return 'before meal';
-        case 'PC':
-            return 'after meal';
-        default:
-            return ''
+            return timingEvent.C;
     }
 }
 
@@ -143,22 +84,22 @@ function alexaTimingToFhirTiming(alexaTiming) {
     }
 }
 
-function getDatesFromTiming(timing, patient, resourceId) {
+function getDatesFromTiming(timing, getStartDate, resource) {
     if (timing.repeat.boundsPeriod) {
         const startDate = DateTime.fromISO(timing.repeat.boundsPeriod.start);
         const endDate = DateTime.fromISO(timing.repeat.boundsPeriod.end)
             .plus({days: 1}); // Adds 1 to include the end date.
         return {
-            start: startDate,
-            end: endDate
+            start: startDate.toUTC(),
+            end: endDate.toUTC()
         }
     } else if (timing.repeat.boundsDuration) {
-        const start = patient.resourceStartDate[resourceId];
+        const start = getStartDate(resource);
         const startDate = DateTime.fromISO(start, {zone: 'utc'});
         const endDate = startDate.plus({days: timing.repeat.boundsDuration.value + 1})
         return {
-            start: startDate,
-            end: endDate
+            start: startDate.toUTC(),
+            end: endDate.toUTC()
         }
     }
 
@@ -207,8 +148,8 @@ function dayToRruleDay(day) {
 }
 
 const compareWhen = (a, b) => {
-    if (numericTiming[a] && numericTiming[b]) {
-        return numericTiming[a] - numericTiming[b];
+    if (timingOrder[a] && timingOrder[b]) {
+        return timingOrder[a] - timingOrder[b];
     }
 
     return 0;
@@ -224,12 +165,9 @@ const tryParseDate = (datetime) => {
 
 module.exports = {
     timingEvent,
-    numericTiming,
     compareWhen,
     relatedTimingCodeToString,
-    stringToTimingCode,
     alexaTimingToFhirTiming,
-    timingCodeToString,
     getDatesFromTiming,
     getTimesFromTimingWithFrequency,
     dayToRruleDay,

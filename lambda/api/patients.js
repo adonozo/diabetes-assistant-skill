@@ -74,21 +74,6 @@ function getObservationsOnDate(email, date, timing) {
     });
 }
 
-// Deprecated
-function getMedicationRequestsForDate(email, date, requestType, timing, timezone) {
-    return new Promise((resolve, reject) => {
-        const params = new URLSearchParams();
-        params.append("date", date)
-        params.append("type", requestType)
-        params.append("timing", timing)
-        params.append("timezone", timezone)
-        const path = `/patients/${email}/alexa?${params.toString()}`
-        const options = api.getOptionsFor(path, 'GET');
-        const request = http.request(options, response => api.createJsonResponse(resolve, reject, response));
-        request.end();
-    });
-}
-
 function getMedicationRequests(email, date, timing, timezone) {
     return new Promise((resolve, reject) => {
         const params = new URLSearchParams();
@@ -109,5 +94,4 @@ module.exports = {
     saveBloodGlucoseLevel,
     getObservationsOnDate,
     getMedicationRequests,
-    getMedicationRequestsForDate
 }
