@@ -1,8 +1,8 @@
 const {RRule} = require("rrule")
 const {DateTime} = require("luxon");
-const fhirTiming = require("./fhir/timing");
-const fhirMedicationRequest = require("./fhir/medicationRequest");
-const fhirServiceRequest = require("./fhir/serviceRequest");
+const fhirTiming = require("./../fhir/timing");
+const fhirMedicationRequest = require("./../fhir/medicationRequest");
+const fhirServiceRequest = require("./../fhir/serviceRequest");
 
 const reminderDirective = {
     type: "Connections.SendRequest",
@@ -257,6 +257,5 @@ function createAbsoluteReminder({
 
 module.exports = {
     reminderDirective,
-    getRemindersForMedicationRequests,
     getRemindersForRequests,
 }

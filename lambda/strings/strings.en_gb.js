@@ -1,6 +1,6 @@
-const {timingEvent} = require("./fhir/timing");
+const {timingEvent} = require("./../fhir/timing");
 const {DateTime} = require("luxon");
-const helpers = require("helper");
+const helpers = require("./../utils/helper");
 
 const locale = 'en-GB'
 

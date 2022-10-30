@@ -25,7 +25,7 @@ const timingEvent = {
     ALL_DAY: 'ALL_DAY'
 }
 
-const numericTiming = {
+const timingOrder = {
     MORN: 1,
     ACM: 2,
     CM: 3,
@@ -148,8 +148,8 @@ function dayToRruleDay(day) {
 }
 
 const compareWhen = (a, b) => {
-    if (numericTiming[a] && numericTiming[b]) {
-        return numericTiming[a] - numericTiming[b];
+    if (timingOrder[a] && timingOrder[b]) {
+        return timingOrder[a] - timingOrder[b];
     }
 
     return 0;
@@ -165,7 +165,6 @@ const tryParseDate = (datetime) => {
 
 module.exports = {
     timingEvent,
-    numericTiming,
     compareWhen,
     relatedTimingCodeToString,
     alexaTimingToFhirTiming,

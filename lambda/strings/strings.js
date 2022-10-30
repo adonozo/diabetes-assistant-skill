@@ -1,6 +1,6 @@
 const {DateTime} = require("luxon");
-const enGb = require("strings.en_gb");
-const esMx = require("strings.es_mx");
+const enGb = require("./strings.en_gb");
+const esMx = require("./strings.es_mx");
 
 function getLocalizedStrings(locale) {
     switch (locale) {

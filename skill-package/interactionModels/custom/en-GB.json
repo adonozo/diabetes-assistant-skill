@@ -24,7 +24,7 @@
           "samples": []
         },
         {
-          "name": "MedicationForDateIntent",
+          "name": "GetMedicationToTakeIntent",
           "slots": [
             {
               "name": "treatmentDate",
@@ -32,12 +32,15 @@
             }
           ],
           "samples": [
-            "What medicines I took {treatmentDate}",
-            "Which pills I took {treatmentDate}",
-            "What is the plan for {treatmentDate}",
-            "What medicines I will take {treatmentDate}",
+            "What medicines I had to take {treatmentDate}",
+            "What pills I had to take {treatmentDate}",
+            "What is my medication for {treatmentDate}",
+            "What medicines I have to take {treatmentDate}",
+            "What pills I have to take {treatmentDate}",
             "Medicines for {treatmentDate}",
             "Medicines on {treatmentDate}",
+            "Pills for {treatmentDate}",
+            "Pills on {treatmentDate}",
             "My medication for {treatmentDate}",
             "My medication {treatmentDate}",
             "medications for {treatmentDate}",
@@ -45,7 +48,7 @@
           ]
         },
         {
-          "name": "MedicationReminderIntent",
+          "name": "CreateMedicationReminderIntent",
           "slots": [],
           "samples": [
             "Remind me to take my medications",
@@ -195,7 +198,7 @@
           ]
         },
         {
-          "name": "AskGlucoseLevelIntent",
+          "name": "GetGlucoseLevelIntent",
           "slots": [
             {
               "name": "time",
@@ -781,7 +784,7 @@
           ]
         },
         {
-          "name": "AskGlucoseLevelIntent",
+          "name": "GetGlucoseLevelIntent",
           "confirmationRequired": false,
           "delegationStrategy": "SKILL_RESPONSE",
           "slots": [

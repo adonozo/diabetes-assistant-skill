@@ -6,6 +6,17 @@ const clientSecret = '__ENV_CLIENT_SECRET';
 const authHost = '__ENV_AUTH_HOST';
 const authServerId = '__ENV_AUTH_SERVER_ID';
 
+async function getValidatedUser (handlerInput) {
+    let token = handlerInput.requestEnvelope.context.System.user.accessToken;
+    if (!token) {
+        return false;
+    }
+
+    const userInfo = await validateToken(token);
+    userInfo.requestOptions = getOptions(token);
+    return userInfo;
+}
+
 function validateToken(token) {
     const auth = "Basic " + new Buffer(clientId + ":" + clientSecret).toString("base64");
     const tokenParam = `?token=${token}`;
@@ -48,6 +59,5 @@ function getOptions(token) {
 }
 
 module.exports = {
-    validateToken,
-    getOptions
+    getValidatedUser,
 }

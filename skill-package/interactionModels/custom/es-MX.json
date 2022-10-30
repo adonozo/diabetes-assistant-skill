@@ -26,7 +26,7 @@
           "samples": []
         },
         {
-          "name": "MedicationForDateIntent",
+          "name": "GetMedicationToTakeIntent",
           "slots": [
             {
               "name": "treatmentDate",
@@ -34,22 +34,30 @@
             }
           ],
           "samples": [
-            "Qué medicamentos tengo que tomar {treatmentDate}",
-            "Qué medicamentos tomé {treatmentDate}",
-            "Qué medicinas tomé {treatmentDate}",
-            "Cuál es el plan para {treatmentDate}",
+            "Qué medicamentos tenía que tomar {treatmentDate}",
+            "Qué medicinas tenía que tomar {treatmentDate}",
             "Que medicamentos tomaré {treatmentDate}",
+            "Que medicinas tomaré {treatmentDate}",
+            "Que medicamentos tengo que tomar {treatmentDate}",
+            "Que medicinas tengo que tomar {treatmentDate}",
             "Medicamentos para el {treatmentDate}",
             "Medicamentos el {treatmentDate}",
             "Medicamentos {treatmentDate}",
+            "Medicinas para el {treatmentDate}",
+            "Medicinas el {treatmentDate}",
+            "Medicinas {treatmentDate}",
             "Mi medicación para {treatmentDate}",
             "Mi medicación {treatmentDate}",
             "Mi medicación el {treatmentDate}",
-            "Mis pastillas {treatmentDate}"
+            "Cuáles eran mis medicinas {treatmentDate}",
+            "Cuáles eran mis medicamentos {treatmentDate}",
+            "Que debia tomar {treatmentDate}",
+            "Que debo tomar {treatmentDate}",
+            "Que tengo que tomar {treatmentDate}"
           ]
         },
         {
-          "name": "MedicationReminderIntent",
+          "name": "CreateMedicationReminderIntent",
           "slots": [],
           "samples": [
             "Recuérdame tomar mis medicamentos",
@@ -233,7 +241,7 @@
           ]
         },
         {
-          "name": "AskGlucoseLevelIntent",
+          "name": "GetGlucoseLevelIntent",
           "slots": [
             {
               "name": "time",
@@ -316,32 +324,32 @@
             "Cuál era mi glucosa {date} durante el {timing}",
             "Cuál era mi glucosa en el {timing}",
             "Cuál era mi azúcar en el {timing}",
-            "Mi glucosa {date}",
-            "Mi glucosa el {date}",
-            "Mi nivel de glucosa {date}",
-            "Mi nivel de glucosa el {date}",
-            "Mi nivel de glucosa el {date} a las {time}",
-            "Mi nivel de glucosa {date} a las {time}",
-            "Mi azúcar {date}",
-            "Mi azúcar el {date}",
-            "Mi azúcar el {date} a las {time}",
-            "Mi azúcar {date} a las {time}",
-            "Mi nivel de glucosa en sangre {date}",
-            "Mi nivel de glucosa en sangre el {date}",
-            "Mi nivel de glucosa en sangre el {date} a las {time}",
-            "Mi nivel de glucosa en sangre {date} a las {time}",
-            "Mi glucosa a las {time}",
-            "Mi glucosa esta {time}",
-            "Mi azúcar a las {time}",
-            "Mi azúcar esta {time}",
-            "Mi glucosa el {date} a las {time}",
-            "Mi glucosa {date} a las {time}",
-            "mi glucosa en el {timing}",
-            "mi nivel de glucosa {timing}",
-            "mi azúcar en el {timing}",
-            "mi nivel de azúcar en el {timing}",
-            "mi glucosa {date} en el {timing}",
-            "mi azúcar {date} en el {timing}"
+            "Dime mi glucosa {date}",
+            "Dime mi glucosa el {date}",
+            "Dime mi nivel de glucosa {date}",
+            "Dime mi nivel de glucosa el {date}",
+            "Dime mi nivel de glucosa el {date} a las {time}",
+            "Dime mi nivel de glucosa {date} a las {time}",
+            "Dime mi azúcar {date}",
+            "Dime mi azúcar el {date}",
+            "Dime mi azúcar el {date} a las {time}",
+            "Dime mi azúcar {date} a las {time}",
+            "Dime mi nivel de glucosa en sangre {date}",
+            "Dime mi nivel de glucosa en sangre el {date}",
+            "Dime mi nivel de glucosa en sangre el {date} a las {time}",
+            "Dime mi nivel de glucosa en sangre {date} a las {time}",
+            "Dime mi glucosa a las {time}",
+            "Dime mi glucosa esta {time}",
+            "Dime mi azúcar a las {time}",
+            "Dime mi azúcar esta {time}",
+            "Dime mi glucosa el {date} a las {time}",
+            "Dime mi glucosa {date} a las {time}",
+            "Dime mi glucosa en el {timing}",
+            "Dime mi nivel de glucosa {timing}",
+            "Dime mi azúcar en el {timing}",
+            "Dime mi nivel de azúcar en el {timing}",
+            "Dime mi glucosa {date} en el {timing}",
+            "Dime mi azúcar {date} en el {timing}"
           ]
         }
       ],
@@ -828,7 +836,7 @@
           ]
         },
         {
-          "name": "AskGlucoseLevelIntent",
+          "name": "GetGlucoseLevelIntent",
           "confirmationRequired": false,
           "delegationStrategy": "SKILL_RESPONSE",
           "slots": [

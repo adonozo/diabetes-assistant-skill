@@ -1,25 +1,8 @@
-const {DateTime, Settings} = require("luxon");
-const fhirTiming = require("./fhir/timing");
-const fhirPatient = require("./fhir/patient");
-const fhirDosage = require("./fhir/dosage");
-const fhirServiceRequest = require("./fhir/serviceRequest");
-
-const minBloodGlucoseValue = 4;
-const maxFastingGlucoseValue = 7;
-const maxAfterMealGlucoseValue = 8.5;
-
-function logMessage(name, object) {
-    console.log(`===== ${name} =====`);
-    console.log(JSON.stringify(object));
-}
-
-const sessionValues = {
-    requestMissingDate: 'requestMissingDate',
-    medicationReminderIntent: 'MedicationReminderIntent',
-    createRemindersIntent: 'CreateRemindersIntent',
-    medicationForDateIntent: 'MedicationForDateIntent',
-    carePlanIntent: 'CarePlanIntent',
-}
+const fhirPatient = require("../fhir/patient");
+const fhirDosage = require("../fhir/dosage");
+const fhirServiceRequest = require("../fhir/serviceRequest");
+const {Settings, DateTime} = require("luxon");
+const fhirTiming = require("../fhir/timing");
 
 /**
  * Checks if there are missing timings, i.e., breakfast, lunch, dinner in medication or service requests.
@@ -150,53 +133,6 @@ async function getTimezoneOrDefault(handlerInput) {
     return userTimeZone;
 }
 
-function getDelegatedSetTimingIntent(timing) {
-    return {
-        name: 'SetTimingIntent',
-        confirmationStatus: "NONE",
-        slots: {
-            event: {
-                name: 'event',
-                value: timing,
-                confirmationStatus: 'NONE',
-            }
-        }
-    }
-}
-
-function getDelegatedSetStartDateIntent(healthRequestName) {
-    return {
-        name: 'SetStartDateIntent',
-        confirmationStatus: "NONE",
-        slots: {
-            healthRequest: {
-                name: 'healthRequest',
-                value: healthRequestName,
-                confirmationStatus: 'NONE',
-            }
-        }
-    }
-}
-
-function getDelegatedSetStartDateWithTimeIntent(healthRequestName, time) {
-    return {
-        name: 'SetStartDateIntent',
-        confirmationStatus: "NONE",
-        slots: {
-            healthRequest: {
-                name: 'healthRequest',
-                value: healthRequestName,
-                confirmationStatus: 'NONE',
-            },
-            healthRequestTime: {
-                name: 'healthRequestTime',
-                value: time,
-                confirmationStatus: 'CONFIRMED',
-            }
-        }
-    }
-}
-
 function utcDateFromLocalDate(date, timezone) {
     const time = DateTime.now().setZone(timezone);
     const utcDate = DateTime.fromISO(`${date}T${time.toISOTime()}`, {zone: timezone}).toUTC();
@@ -246,50 +182,13 @@ function getDaysDifference(start, end) {
     return Math.abs(days);
 }
 
-function getBloodGlucoseAlert(value, stringTiming, localizedMessages) {
-    if (value < minBloodGlucoseValue) {
-        return localizedMessages.responses.LOW_GLUCOSE;
-    }
-
-    const timing = localizedMessages.stringToTimingCode(stringTiming);
-    if ((timing === fhirTiming.timingEvent.ACM && value > maxFastingGlucoseValue)
-        || value > maxAfterMealGlucoseValue) {
-        return localizedMessages.responses.HIGH_GLUCOSE;
-    }
-
-    return '';
-}
-
-function listItems(values, concatWord) {
-    if (values.length === 1) {
-        return values[0];
-    }
-
-    const joinComma = values.length > 2 ? ',' : ''
-    return values.map((value, index) =>
-        index === values.length - 1 ? ` ${concatWord} ${value}.` : ` ${value}`)
-        .join(joinComma)
-}
-
-function wrapSpeakMessage(message) {
-    return `<speak>${message}</speak>`
-}
-
 module.exports = {
-    logMessage,
     getMissingDates,
     getTimezoneOrDefault,
-    getDelegatedSetTimingIntent,
-    getDelegatedSetStartDateIntent,
     getActiveMissingTimings,
     getActiveMissingStartDate,
     utcDateFromLocalDate,
     utcTimeFromLocalTime,
     utcDateTimeFromLocalDateAndTime,
     getSuggestedTiming,
-    getDelegatedSetStartDateWithTimeIntent,
-    getBloodGlucoseAlert,
-    sessionValues,
-    listItems,
-    wrapSpeakMessage,
 }
