@@ -16,7 +16,7 @@ async function handle(handlerInput, patient, requests) {
     const userTimeZone = await timeUtil.getTimezoneOrDefault(handlerInput);
     const missingDate = timeUtil.getActiveMissingStartDate(patient, requests);
     if (missingDate) {
-        return intentUtil.switchContextToStartDate(handlerInput, missingDate, userTimezone, localizedMessages);
+        return intentUtil.switchContextToStartDate(handlerInput, missingDate, userTimeZone, localizedMessages);
     }
 
     // Create reminders
