@@ -371,6 +371,31 @@
               "name": {
                 "value": "cena"
               }
+            },
+            {
+              "name": {
+                "value": "madrugada"
+              }
+            },
+            {
+              "name": {
+                "value": "mañana"
+              }
+            },
+            {
+              "name": {
+                "value": "tarde"
+              }
+            },
+            {
+              "name": {
+                "value": "noche"
+              }
+            },
+            {
+              "name": {
+                "value": "mediodía"
+              }
             }
           ]
         },

@@ -319,6 +319,36 @@
               "name": {
                 "value": "dinner"
               }
+            },
+            {
+              "name": {
+                "value": "dawn"
+              }
+            },
+            {
+              "name": {
+                "value": "morning"
+              }
+            },
+            {
+              "name": {
+                "value": "noon"
+              }
+            },
+            {
+              "name": {
+                "value": "afternoon"
+              }
+            },
+            {
+              "name": {
+                "value": "evening"
+              }
+            },
+            {
+              "name": {
+                "value": "night"
+              }
             }
           ]
         },
