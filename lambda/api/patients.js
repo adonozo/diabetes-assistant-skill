@@ -62,12 +62,13 @@ function saveBloodGlucoseLevel(email, observation) {
     })
 }
 
-function getObservationsOnDate(email, date, timing) {
+function getObservationsOnDate(email, date, timing, timezone) {
     return new Promise((resolve, reject) => {
         const params = new URLSearchParams();
         params.append("date", date);
         params.append("timing", timing);
-        const path = `/patients/${email}/observations/?${params.toString()}`
+        params.append("timezone", timezone);
+        const path = `/alexa/${email}/observations/?${params.toString()}`
         const options = api.getOptionsFor(path, 'GET');
         const request = http.request(options, response => api.createJsonResponse(resolve, reject, response));
         request.end();

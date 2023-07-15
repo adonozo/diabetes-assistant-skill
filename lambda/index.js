@@ -223,7 +223,7 @@ const GetGlucoseLevelIntentDateAndTimingHandler = {
 
         const timingCode = localizedMessages.stringToTimingCode(timing);
         const utcDate = timeUtil.utcDateFromLocalDate(date, timezone);
-        const bundle = await patientsApi.getObservationsOnDate(userInfo.username, utcDate, timingCode);
+        const bundle = await patientsApi.getObservationsOnDate(userInfo.username, utcDate, timingCode, timezone);
         return getGlucoseLevelHandler.handle(handlerInput, bundle, timezone);
     }
 }
@@ -250,7 +250,7 @@ const GetGlucoseLevelIntentDateAndTimeHandler = {
         const dateTime = timing === fhirTiming.timingEvent.EXACT ?
             timeUtil.utcDateTimeFromLocalDateAndTime(date, time, timezone)
             : timeUtil.utcDateFromLocalDate(date, timezone);
-        const bundle = await patientsApi.getObservationsOnDate(userInfo.username, dateTime, timing);
+        const bundle = await patientsApi.getObservationsOnDate(userInfo.username, dateTime, timing, timezone);
         return getGlucoseLevelHandler.handle(handlerInput, bundle, timezone);
     }
 }
@@ -273,7 +273,7 @@ const GetGlucoseLevelIntentDateHandler = {
         const timezone = await timeUtil.getTimezoneOrDefault(handlerInput);
         const date = handlerInput.requestEnvelope.request.intent.slots.date.value;
         const utcDate = timeUtil.utcDateFromLocalDate(date, timezone);
-        const bundle = await patientsApi.getObservationsOnDate(userInfo.username, utcDate, fhirTiming.timingEvent.ALL_DAY);
+        const bundle = await patientsApi.getObservationsOnDate(userInfo.username, utcDate, fhirTiming.timingEvent.ALL_DAY, timezone);
         return getGlucoseLevelHandler.handle(handlerInput, bundle, timezone);
     }
 }
@@ -299,7 +299,7 @@ const GetGlucoseLevelIntentTimeHandler = {
         const dateTime = timing === fhirTiming.timingEvent.EXACT ?
             timeUtil.utcTimeFromLocalTime(time, timezone)
             : DateTime.utc().toISO();
-        const bundle = await patientsApi.getObservationsOnDate(userInfo.username, dateTime, timing);
+        const bundle = await patientsApi.getObservationsOnDate(userInfo.username, dateTime, timing, timezone);
         return getGlucoseLevelHandler.handle(handlerInput, bundle, timezone);
     }
 }
@@ -322,7 +322,7 @@ const GetGlucoseLevelIntentTimingHandler = {
         const timezone = await timeUtil.getTimezoneOrDefault(handlerInput);
         const timing = handlerInput.requestEnvelope.request.intent.slots.timing.value;
         const date = DateTime.utc().toISO();
-        const bundle = await patientsApi.getObservationsOnDate(userInfo.username, date, timing);
+        const bundle = await patientsApi.getObservationsOnDate(userInfo.username, date, timing, timezone);
         return getGlucoseLevelHandler.handle(handlerInput, bundle, timezone);
     }
 }
