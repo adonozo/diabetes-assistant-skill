@@ -835,6 +835,21 @@
           ]
         },
         {
+          "name": "GetMedicationToTakeIntent",
+          "confirmationRequired": false,
+          "slots": [
+            {
+              "name": "treatmentDate",
+              "type": "AMAZON.DATE",
+              "confirmationRequired": false,
+              "elicitationRequired": true,
+              "prompts": {
+                "elicitation": "Elicit.Slot.getMedicationToTake.treatmentDate"
+              }
+            }
+          ]
+        },
+        {
           "name": "RegisterGlucoseLevelIntent",
           "confirmationRequired": false,
           "delegationStrategy": "SKILL_RESPONSE",
@@ -930,6 +945,15 @@
           {
             "type": "PlainText",
             "value": "¿Quieres fijar la hora para el desayuno, almuerzo o cena?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.getMedicationToTake.treatmentDate",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "¿Cuál es la fecha que te interesa?"
           }
         ]
       },
