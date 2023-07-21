@@ -2,6 +2,7 @@ const fhirTiming = require("./timing");
 const fhir = require("./fhir");
 
 const DOSAGE_START_DATE = 'http://diabetes-assistant.com/fhir/StructureDefinition/DosageStartDate';
+const DOSAGE_NEEDS_START_DATE = 'http://diabetes-assistant.com/fhir/StructureDefinition/NeedsStartDateFlag';
 
 function getDosageStartDate(dosage) {
     const startDateExtension = fhir.getExtension(dosage, DOSAGE_START_DATE);
@@ -17,6 +18,11 @@ function getDosageStartDate(dosage) {
     return undefined;
 }
 
+function dosageNeedsStartDate(dosage) {
+    return fhir.getExtension(dosage, DOSAGE_NEEDS_START_DATE);
+}
+
 module.exports = {
     getDosageStartDate,
+    dosageNeedsStartDate
 }

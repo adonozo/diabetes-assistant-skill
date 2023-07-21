@@ -81,7 +81,7 @@ function getMedicationRequests(email, date, timing, timezone) {
         params.append("date", date)
         params.append("timing", timing)
         params.append("timezone", timezone)
-        const path = `/patients/${email}/alexa/medicationRequest?${params.toString()}`
+        const path = `/alexa/${email}/medicationRequests?${params.toString()}`
         const options = api.getOptionsFor(path, 'GET');
         const request = http.request(options, response => api.createJsonResponse(resolve, reject, response));
         request.end();
