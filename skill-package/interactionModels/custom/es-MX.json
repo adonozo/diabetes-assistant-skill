@@ -51,9 +51,13 @@
             "Mi medicación el {treatmentDate}",
             "Cuáles eran mis medicinas {treatmentDate}",
             "Cuáles eran mis medicamentos {treatmentDate}",
-            "Que debia tomar {treatmentDate}",
-            "Que debo tomar {treatmentDate}",
-            "Que tengo que tomar {treatmentDate}"
+            "Cuáles son mis medicamentos para {treatmentDate}",
+            "Qué debia tomar {treatmentDate}",
+            "Qué debo tomar {treatmentDate}",
+            "Qué tengo que tomar {treatmentDate}",
+            "Qué medicamentos tengo",
+            "Dime mi medicación",
+            "Dime mi medicación para {treatmentDate}"
           ]
         },
         {
