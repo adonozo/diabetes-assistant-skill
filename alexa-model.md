@@ -179,7 +179,7 @@ Queries active `medication requests` on a given date
 
 Queries active `medication requests` and creates reminders based on the frequency dates
 
-### Create reminders (TBD) (1)(2)
+### Create reminders (1)(2)
 
 Queries active `care plans` and creates reminders for `medication requests` and `service requests`
 
@@ -187,9 +187,9 @@ Queries active `care plans` and creates reminders for `medication requests` and 
 
 Queries `observations` on a given date
 
-### Register my blood glucose level
+### Register my blood glucose {level} at {timing}
 
-Saves a blood glucose level reading
+Saves a blood glucose level reading taken at some timing 
 
 ---
 
