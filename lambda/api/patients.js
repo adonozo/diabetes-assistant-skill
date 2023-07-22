@@ -34,8 +34,23 @@ function updateTiming(email, timingUpdate) {
  */
 function setDosageStartDate(email, dosageId, startDate) {
     return new Promise((resolve, reject) => {
-        const data = JSON.stringify(startDate);
+        const data = JSON.stringify({startDate: startDate});
         const path = `/patients/${email}/dosage/${dosageId}/startDate`
+        const options = api.getOptionsFor(path, 'PUT');
+        options.headers = {
+            'Content-Type': 'application/json',
+            'Content-Length': data.length
+        }
+        const request = http.request(options, response => api.createJsonResponse(resolve, reject, response));
+        request.write(data);
+        request.end();
+    });
+}
+
+function setServiceRequestStartDate(email, serviceRequestId, startDate) {
+    return new Promise((resolve, reject) => {
+        const data = JSON.stringify({startDate: startDate});
+        const path = `/patients/${email}/serviceRequest/${serviceRequestId}/startDate`
         const options = api.getOptionsFor(path, 'PUT');
         options.headers = {
             'Content-Type': 'application/json',
@@ -92,6 +107,7 @@ module.exports = {
     getSelf,
     updateTiming,
     setDosageStartDate,
+    setServiceRequestStartDate,
     saveBloodGlucoseLevel,
     getObservationsOnDate,
     getMedicationRequests,
