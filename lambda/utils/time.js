@@ -1,9 +1,6 @@
 const fhirPatient = require("../fhir/patient");
-const fhirDosage = require("../fhir/dosage");
-const fhirServiceRequest = require("../fhir/serviceRequest");
 const {Settings, DateTime} = require("luxon");
 const fhirTiming = require("../fhir/timing");
-const {dosageNeedsStartDate} = require("../fhir/dosage");
 
 /**
  * Checks if there are missing timings, i.e., breakfast, lunch, dinner in medication or service requests.
@@ -42,7 +39,7 @@ function requestsNeedStartDate(requests) {
     for (const request of requests) {
         if (request.resourceType === 'MedicationRequest') {
             for (const instruction of request.dosageInstruction) {
-                if (dosageNeedsStartDate(instruction) && !isNaN(instruction.timing?.repeat?.boundsDuration.value)) {
+                if (fhirTiming.timingNeedsStartDate(instruction.timing) && !isNaN(instruction.timing?.repeat?.boundsDuration.value)) {
                     return {
                         type: 'MedicationRequest',
                         id: instruction.id,
@@ -53,7 +50,7 @@ function requestsNeedStartDate(requests) {
                 }
             }
         } else if (request.resourceType === 'ServiceRequest') {
-            if (dosageNeedsStartDate(request.occurrenceTiming) && !isNaN(request.occurrenceTiming?.repeat?.boundsDuration.value)) {
+            if (fhirTiming.timingNeedsStartDate(request.occurrenceTiming) && !isNaN(request.occurrenceTiming?.repeat?.boundsDuration.value)) {
                 return {
                     type: 'ServiceRequest',
                     id: request.id,
@@ -78,7 +75,7 @@ function getMissingDates(patient, medicationRequests) {
     const dates = new Set();
     medicationRequests.forEach(request =>
         request.dosageInstruction.forEach(instruction => {
-            const startDate = fhirDosage.getDosageStartDate(instruction);
+            const startDate = fhirTiming.getTimingStartDate(instruction.timing);
             if (instruction.timing?.repeat?.boundsDuration
                 && !isNaN(instruction.timing?.repeat?.boundsDuration.value)
                 && !startDate

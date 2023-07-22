@@ -1,7 +1,28 @@
 const {DateTime} = require("luxon");
 const {RRule} = require("rrule")
+const fhir = require("./fhir");
 
 const DEFAULT_TIMEZONE = 'UTC'
+const TIMING_START_DATE = 'http://diabetes-assistant.com/fhir/StructureDefinition/DosageStartDate';
+const TIMING_NEEDS_START_DATE = 'http://diabetes-assistant.com/fhir/StructureDefinition/NeedsStartDateFlag';
+
+function getTimingStartDate(timing) {
+    const startDateExtension = fhir.getExtension(timing, TIMING_START_DATE);
+    if (!startDateExtension) {
+        return undefined;
+    }
+
+    const date = fhirTiming.tryParseDate(startDateExtension.valueDateTime);
+    if (date) {
+        return date;
+    }
+
+    return undefined;
+}
+
+function timingNeedsStartDate(timing) {
+    return fhir.getExtension(timing, TIMING_NEEDS_START_DATE);
+}
 
 const timingEvent = {
     C: 'C',
@@ -172,4 +193,6 @@ module.exports = {
     getTimesFromTimingWithFrequency,
     dayToRruleDay,
     tryParseDate,
+    getTimingStartDate,
+    timingNeedsStartDate
 }

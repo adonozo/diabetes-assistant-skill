@@ -1,6 +1,5 @@
 const fhirTiming = require("./timing");
 const {DateTime} = require("luxon");
-const fhirDosage = require("./dosage");
 const fhirPatient = require("./patient");
 
 /**
@@ -58,7 +57,7 @@ function getMedicationText(request, patient, timezone) {
         } else if (dosage.timing.repeat.timeOfDay && Array.isArray(dosage.timing.repeat.timeOfDay)) {
             time = dosage.timing.repeat.timeOfDay.sort();
         } else if (dosage.timing.repeat.frequency > 1) {
-            const startDate = fhirDosage.getDosageStartDate(dosage.id);
+            const startDate = fhirTiming.getTimingStartDate(dosage.timing);
             time = fhirTiming.getTimesFromTimingWithFrequency(dosage.timing.repeat.frequency, startDate, timezone)
                 .sort();
         }
@@ -79,7 +78,7 @@ function getMedicationTextData({
     const medicationData = [];
     const medication = request.medicationReference.display;
     request.dosageInstruction.forEach(dosage => {
-        const {start, end} = fhirTiming.getDatesFromTiming(dosage.timing, fhirDosage.getDosageStartDate, dosage);
+        const {start, end} = fhirTiming.getDatesFromTiming(dosage.timing, fhirTiming.getTimingStartDate, dosage);
         const {value, unit} = getMedicationValues(dosage);
         if (dosage.timing.repeat.when && Array.isArray(dosage.timing.repeat.when) && dosage.timing.repeat.when.length > 0) {
             dosage.timing.repeat.when.forEach(timing => {
@@ -119,7 +118,7 @@ function getMedicationTextData({
                 medicationData.push(processedText)
             });
         } else if (dosage.timing.repeat.frequency && dosage.timing.repeat.frequency > 1) {
-            const startDate = fhirDosage.getDosageStartDate(dosage); // This is in UTC
+            const startDate = fhirTiming.getTimingStartDate(dosage.timing); // This is in UTC
             const dateTime = DateTime.fromISO(startDate).setZone(timezone);
             const processedText = textProcessor({
                 value: value,
