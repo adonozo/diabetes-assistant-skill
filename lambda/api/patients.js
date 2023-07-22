@@ -32,7 +32,7 @@ function updateTiming(email, timingUpdate) {
  * @param startDate {{startDate: string}} The medication start date
  * @return {Promise<any>} An empty response if successful
  */
-function setStartDate(email, dosageId, startDate) {
+function setDosageStartDate(email, dosageId, startDate) {
     return new Promise((resolve, reject) => {
         const data = JSON.stringify(startDate);
         const path = `/patients/${email}/dosage/${dosageId}/startDate`
@@ -91,7 +91,7 @@ function getMedicationRequests(email, date, timing, timezone) {
 module.exports = {
     getSelf,
     updateTiming,
-    setStartDate,
+    setDosageStartDate,
     saveBloodGlucoseLevel,
     getObservationsOnDate,
     getMedicationRequests,

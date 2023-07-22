@@ -19,7 +19,7 @@ async function handle(handlerInput, patientEmail) {
     const userTimeZone = await timeUtil.getTimezoneOrDefault(handlerInput);
     const dateTime = DateTime.fromISO(`${date}T${time}`, {zone: userTimeZone});
 
-    await patientsApi.setStartDate(patientEmail, missingDate.id, {startDate: dateTime.toUTC().toISO()});
+    await patientsApi.setDosageStartDate(patientEmail, missingDate.id, {startDate: dateTime.toUTC().toISO()});
     const {speakOutput, reprompt} = getStartDateConfirmedResponse(handlerInput, session, healthRequest);
     delete session[helper.sessionValues.requestMissingDate];
     handlerInput.attributesManager.setSessionAttributes(session);
