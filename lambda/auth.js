@@ -6,7 +6,7 @@ const clientSecret = '__ENV_CLIENT_SECRET';
 const authHost = '__ENV_AUTH_HOST';
 const authServerId = '__ENV_AUTH_SERVER_ID';
 
-async function getValidatedUser (handlerInput) {
+async function getAuthorizedUser (handlerInput) {
     let token = handlerInput.requestEnvelope.context.System.user.accessToken;
     if (!token) {
         return false;
@@ -59,5 +59,5 @@ function getOptions(token) {
 }
 
 module.exports = {
-    getValidatedUser,
+    getAuthorizedUser,
 }

@@ -4,6 +4,7 @@ const fhirTiming = require("../fhir/timing");
 const fhirCarePlan = require("../fhir/carePlan");
 const fhirMedicationRequest = require("../fhir/medicationRequest");
 const intentUtil = require("../utils/intent");
+const {logMessage} = require("../utils/helper");
 
 async function handle(handlerInput, patient) {
     const localizedMessages = intentUtil.getLocalizedStrings(handlerInput);
@@ -11,19 +12,19 @@ async function handle(handlerInput, patient) {
     const userTimezone = await timeUtil.getTimezoneOrDefault(handlerInput);
     const medicationRequest = await patientsApi.getMedicationRequests(patient.id, date,
         fhirTiming.timingEvent.ALL_DAY, userTimezone);
-    const medications = fhirCarePlan.medicationsFromBundle(medicationRequest);
+    const medicationRequests = fhirCarePlan.medicationsFromBundle(medicationRequest);
 
-    // Check missing dates in requests
-    const missingDate = timeUtil.getActiveMissingStartDate(patient, medications);
-    if (missingDate) {
-        return intentUtil.switchContextToStartDate(handlerInput, missingDate, userTimezone, localizedMessages);
+    const requestsWithMissingStartDate = timeUtil.requestsNeedStartDate(medicationRequests);
+    if (requestsWithMissingStartDate) {
+        logMessage("Medication request needs start date", requestsWithMissingStartDate)
+        return intentUtil.switchContextToStartDate(handlerInput, requestsWithMissingStartDate, userTimezone, localizedMessages);
     }
 
     let speakOutput
-    if (medications.length === 0) {
+    if (medicationRequests.length === 0) {
         speakOutput = localizedMessages.getNoRecordsTextForDay(date, userTimezone);
     } else {
-        const medicationText = fhirMedicationRequest.getTextForMedicationRequests(medications, patient, userTimezone, localizedMessages);
+        const medicationText = fhirMedicationRequest.getTextForMedicationRequests(medicationRequests, patient, userTimezone, localizedMessages);
         const datePreposition = localizedMessages.responses.DATE_PREPOSITION;
         speakOutput = `${localizedMessages.getTextForDay(date, userTimezone, datePreposition)}, ${medicationText}`;
     }

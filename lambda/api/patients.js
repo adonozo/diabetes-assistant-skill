@@ -32,10 +32,19 @@ function updateTiming(email, timingUpdate) {
  * @param startDate {{startDate: string}} The medication start date
  * @return {Promise<any>} An empty response if successful
  */
-function setStartDate(email, dosageId, startDate) {
+function setDosageStartDate(email, dosageId, startDate) {
+    const path = `/patients/${email}/dosage/${dosageId}/startDate`;
+    return setResourceStartDate(email, serviceRequestId, startDate, path);
+}
+
+function setServiceRequestStartDate(email, serviceRequestId, startDate) {
+    const path = `/patients/${email}/serviceRequest/${serviceRequestId}/startDate`;
+    return setResourceStartDate(email, serviceRequestId, startDate, path);
+}
+
+function setResourceStartDate(email, serviceRequestId, startDate, path) {
     return new Promise((resolve, reject) => {
-        const data = JSON.stringify(startDate);
-        const path = `/patients/${email}/dosage/${dosageId}/startDate`
+        const data = JSON.stringify({startDate: startDate});
         const options = api.getOptionsFor(path, 'PUT');
         options.headers = {
             'Content-Type': 'application/json',
@@ -62,12 +71,13 @@ function saveBloodGlucoseLevel(email, observation) {
     })
 }
 
-function getObservationsOnDate(email, date, timing) {
+function getObservationsOnDate(email, date, timing, timezone) {
     return new Promise((resolve, reject) => {
         const params = new URLSearchParams();
         params.append("date", date);
         params.append("timing", timing);
-        const path = `/patients/${email}/observations/?${params.toString()}`
+        params.append("timezone", timezone);
+        const path = `/alexa/${email}/observations/?${params.toString()}`
         const options = api.getOptionsFor(path, 'GET');
         const request = http.request(options, response => api.createJsonResponse(resolve, reject, response));
         request.end();
@@ -80,7 +90,7 @@ function getMedicationRequests(email, date, timing, timezone) {
         params.append("date", date)
         params.append("timing", timing)
         params.append("timezone", timezone)
-        const path = `/patients/${email}/alexa/medicationRequest?${params.toString()}`
+        const path = `/alexa/${email}/medicationRequests?${params.toString()}`
         const options = api.getOptionsFor(path, 'GET');
         const request = http.request(options, response => api.createJsonResponse(resolve, reject, response));
         request.end();
@@ -90,7 +100,8 @@ function getMedicationRequests(email, date, timing, timezone) {
 module.exports = {
     getSelf,
     updateTiming,
-    setStartDate,
+    setDosageStartDate,
+    setServiceRequestStartDate,
     saveBloodGlucoseLevel,
     getObservationsOnDate,
     getMedicationRequests,
