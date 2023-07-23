@@ -53,23 +53,23 @@ function getLocalizedStrings (handlerInput) {
     return strings.getLocalizedStrings(handlerInput.requestEnvelope.request.locale);
 }
 
-function switchContextToStartDate(handlerInput, missingDate, userTimeZone, localizedMessages) {
+function switchContextToStartDate(handlerInput, requestWithMissingDate, userTimeZone, localizedMessages) {
     const attributesManager = handlerInput.attributesManager;
     const session = attributesManager.getSessionAttributes();
     const intent = handlerInput.requestEnvelope.request.intent;
     session[intent.name] = intent;
-    session[helper.sessionValues.requestMissingDate] = missingDate;
+    session[helper.sessionValues.requestMissingDate] = requestWithMissingDate;
     attributesManager.setSessionAttributes(session);
     let delegatedIntent;
-    if (missingDate.frequency > 1) {
-        delegatedIntent = getDelegatedSetStartDateIntent(missingDate.name);
+    if (requestWithMissingDate.frequency > 1) {
+        delegatedIntent = getDelegatedSetStartDateIntent(requestWithMissingDate.name);
     } else {
         const userTime = DateTime.utc().setZone(userTimeZone);
         const time = userTime.toISOTime({ suppressSeconds: true, includeOffset: false });
-        delegatedIntent= getDelegatedSetStartDateWithTimeIntent(missingDate.name, time);
+        delegatedIntent= getDelegatedSetStartDateWithTimeIntent(requestWithMissingDate.name, time);
     }
 
-    const requiredSetup = localizedMessages.getStartDatePrompt(missingDate);
+    const requiredSetup = localizedMessages.getStartDatePrompt(requestWithMissingDate);
     return handlerInput.responseBuilder
         .addDelegateDirective(delegatedIntent)
         .speak(requiredSetup)

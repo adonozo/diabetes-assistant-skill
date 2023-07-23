@@ -251,8 +251,17 @@ function stringToTimingCode(value) {
         case 'antes de comer':
             return 'AC'
         case 'después de comer':
-        case 'despues de comer':
             return 'PC'
+        case 'madrugada':
+            return 'MORN_early'
+        case 'mañana':
+            return 'MORN'
+        case 'tarde':
+            return 'AFT'
+        case 'noche':
+            return 'NIGHT'
+        case 'mediodía':
+            return 'NOON'
         default:
             return 'EXACT'
     }

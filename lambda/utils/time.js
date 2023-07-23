@@ -1,6 +1,4 @@
 const fhirPatient = require("../fhir/patient");
-const fhirDosage = require("../fhir/dosage");
-const fhirServiceRequest = require("../fhir/serviceRequest");
 const {Settings, DateTime} = require("luxon");
 const fhirTiming = require("../fhir/timing");
 
@@ -34,65 +32,32 @@ function getActiveMissingTimings(patient, requests) {
 
 /**
  * Checks if there are medications without a specific start date, i.e., bound is duration rather than period.
- * @param patient The patient
- * @param requests {[]} The active medication request
- * @returns {{type: string, id: string, name: string, duration: string, frequency: number} | undefined}
+ * @param requests {[]} The active medication requests
+ * @returns {{type: string, id: string, name: string, duration: number, frequency: number} | undefined}
  */
-function getActiveMissingStartDate(patient, requests) {
+function requestsNeedStartDate(requests) {
     for (const request of requests) {
         if (request.resourceType === 'MedicationRequest') {
             for (const instruction of request.dosageInstruction) {
-                const startDate = fhirDosage.getDosageStartDate(instruction);
-                if (instruction.timing?.repeat?.boundsDuration
-                    && !isNaN(instruction.timing?.repeat?.boundsDuration.value)
-                    && !startDate
-                ) {
+                if (fhirTiming.timingNeedsStartDate(instruction.timing) && !isNaN(instruction.timing?.repeat?.boundsDuration.value)) {
                     return {
                         type: 'MedicationRequest',
                         id: instruction.id,
                         name: request.medicationReference.display,
                         duration: instruction.timing?.repeat?.boundsDuration.value,
                         frequency: instruction.timing?.repeat?.frequency
-                    }
-                } else if (instruction.timing?.repeat?.boundsPeriod
-                    && instruction.timing?.repeat?.frequency > 1
-                    && !startDate
-                ) {
-                    const duration = getDaysDifference(instruction.timing.repeat.boundsPeriod.start, instruction.timing.repeat.boundsPeriod.end);
-                    return {
-                        type: 'MedicationRequest',
-                        id: instruction.id,
-                        name: request.medicationReference.display,
-                        duration: duration,
-                        frequency: instruction.timing?.repeat?.frequency
-                    }
+                    };
                 }
             }
         } else if (request.resourceType === 'ServiceRequest') {
-            const startDate = fhirServiceRequest.getServiceRequestStartDate(request);
-            if (request.occurrenceTiming?.repeat?.boundsDuration
-                && !isNaN(request.occurrenceTiming?.repeat?.boundsDuration.value)
-                && !startDate
-            ) {
+            if (fhirTiming.timingNeedsStartDate(request.occurrenceTiming) && !isNaN(request.occurrenceTiming?.repeat?.boundsDuration.value)) {
                 return {
                     type: 'ServiceRequest',
                     id: request.id,
                     name: request.code.coding[0].display,
                     duration: request.occurrenceTiming?.repeat?.boundsDuration.value,
                     frequency: request.occurrenceTiming.repeat.frequency
-                };
-            } else if (request.occurrenceTiming?.repeat?.boundsPeriod
-                && request.occurrenceTiming?.repeat?.frequency > 1
-                && !startDate
-            ) {
-                const duration = getDaysDifference(request.occurrenceTiming.repeat.boundsPeriod.start, request.occurrenceTiming.repeat.boundsPeriod.end);
-                return {
-                    type: 'ServiceRequest',
-                    id: request.id,
-                    name: request.code.coding[0].display,
-                    duration: duration,
-                    frequency: request.occurrenceTiming.repeat.frequency
-                };
+                }
             }
         }
     }
@@ -110,7 +75,7 @@ function getMissingDates(patient, medicationRequests) {
     const dates = new Set();
     medicationRequests.forEach(request =>
         request.dosageInstruction.forEach(instruction => {
-            const startDate = fhirDosage.getDosageStartDate(instruction);
+            const startDate = fhirTiming.getTimingStartDate(instruction.timing);
             if (instruction.timing?.repeat?.boundsDuration
                 && !isNaN(instruction.timing?.repeat?.boundsDuration.value)
                 && !startDate
@@ -186,9 +151,9 @@ module.exports = {
     getMissingDates,
     getTimezoneOrDefault,
     getActiveMissingTimings,
-    getActiveMissingStartDate,
     utcDateFromLocalDate,
     utcTimeFromLocalTime,
     utcDateTimeFromLocalDateAndTime,
     getSuggestedTiming,
+    requestsNeedStartDate
 }

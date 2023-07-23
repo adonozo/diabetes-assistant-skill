@@ -12,11 +12,12 @@ async function handle(handlerInput, patient, requests) {
         return switchContextToTiming(handlerInput, timingValidations.values().next().value);
     }
 
-    // Check if start date setup is needed.
     const userTimeZone = await timeUtil.getTimezoneOrDefault(handlerInput);
-    const missingDate = timeUtil.getActiveMissingStartDate(patient, requests);
-    if (missingDate) {
-        return intentUtil.switchContextToStartDate(handlerInput, missingDate, userTimezone, localizedMessages);
+
+    // Check if start date setup is needed.
+    const requestsNeedStartDate = timeUtil.requestsNeedStartDate(requests);
+    if (requestsNeedStartDate) {
+        return intentUtil.switchContextToStartDate(handlerInput, requestsNeedStartDate, userTimeZone, localizedMessages);
     }
 
     // Create reminders
@@ -32,6 +33,7 @@ async function handle(handlerInput, patient, requests) {
         try {
             await remindersApiClient.createReminder(reminder);
         } catch (e) {
+            console.log("Couldn't create reminder", e);
             speakOutput = localizedMessages.responses.REMINDER_NOT_CREATED;
         }
     }
