@@ -3,7 +3,7 @@ const {RRule} = require("rrule")
 const fhir = require("./fhir");
 
 const DEFAULT_TIMEZONE = 'UTC'
-const TIMING_START_DATE = 'http://diabetes-assistant.com/fhir/StructureDefinition/DosageStartDate';
+const TIMING_START_DATE = 'http://diabetes-assistant.com/fhir/StructureDefinition/TimingStartDate';
 const TIMING_NEEDS_START_DATE = 'http://diabetes-assistant.com/fhir/StructureDefinition/NeedsStartDateFlag';
 
 function getTimingStartDate(timing) {
