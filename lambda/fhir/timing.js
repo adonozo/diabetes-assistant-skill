@@ -12,7 +12,7 @@ function getTimingStartDate(timing) {
         return undefined;
     }
 
-    const date = fhirTiming.tryParseDate(startDateExtension.valueDateTime);
+    const date = tryParseDate(startDateExtension.valueDateTime);
     if (date) {
         return date;
     }
@@ -105,7 +105,7 @@ function alexaTimingToFhirTiming(alexaTiming) {
     }
 }
 
-function getDatesFromTiming(timing, getStartDate, resource) {
+function getDatesFromTiming(timing) {
     if (timing.repeat.boundsPeriod) {
         const startDate = DateTime.fromISO(timing.repeat.boundsPeriod.start);
         const endDate = DateTime.fromISO(timing.repeat.boundsPeriod.end)
@@ -115,9 +115,9 @@ function getDatesFromTiming(timing, getStartDate, resource) {
             end: endDate.toUTC()
         }
     } else if (timing.repeat.boundsDuration) {
-        const start = getStartDate(resource);
+        const start = getTimingStartDate(timing);
         const startDate = DateTime.fromISO(start, {zone: 'utc'});
-        const endDate = startDate.plus({days: timing.repeat.boundsDuration.value + 1})
+        const endDate = addDurationToDate(startDate, timing.repeat.boundsDuration)
         return {
             start: startDate.toUTC(),
             end: endDate.toUTC()
@@ -181,6 +181,19 @@ const tryParseDate = (datetime) => {
         return DateTime.fromISO(datetime, {zone: DEFAULT_TIMEZONE});
     } catch (e) {
         return undefined;
+    }
+}
+
+const addDurationToDate = (date, boundsDuration) => {
+    switch (boundsDuration.unit) {
+        case 'd':
+            return date.plus({days: boundsDuration.value}).endOf('day');
+        case 'wk':
+            return date.plus({weeks: boundsDuration.value}).endOf('day');
+        case 'mo':
+            return date.plus({months: boundsDuration.value}).endOf('day');
+        default:
+            return date;
     }
 }
 

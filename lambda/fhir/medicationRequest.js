@@ -78,7 +78,7 @@ function getMedicationTextData({
     const medicationData = [];
     const medication = request.medicationReference.display;
     request.dosageInstruction.forEach(dosage => {
-        const {start, end} = fhirTiming.getDatesFromTiming(dosage.timing, fhirTiming.getTimingStartDate, dosage);
+        const {start, end} = fhirTiming.getDatesFromTiming(dosage.timing);
         const {value, unit} = getMedicationValues(dosage);
         if (dosage.timing.repeat.when && Array.isArray(dosage.timing.repeat.when) && dosage.timing.repeat.when.length > 0) {
             dosage.timing.repeat.when.forEach(timing => {

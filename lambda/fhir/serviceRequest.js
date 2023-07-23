@@ -49,56 +49,45 @@ function getServiceTextData({
         return serviceData;
     }
 
-    const {start, end} = fhirTiming.getDatesFromTiming(request.occurrenceTiming, getServiceRequestStartDate, request);
-    const repeat = request.occurrenceTiming.repeat;
-    if (repeat.when && Array.isArray(repeat.when) && repeat.when.length > 0) {
-        repeat.when.forEach(timing => {
-            const timingPreferences = fhirPatient.getTimingPreferences(patient);
-            const patientDate = timingPreferences.get(timing);
-            const dateTime = DateTime.fromISO(patientDate).setZone(timezone);
-            const processedText = textProcessor({
-                action: action,
-                timing: timing,
-                dateTime: dateTime,
-                start: start,
-                end: end,
-                frequency: repeat.frequency,
-                dayOfWeek: repeat.dayOfWeek,
-                localizedMessages: localizedMessages
-            })
-            serviceData.push(processedText)
-        });
-    } else if (repeat.timeOfDay && Array.isArray(repeat.timeOfDay) && repeat.timeOfDay.length > 0) {
-        repeat.timeOfDay.forEach(timing => {  // Timing is in local time (hh:mm)
-            const date = DateTime.utc();
-            const dateTime = DateTime.fromISO(`${date.toISODate()}T${timing}Z`);
-            const processedText = textProcessor({
-                action: action,
-                timing: timing,
-                dateTime: dateTime, // RRULE uses local time, should not convert to UTC
-                start: start,
-                end: end,
-                frequency: repeat.frequency,
-                dayOfWeek: repeat.dayOfWeek,
-                localizedMessages: localizedMessages
-            })
-            serviceData.push(processedText)
-        });
-    } else if (repeat.frequency && repeat.frequency > 1) {
-        const startDate = getServiceRequestStartDate(request); // This is in UTC
-        const dateTime = DateTime.fromISO(startDate).setZone(timezone);
-        const processedText = textProcessor({
-            action: action,
-            timing: dateTime.toISOTime({ suppressSeconds: true, includeOffset: false }),
-            dateTime: dateTime,
-            start: start,
-            end: end,
-            frequency: repeat.frequency,
-            dayOfWeek: repeat.dayOfWeek,
-            localizedMessages: localizedMessages
-        })
-        serviceData.push(processedText)
-    }
+    const {start, end} = fhirTiming.getDatesFromTiming(request.occurrenceTiming);
+
+    request.contained.forEach(req => {
+        const repeat = req.occurrenceTiming.repeat;
+        if (repeat.when && Array.isArray(repeat.when) && repeat.when.length > 0) {
+            repeat.when.forEach(timing => {
+                const timingPreferences = fhirPatient.getTimingPreferences(patient);
+                const patientDate = timingPreferences.get(timing);
+                const dateTime = DateTime.fromISO(patientDate).setZone(timezone);
+                const processedText = textProcessor({
+                    action: action,
+                    timing: timing,
+                    dateTime: dateTime,
+                    start: start,
+                    end: end,
+                    frequency: repeat.frequency,
+                    dayOfWeek: repeat.dayOfWeek,
+                    localizedMessages: localizedMessages
+                })
+                serviceData.push(processedText)
+            });
+        } else if (repeat.timeOfDay && Array.isArray(repeat.timeOfDay) && repeat.timeOfDay.length > 0) {
+            repeat.timeOfDay.forEach(timing => {  // Timing is in local time (hh:mm)
+                const date = DateTime.utc();
+                const dateTime = DateTime.fromISO(`${date.toISODate()}T${timing}Z`);
+                const processedText = textProcessor({
+                    action: action,
+                    timing: timing,
+                    dateTime: dateTime, // RRULE uses local time, should not convert to UTC
+                    start: start,
+                    end: end,
+                    frequency: repeat.frequency,
+                    dayOfWeek: repeat.dayOfWeek,
+                    localizedMessages: localizedMessages
+                })
+                serviceData.push(processedText)
+            });
+        }
+    })
 
     return serviceData;
 }

@@ -33,24 +33,18 @@ function updateTiming(email, timingUpdate) {
  * @return {Promise<any>} An empty response if successful
  */
 function setDosageStartDate(email, dosageId, startDate) {
-    return new Promise((resolve, reject) => {
-        const data = JSON.stringify({startDate: startDate});
-        const path = `/patients/${email}/dosage/${dosageId}/startDate`
-        const options = api.getOptionsFor(path, 'PUT');
-        options.headers = {
-            'Content-Type': 'application/json',
-            'Content-Length': data.length
-        }
-        const request = http.request(options, response => api.createJsonResponse(resolve, reject, response));
-        request.write(data);
-        request.end();
-    });
+    const path = `/patients/${email}/dosage/${dosageId}/startDate`;
+    return setResourceStartDate(email, serviceRequestId, startDate, path);
 }
 
 function setServiceRequestStartDate(email, serviceRequestId, startDate) {
+    const path = `/patients/${email}/serviceRequest/${serviceRequestId}/startDate`;
+    return setResourceStartDate(email, serviceRequestId, startDate, path);
+}
+
+function setResourceStartDate(email, serviceRequestId, startDate, path) {
     return new Promise((resolve, reject) => {
         const data = JSON.stringify({startDate: startDate});
-        const path = `/patients/${email}/serviceRequest/${serviceRequestId}/startDate`
         const options = api.getOptionsFor(path, 'PUT');
         options.headers = {
             'Content-Type': 'application/json',
