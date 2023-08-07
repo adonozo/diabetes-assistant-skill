@@ -4,21 +4,28 @@ const fhirTiming = require("../fhir/timing");
 const fhirCarePlan = require("../fhir/carePlan");
 const fhirMedicationRequest = require("../fhir/medicationRequest");
 const intentUtil = require("../utils/intent");
-const {logMessage} = require("../utils/helper");
 
 async function handle(handlerInput, patient) {
     const localizedMessages = intentUtil.getLocalizedStrings(handlerInput);
     const date = handlerInput.requestEnvelope.request.intent.slots.treatmentDate.value;
     const userTimezone = await timeUtil.getTimezoneOrDefault(handlerInput);
-    const medicationRequest = await patientsApi.getMedicationRequests(patient.id, date,
-        fhirTiming.timingEvent.ALL_DAY, userTimezone);
-    const medicationRequests = fhirCarePlan.medicationsFromBundle(medicationRequest);
 
-    const requestsWithMissingStartDate = timeUtil.requestsNeedStartDate(medicationRequests);
-    if (requestsWithMissingStartDate) {
-        logMessage("Medication request needs start date", requestsWithMissingStartDate)
-        return intentUtil.switchContextToStartDate(handlerInput, requestsWithMissingStartDate, userTimezone, localizedMessages);
+    let medicationRequest;
+    try {
+        medicationRequest = await patientsApi.getMedicationRequests(patient.id, date,
+            fhirTiming.timingEvent.ALL_DAY, userTimezone);
+    } catch (errorResponse) {
+        if (errorResponse.status !== 422) {
+            console.log("Unexpected error", errorResponse)
+            throw "Unexpected error";
+        }
+
+        const requestsWithMissingStartDate = [errorResponse.resource];
+        const customNeedsStartDate = timeUtil.requestsNeedStartDate(requestsWithMissingStartDate);
+        return intentUtil.switchContextToStartDate(handlerInput, customNeedsStartDate, userTimezone, localizedMessages);
     }
+
+    const medicationRequests = fhirCarePlan.medicationsFromBundle(medicationRequest);
 
     let speakOutput
     if (medicationRequests.length === 0) {
