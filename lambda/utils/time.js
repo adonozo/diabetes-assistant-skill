@@ -65,27 +65,6 @@ function requestsNeedStartDate(requests) {
     return undefined;
 }
 
-/**
- * Checks if there are medications without a specific start date, i.e., bound is duration rather than period.
- * @param patient The patient
- * @param medicationRequests {[]} The active medication request
- * @returns {Set<string>}
- */
-function getMissingDates(patient, medicationRequests) {
-    const dates = new Set();
-    medicationRequests.forEach(request =>
-        request.dosageInstruction.forEach(instruction => {
-            const startDate = fhirTiming.getTimingStartDate(instruction.timing);
-            if (instruction.timing?.repeat?.boundsDuration
-                && !isNaN(instruction.timing?.repeat?.boundsDuration.value)
-                && !startDate
-            ) {
-                dates.add(instruction.id)
-            }
-        }));
-    return dates;
-}
-
 async function getTimezoneOrDefault(handlerInput) {
     const serviceClientFactory = handlerInput.serviceClientFactory;
     const deviceId = handlerInput.requestEnvelope.context.System.device.deviceId;
@@ -136,19 +115,7 @@ function getSuggestedTiming(patient) {
     return fhirTiming.relatedTimingCodeToString(suggestion);
 }
 
-/**
- * @param start {string} In ISO format
- * @param end {string} In ISO format
- */
-function getDaysDifference(start, end) {
-    const startDate = DateTime.fromISO(start);
-    const endDate = DateTime.fromISO(end);
-    const days = endDate.diff(startDate, ["hours"]).toObject().days;
-    return Math.abs(days);
-}
-
 module.exports = {
-    getMissingDates,
     getTimezoneOrDefault,
     getActiveMissingTimings,
     utcDateFromLocalDate,
