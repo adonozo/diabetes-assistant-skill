@@ -1,6 +1,7 @@
 const strings = require("../strings/strings");
 const helper = require("./helper");
 const {DateTime} = require("luxon");
+const fhirTiming = require("../fhir/timing");
 
 function getDelegatedSetTimingIntent(timing) {
     return {
@@ -76,8 +77,26 @@ function switchContextToStartDate(handlerInput, requestWithMissingDate, userTime
         .getResponse();
 }
 
+function switchContextToTiming (handlerInput, timing) {
+    const localizedMessages = intentUtil.getLocalizedStrings(handlerInput);
+    const attributesManager = handlerInput.attributesManager;
+    const session = attributesManager.getSessionAttributes();
+    const nextTimingCode = fhirTiming.relatedTimingCodeToString(timing);
+    const nextTiming = localizedMessages.codeToString(nextTimingCode)
+
+    const intent = handlerInput.requestEnvelope.request.intent;
+    session[intent.name] = intent;
+    attributesManager.setSessionAttributes(session);
+
+    return handlerInput.responseBuilder
+        .addDelegateDirective(intentUtil.getDelegatedSetTimingIntent(nextTiming))
+        .speak(localizedMessages.responses.SETUP_TIMINGS)
+        .getResponse()
+}
+
 module.exports = {
     getDelegatedSetTimingIntent,
     getLocalizedStrings,
     switchContextToStartDate,
+    switchContextToTiming
 }

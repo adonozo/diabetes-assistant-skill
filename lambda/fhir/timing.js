@@ -5,6 +5,8 @@ const fhir = require("./fhir");
 const DEFAULT_TIMEZONE = 'UTC'
 const TIMING_START_DATE = 'http://diabetes-assistant.com/fhir/StructureDefinition/TimingStartDate';
 const TIMING_NEEDS_START_DATE = 'http://diabetes-assistant.com/fhir/StructureDefinition/NeedsStartDateFlag';
+const TIMING_START_TIME = 'http://diabetes-assistant.com/fhir/StructureDefinition/TimingStartTime';
+const TIMING_NEEDS_START_TIME = 'http://diabetes-assistant.com/fhir/StructureDefinition/NeedsStartTimeFlag';
 
 function getTimingStartDate(timing) {
     const startDateExtension = fhir.getExtension(timing, TIMING_START_DATE);
@@ -22,6 +24,14 @@ function getTimingStartDate(timing) {
 
 function timingNeedsStartDate(timing) {
     return fhir.getExtension(timing, TIMING_NEEDS_START_DATE);
+}
+
+function timingNeedsStartTime(timing) {
+    return fhir.getExtension(timing, TIMING_NEEDS_START_TIME);
+}
+
+function getTimingStartTime(timing) {
+    return fhir.getExtension(timing, TIMING_START_TIME);
 }
 
 const timingEvent = {
@@ -207,5 +217,6 @@ module.exports = {
     dayToRruleDay,
     tryParseDate,
     getTimingStartDate,
-    timingNeedsStartDate
+    timingNeedsStartDate,
+    timingNeedsStartTime
 }

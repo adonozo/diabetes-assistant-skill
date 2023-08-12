@@ -1,6 +1,5 @@
 const timeUtil = require("../utils/time");
 const reminders = require("../utils/reminder");
-const fhirTiming = require("../fhir/timing");
 const intentUtil = require("../utils/intent");
 
 async function handle(handlerInput, patient, requests) {
@@ -9,7 +8,7 @@ async function handle(handlerInput, patient, requests) {
     // Check if timing setup is needed.
     const timingValidations = timeUtil.getActiveMissingTimings(patient, requests);
     if (timingValidations.size > 0) {
-        return switchContextToTiming(handlerInput, timingValidations.values().next().value);
+        return intentUtil.switchContextToTiming(handlerInput, timingValidations.values().next().value);
     }
 
     const userTimeZone = await timeUtil.getTimezoneOrDefault(handlerInput);
@@ -42,23 +41,6 @@ async function handle(handlerInput, patient, requests) {
         .speak(speakOutput)
         .getResponse();
 }
-
-const switchContextToTiming = (handlerInput, timing) => {
-    const localizedMessages = intentUtil.getLocalizedStrings(handlerInput);
-    const attributesManager = handlerInput.attributesManager;
-    const session = attributesManager.getSessionAttributes();
-    const nextTimingCode = fhirTiming.relatedTimingCodeToString(timing);
-    const nextTiming = localizedMessages.codeToString(nextTimingCode)
-
-    const intent = handlerInput.requestEnvelope.request.intent;
-    session[intent.name] = intent;
-    attributesManager.setSessionAttributes(session);
-
-    return handlerInput.responseBuilder
-        .addDelegateDirective(intentUtil.getDelegatedSetTimingIntent(nextTiming))
-        .speak(localizedMessages.responses.SETUP_TIMINGS)
-        .getResponse()
-};
 
 module.exports = {
     handle
