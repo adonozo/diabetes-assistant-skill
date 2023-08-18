@@ -34,10 +34,10 @@ function updateTiming(email, timingUpdate) {
  */
 function setDosageStartDate(email, dosageId, startDateTime) {
     const path = `/patients/${email}/dosage/${dosageId}/startDate`;
-    return setResourceStartDate(email, serviceRequestId, startDateTime, path);
+    return setResourceStartDate(email, dosageId, startDateTime, path);
 }
 
-function setServiceRequestStartDate(email, serviceRequestId, startDate) { // TODO update this startDate to an object (as above)
+function setServiceRequestStartDate(email, serviceRequestId, startDate) {
     const path = `/patients/${email}/serviceRequest/${serviceRequestId}/startDate`;
     return setResourceStartDate(email, serviceRequestId, startDate, path);
 }

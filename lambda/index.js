@@ -93,6 +93,44 @@ const GetMedicationToTakeIntentHandler = {
     }
 };
 
+const SetStartDateInProgressIntentInitialHandler = {
+    canHandle(handlerInput) {
+        return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
+            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'SetStartDateIntent'
+            && Alexa.getDialogState(handlerInput.requestEnvelope) !== 'COMPLETED';
+    },
+    async handle(handlerInput) {
+        const userInfo = await auth.getAuthorizedUser(handlerInput);
+        if (!userInfo) {
+            return requestAccountLink(handlerInput);
+        }
+
+        return handlerInput.responseBuilder
+            .addDelegateDirective()
+            .getResponse();
+    }
+}
+
+const SetStartDateInProgressIntentHandler = {
+    canHandle(handlerInput) {
+        return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
+            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'SetStartDateIntent'
+            && handlerInput.requestEnvelope.request.intent.slots.date.value
+            && !handlerInput.requestEnvelope.request.intent.slots.healthRequestTime.value
+            && Alexa.getDialogState(handlerInput.requestEnvelope) !== 'COMPLETED';
+    },
+    async handle(handlerInput) {
+        // TODO this handler is not called
+        console.log("Reached: SetStartDateInProgressIntentHandler")
+        const userInfo = await auth.getAuthorizedUser(handlerInput);
+        if (!userInfo) {
+            return requestAccountLink(handlerInput);
+        }
+
+        return setStartDateHandler.handleInProgress(handlerInput, userInfo.username);
+    }
+}
+
 const SetStartDateCompletedIntentHandler = {
     canHandle(handlerInput) {
         return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
@@ -415,6 +453,8 @@ exports.handler = Alexa.SkillBuilders.custom()
         HelpIntentHandler,
         CancelAndStopIntentHandler,
         SessionEndedRequestHandler,
+        SetStartDateInProgressIntentInitialHandler,
+        SetStartDateInProgressIntentHandler,
         SetStartDateCompletedIntentHandler,
         RegisterGlucoseLevelIntentInProgressWithValueHandler,
         RegisterGlucoseLevelIntentInProgressHandler,
@@ -425,7 +465,7 @@ exports.handler = Alexa.SkillBuilders.custom()
         GetGlucoseLevelIntentTimeHandler,
         GetGlucoseLevelIntentTimingHandler,
         IntentReflectorHandler, // make sure IntentReflectorHandler is last, so it doesn't override your custom intent handlers
-        ) 
+        )
     .addErrorHandlers(
         ErrorHandler,
         )

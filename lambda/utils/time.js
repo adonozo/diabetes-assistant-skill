@@ -45,6 +45,7 @@ function requestsNeedStartDate(requests) {
                         id: instruction.id,
                         name: request.medicationReference.display,
                         duration: instruction.timing?.repeat?.boundsDuration.value,
+                        durationUnit: instruction.timing?.repeat?.boundsDuration.unit,
                         frequency: instruction.timing?.repeat?.frequency,
                         timing: instruction.timing
                     };
@@ -57,6 +58,7 @@ function requestsNeedStartDate(requests) {
                     id: request.id,
                     name: request.code.coding[0].display,
                     duration: request.occurrenceTiming?.repeat?.boundsDuration.value,
+                    durationUnit: request.occurrenceTiming?.repeat?.boundsDuration.unit,
                     frequency: request.occurrenceTiming.repeat.frequency,
                     timing: request.occurrenceTiming
                 }

@@ -22,17 +22,11 @@ function getDelegatedSetTimingIntent(timing) {
     }
 }
 
-function getDelegatedSetStartDateIntent(healthRequestName) {
+function getDelegatedSetStartDateIntent() {
     return {
         name: 'SetStartDateIntent',
         confirmationStatus: "NONE",
-        slots: {
-            healthRequest: {
-                name: 'healthRequest',
-                value: healthRequestName,
-                confirmationStatus: 'NONE',
-            }
-        }
+        slots: {}
     }
 }
 
@@ -66,14 +60,7 @@ function switchContextToStartDate(handlerInput, requestWithMissingDate, userTime
     session[intent.name] = intent;
     session[helper.sessionValues.requestMissingDate] = requestWithMissingDate;
     attributesManager.setSessionAttributes(session);
-    const delegatedIntent = getDelegatedSetStartDateIntent(requestWithMissingDate.name);
-    // if (requestWithMissingDate.frequency > 1) { // TODO update this
-    //     delegatedIntent = getDelegatedSetStartDateIntent(requestWithMissingDate.name);
-    // } else {
-    //     const userTime = DateTime.utc().setZone(userTimeZone);
-    //     const time = userTime.toISOTime({ suppressSeconds: true, includeOffset: false });
-    //     delegatedIntent= getDelegatedSetStartDateWithTimeIntent(requestWithMissingDate.name, time);
-    // }
+    const delegatedIntent = getDelegatedSetStartDateIntent(); // TODO set the date slot when date is set
 
     const requiredSetup = localizedMessages.getStartDatePrompt(requestWithMissingDate);
     return handlerInput.responseBuilder
@@ -107,8 +94,15 @@ function switchContextToTiming (handlerInput, requestWithMissingDate, userTimeZo
         .getResponse()
 }
 
+function buildErrorResponse(handlerInput) {
+    return handlerInput.responseBuilder
+        .speak(localizedMessages.responses.ERROR)
+        .getResponse();
+}
+
 module.exports = {
     getLocalizedStrings,
     switchContextToStartDate,
-    switchContextToTiming
+    switchContextToTiming,
+    buildErrorResponse
 }
