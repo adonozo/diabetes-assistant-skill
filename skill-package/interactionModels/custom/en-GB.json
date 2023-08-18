@@ -62,14 +62,6 @@
           "name": "SetStartDateIntent",
           "slots": [
             {
-              "name": "healthRequest",
-              "type": "healthRequestName",
-              "samples": [
-                "Start date for {healthRequest}",
-                "Initial date for {healthRequest}"
-              ]
-            },
-            {
               "name": "date",
               "type": "AMAZON.DATE",
               "samples": [
@@ -94,11 +86,7 @@
             }
           ],
           "samples": [
-            "I'll start taking {healthRequest} on {date}",
-            "I'll start taking {healthRequest} {date}",
-            "Set the start date for {healthRequest}",
-            "{healthRequest} start date",
-            "start date for {healthRequest}"
+            "I'll start taking the medication on {date}"
           ]
         },
         {
@@ -695,13 +683,8 @@
         {
           "name": "SetStartDateIntent",
           "confirmationRequired": false,
+          "delegationStrategy": "SKILL_RESPONSE",
           "slots": [
-            {
-              "name": "healthRequest",
-              "type": "healthRequestName",
-              "confirmationRequired": false,
-              "elicitationRequired": false
-            },
             {
               "name": "date",
               "type": "AMAZON.DATE",
