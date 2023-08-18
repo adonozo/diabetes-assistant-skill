@@ -3,21 +3,22 @@ const {DateTime} = require("luxon");
 const patientsApi = require("../api/patients");
 const helper = require("../utils/helper");
 const intentUtil = require("../utils/intent");
+const fhirTiming = require("../fhir/timing");
 
 async function handle(handlerInput, patientEmail) {
     const localizedMessages = intentUtil.getLocalizedStrings(handlerInput);
     const currentIntent = handlerInput.requestEnvelope.request.intent;
-    const timing = currentIntent.slots.event.value;
-    const time = currentIntent.slots.time.value;
-    const userTimeZone = await timeUtil.getTimezoneOrDefault(handlerInput);
-    const dateTime = DateTime.fromISO(`${DateTime.now().toISODate()}T${time}`, {zone: userTimeZone});
-
-    await patientsApi.updateTiming(patientEmail, {
-        timing: localizedMessages.stringToTimingCode(timing),
-        dateTime: dateTime.toUTC().toISO()
-    })
-
     const session = handlerInput.attributesManager.getSessionAttributes();
+
+    //const timing = currentIntent.slots.event.value;
+
+    const missingDate = session[helper.sessionValues.requestMissingDate];
+    const dosageId = missingDate.id;
+    const startDate = fhirTiming.getTimingStartDate(missingDate.timing);
+    const time = currentIntent.slots.time.value;
+
+    await patientsApi.setDosageStartDate(patientEmail, dosageId,{startDate: startDate, startTime: time})
+
     const { speakOutput, reprompt } = getSpeakResponses(session, localizedMessages);
 
     return handlerInput.responseBuilder

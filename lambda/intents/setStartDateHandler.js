@@ -3,6 +3,7 @@ const timeUtil = require("../utils/time");
 const {DateTime} = require("luxon");
 const patientsApi = require("../api/patients");
 const intentUtil = require("../utils/intent");
+const fhirTiming = require("../fhir/timing");
 
 async function handle(handlerInput, patientEmail) {
     const localizedMessages = intentUtil.getLocalizedStrings(handlerInput);
@@ -31,6 +32,10 @@ async function handle(handlerInput, patientEmail) {
     const {speakOutput, reprompt} = getStartDateConfirmedResponse(handlerInput, session, healthRequest);
     delete session[helper.sessionValues.requestMissingDate];
     handlerInput.attributesManager.setSessionAttributes(session);
+
+    if (fhirTiming.timingNeedsStartTime(missingDate.timing)) {
+        return intentUtil.switchContextToTiming(handlerInput, missingDate, userTimeZone);
+    }
 
     return handlerInput.responseBuilder
         .speak(speakOutput)

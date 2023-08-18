@@ -61,14 +61,14 @@ function switchContextToStartDate(handlerInput, requestWithMissingDate, userTime
     session[intent.name] = intent;
     session[helper.sessionValues.requestMissingDate] = requestWithMissingDate;
     attributesManager.setSessionAttributes(session);
-    let delegatedIntent;
-    if (requestWithMissingDate.frequency > 1) {
-        delegatedIntent = getDelegatedSetStartDateIntent(requestWithMissingDate.name);
-    } else {
-        const userTime = DateTime.utc().setZone(userTimeZone);
-        const time = userTime.toISOTime({ suppressSeconds: true, includeOffset: false });
-        delegatedIntent= getDelegatedSetStartDateWithTimeIntent(requestWithMissingDate.name, time);
-    }
+    const delegatedIntent = getDelegatedSetStartDateIntent(requestWithMissingDate.name);
+    // if (requestWithMissingDate.frequency > 1) { // TODO update this
+    //     delegatedIntent = getDelegatedSetStartDateIntent(requestWithMissingDate.name);
+    // } else {
+    //     const userTime = DateTime.utc().setZone(userTimeZone);
+    //     const time = userTime.toISOTime({ suppressSeconds: true, includeOffset: false });
+    //     delegatedIntent= getDelegatedSetStartDateWithTimeIntent(requestWithMissingDate.name, time);
+    // }
 
     const requiredSetup = localizedMessages.getStartDatePrompt(requestWithMissingDate);
     return handlerInput.responseBuilder
@@ -77,19 +77,20 @@ function switchContextToStartDate(handlerInput, requestWithMissingDate, userTime
         .getResponse();
 }
 
-function switchContextToTiming (handlerInput, timing) {
-    const localizedMessages = intentUtil.getLocalizedStrings(handlerInput);
+function switchContextToTiming (handlerInput, requestWithMissingDate, userTimeZone) {
+    const localizedMessages = getLocalizedStrings(handlerInput);
     const attributesManager = handlerInput.attributesManager;
     const session = attributesManager.getSessionAttributes();
-    const nextTimingCode = fhirTiming.relatedTimingCodeToString(timing);
-    const nextTiming = localizedMessages.codeToString(nextTimingCode)
+    //const nextTimingCode = fhirTiming.relatedTimingCodeToString(timing);
+    const nextTiming = localizedMessages.codeToString("ACM")
 
     const intent = handlerInput.requestEnvelope.request.intent;
     session[intent.name] = intent;
+    session[helper.sessionValues.requestMissingDate] = requestWithMissingDate;
     attributesManager.setSessionAttributes(session);
 
     return handlerInput.responseBuilder
-        .addDelegateDirective(intentUtil.getDelegatedSetTimingIntent(nextTiming))
+        .addDelegateDirective(getDelegatedSetTimingIntent(nextTiming))
         .speak(localizedMessages.responses.SETUP_TIMINGS)
         .getResponse()
 }

@@ -20,15 +20,18 @@ async function handle(handlerInput, patient) {
             throw "Unexpected error";
         }
 
-        const missingDataResource = [errorResponse.resource];
+        const missingDataResource = errorResponse.resource;
         if (fhirMedicationRequest.requestNeedsStartDate(missingDataResource)) {
-            const customNeedsStartDate = timeUtil.requestsNeedStartDate(missingDataResource);
+            const customNeedsStartDate = timeUtil.requestsNeedStartDate([missingDataResource]);
             return intentUtil.switchContextToStartDate(handlerInput, customNeedsStartDate, userTimezone, localizedMessages);
         }
 
         if (fhirMedicationRequest.requestNeedsStartTime(missingDataResource)) {
-            return intentUtil.switchContextToTiming(handlerInput, missingDataResource.dosageInstruction[0].timing)
+            const customNeedsStartDate = timeUtil.requestsNeedStartDate([missingDataResource]);
+            return intentUtil.switchContextToTiming(handlerInput, customNeedsStartDate, userTimezone)
         }
+
+        throw "Couldn't get the resource";
     }
 
     const medicationRequests = fhirCarePlan.medicationsFromBundle(medicationRequest);

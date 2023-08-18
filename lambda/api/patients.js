@@ -29,22 +29,22 @@ function updateTiming(email, timingUpdate) {
  *
  * @param email {string} The patient's email
  * @param dosageId {string} The dosage ID to set the start date for
- * @param startDate {{startDate: string}} The medication start date
+ * @param startDateTime {{startDate: string, startTime: string}} The medication start date
  * @return {Promise<any>} An empty response if successful
  */
-function setDosageStartDate(email, dosageId, startDate) {
+function setDosageStartDate(email, dosageId, startDateTime) {
     const path = `/patients/${email}/dosage/${dosageId}/startDate`;
-    return setResourceStartDate(email, serviceRequestId, startDate, path);
+    return setResourceStartDate(email, serviceRequestId, startDateTime, path);
 }
 
-function setServiceRequestStartDate(email, serviceRequestId, startDate) {
+function setServiceRequestStartDate(email, serviceRequestId, startDate) { // TODO update this startDate to an object (as above)
     const path = `/patients/${email}/serviceRequest/${serviceRequestId}/startDate`;
     return setResourceStartDate(email, serviceRequestId, startDate, path);
 }
 
-function setResourceStartDate(email, serviceRequestId, startDate, path) {
+function setResourceStartDate(email, serviceRequestId, startDateTime, path) {
     return new Promise((resolve, reject) => {
-        const data = JSON.stringify({startDate: startDate});
+        const data = JSON.stringify(startDateTime);
         const options = api.getOptionsFor(path, 'PUT');
         options.headers = {
             'Content-Type': 'application/json',

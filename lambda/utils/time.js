@@ -33,30 +33,32 @@ function getActiveMissingTimings(patient, requests) {
 /**
  * Checks if there are medications without a specific start date, i.e., bound is duration rather than period.
  * @param requests {[]} The active medication requests
- * @returns {{type: string, id: string, name: string, duration: number, frequency: number} | undefined}
+ * @returns {{type: string, id: string, name: string, duration: number, frequency: number, timing: {}} | undefined}
  */
 function requestsNeedStartDate(requests) {
     for (const request of requests) {
         if (request.resourceType === 'MedicationRequest') {
             for (const instruction of request.dosageInstruction) {
-                if (fhirTiming.timingNeedsStartDate(instruction.timing) && !isNaN(instruction.timing?.repeat?.boundsDuration.value)) {
+                if (fhirTiming.timingNeedsStartDate(instruction.timing) || fhirTiming.timingNeedsStartTime(instruction.timing)) {
                     return {
                         type: 'MedicationRequest',
                         id: instruction.id,
                         name: request.medicationReference.display,
                         duration: instruction.timing?.repeat?.boundsDuration.value,
-                        frequency: instruction.timing?.repeat?.frequency
+                        frequency: instruction.timing?.repeat?.frequency,
+                        timing: instruction.timing
                     };
                 }
             }
         } else if (request.resourceType === 'ServiceRequest') {
-            if (fhirTiming.timingNeedsStartDate(request.occurrenceTiming) && !isNaN(request.occurrenceTiming?.repeat?.boundsDuration.value)) {
+            if (fhirTiming.timingNeedsStartDate(request.occurrenceTiming) || fhirTiming.timingNeedsStartTime(request.occurrenceTiming) ) {
                 return {
                     type: 'ServiceRequest',
                     id: request.id,
                     name: request.code.coding[0].display,
                     duration: request.occurrenceTiming?.repeat?.boundsDuration.value,
-                    frequency: request.occurrenceTiming.repeat.frequency
+                    frequency: request.occurrenceTiming.repeat.frequency,
+                    timing: request.occurrenceTiming
                 }
             }
         }
