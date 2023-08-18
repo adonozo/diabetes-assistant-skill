@@ -5,7 +5,7 @@ const helpers = require("./../utils/helper");
 const locale = 'en-GB'
 
 const responses = {
-    WELCOME: "Welcome, I can set up reminders or tell you your medications for tomorrow. Which would you like to try?",
+    WELCOME: "Hi, I can tell you your medications for tomorrow",
     REMINDER_PERMISSIONS: "I need permission to access your reminders.",
     SUCCESSFUL_REMINDER_PERMISSION: `Now that you've provided permission, you can try again by saying "setup reminders"`,
     SUCCESSFUL_REMINDER_PERMISSION_REPROMPT: 'You can try again by saying "setup reminders"',
@@ -39,8 +39,8 @@ function getMedicationReminderText(value, unit, medication, time) {
     return `Take ${value} ${unit} of ${medication} ${timing}`;
 }
 
-function getConfirmationDateText(healthRequest) {
-    return `You have set the start date for ${healthRequest}.`;
+function getConfirmationDateText(requestName) {
+    return `You have set the start date for ${requestName}.`;
 }
 
 function getSuggestedTimeText(mealCode) {
@@ -76,12 +76,13 @@ function timingString(timing) {
 
 function getStartDatePrompt(missingDate) {
     const init = 'I need some information first.';
+    const unit = durationUnitToString(missingDate.durationUnit);
     if (missingDate.type === 'MedicationRequest') {
-        return `${init} You need to take ${missingDate.name} for ${missingDate.duration} days.`;
+        return `${init} You need to take ${missingDate.name} for ${missingDate.duration} ${unit}.`;
     }
 
     if (missingDate.type === 'ServiceRequest') {
-        return `${init} Your plan includes: ${missingDate.name} for ${missingDate.duration} days.`;
+        return `${init} Your plan includes: ${missingDate.name} for ${missingDate.duration} ${unit}.`;
     }
 
     return '';
@@ -303,6 +304,17 @@ function unitsToStrings(unit, isPlural) {
             return 'tablet' + (isPlural ? 's' : '');
         default:
             return unit;
+    }
+}
+
+function durationUnitToString(unit) {
+    switch (unit.toLowerCase()) {
+        case 'd':
+            return 'days';
+        case 'wk':
+            return 'weeks';
+        case 'mo':
+            return 'months';
     }
 }
 
