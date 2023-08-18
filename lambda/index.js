@@ -13,7 +13,6 @@ const getGlucoseLevelHandler = require("./intents/getGlucoseLeveIHandler");
 const getMedicationToTakeHandler = require("./intents/getMedicationToTakeHandler");
 const registerGlucoseLevelHandler = require("./intents/registerGlucoseLevelHandler");
 const setStartDateHandler = require("./intents/setStartDateHandler");
-const setTimingHandler = require("./intents/setTimingHandler");
 const strings = require('./strings/strings');
 const remindersUtil = require('./utils/reminder');
 const timeUtil = require("./utils/time");
@@ -93,36 +92,6 @@ const GetMedicationToTakeIntentHandler = {
         return getMedicationToTakeHandler.handle(handlerInput, self);
     }
 };
-
-const SetTimingInProgressIntentHandler = {
-    canHandle(handlerInput) {
-        return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
-            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'SetTimingIntent'
-            && Alexa.getDialogState(handlerInput.requestEnvelope) !== 'COMPLETED';
-    },
-    handle(handlerInput) {
-        const currentIntent = handlerInput.requestEnvelope.request.intent;
-        return handlerInput.responseBuilder
-            .addDelegateDirective(currentIntent)
-            .getResponse();
-    }
-}
-
-const SetTimingCompletedIntentHandler = {
-    canHandle(handlerInput) {
-        return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
-            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'SetTimingIntent'
-            && Alexa.getDialogState(handlerInput.requestEnvelope) === 'COMPLETED';
-    },
-    async handle(handlerInput) {
-        const userInfo = await auth.getAuthorizedUser(handlerInput);
-        if (!userInfo) {
-            return requestAccountLink(handlerInput);
-        }
-
-        return setTimingHandler.handle(handlerInput, userInfo.username)
-    }
-}
 
 const SetStartDateCompletedIntentHandler = {
     canHandle(handlerInput) {
@@ -446,8 +415,6 @@ exports.handler = Alexa.SkillBuilders.custom()
         HelpIntentHandler,
         CancelAndStopIntentHandler,
         SessionEndedRequestHandler,
-        SetTimingInProgressIntentHandler,
-        SetTimingCompletedIntentHandler,
         SetStartDateCompletedIntentHandler,
         RegisterGlucoseLevelIntentInProgressWithValueHandler,
         RegisterGlucoseLevelIntentInProgressHandler,

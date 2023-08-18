@@ -3,6 +3,11 @@ const helper = require("./helper");
 const {DateTime} = require("luxon");
 const fhirTiming = require("../fhir/timing");
 
+/**
+ * @deprecated
+ * @param timing
+ * @returns {{slots: {event: {confirmationStatus: string, name: string, value}}, confirmationStatus: string, name: string}}
+ */
 function getDelegatedSetTimingIntent(timing) {
     return {
         name: 'SetTimingIntent',
@@ -77,6 +82,13 @@ function switchContextToStartDate(handlerInput, requestWithMissingDate, userTime
         .getResponse();
 }
 
+/**
+ * @deprecated
+ * @param handlerInput
+ * @param requestWithMissingDate
+ * @param userTimeZone
+ * @returns {*}
+ */
 function switchContextToTiming (handlerInput, requestWithMissingDate, userTimeZone) {
     const localizedMessages = getLocalizedStrings(handlerInput);
     const attributesManager = handlerInput.attributesManager;
@@ -96,7 +108,6 @@ function switchContextToTiming (handlerInput, requestWithMissingDate, userTimeZo
 }
 
 module.exports = {
-    getDelegatedSetTimingIntent,
     getLocalizedStrings,
     switchContextToStartDate,
     switchContextToTiming
