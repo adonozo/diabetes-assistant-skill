@@ -3,34 +3,6 @@ const {Settings, DateTime} = require("luxon");
 const fhirTiming = require("../fhir/timing");
 
 /**
- * Checks if there are missing timings, i.e., breakfast, lunch, dinner in medication or service requests.
- * @param patient The patient
- * @param requests {[]} The active medication or service request
- * @returns {Set<string>}
- */
-function getActiveMissingTimings(patient, requests) {
-    const timings = new Set();
-    requests.forEach(request => {
-        if (request.resourceType === 'MedicationRequest') {
-            request.dosageInstruction.forEach(instruction =>
-                instruction.timing?.repeat?.when?.forEach(timing => timings.add(timing)));
-        } else if (request.resourceType === 'ServiceRequest') {
-            request.occurrenceTiming?.repeat?.when?.forEach(timing => timings.add(timing));
-        }
-    });
-
-    const timingPreferences = fhirPatient.getTimingPreferences(patient);
-    if (!timingPreferences) {
-        return timings;
-    }
-
-    timingPreferences.forEach((datetime, timing) => {
-        timings.delete(timing)
-    })
-    return timings;
-}
-
-/**
  * Checks if there are medications without a specific start date, i.e., bound is duration rather than period.
  * @param requests {[]} The active medication requests
  * @returns {{type: string, id: string, name: string, duration: number, frequency: number, timing: {}} | undefined}
@@ -121,7 +93,6 @@ function getSuggestedTiming(patient) {
 
 module.exports = {
     getTimezoneOrDefault,
-    getActiveMissingTimings,
     utcDateFromLocalDate,
     utcTimeFromLocalTime,
     utcDateTimeFromLocalDateAndTime,

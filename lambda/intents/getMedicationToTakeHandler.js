@@ -26,11 +26,6 @@ async function handle(handlerInput, patient) {
             return intentUtil.switchContextToStartDate(handlerInput, customNeedsStartDate, userTimezone, localizedMessages);
         }
 
-        if (fhirMedicationRequest.requestNeedsStartTime(missingDataResource)) {
-            const customNeedsStartDate = timeUtil.requestsNeedStartDate([missingDataResource]);
-            return intentUtil.switchContextToTiming(handlerInput, customNeedsStartDate, userTimezone)
-        }
-
         throw new Error("Couldn't get the resource");
     }
 

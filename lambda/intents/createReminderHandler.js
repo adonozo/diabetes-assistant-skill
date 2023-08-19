@@ -4,13 +4,6 @@ const intentUtil = require("../utils/intent");
 
 async function handle(handlerInput, patient, requests) {
     const localizedMessages = intentUtil.getLocalizedStrings(handlerInput);
-
-    // Check if timing setup is needed.
-    const timingValidations = timeUtil.getActiveMissingTimings(patient, requests);
-    if (timingValidations.size > 0) {
-        return intentUtil.switchContextToTiming(handlerInput, timingValidations.values().next().value);
-    }
-
     const userTimeZone = await timeUtil.getTimezoneOrDefault(handlerInput);
 
     // Check if start date setup is needed.

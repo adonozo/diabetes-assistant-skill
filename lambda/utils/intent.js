@@ -2,25 +2,6 @@ const strings = require("../strings/strings");
 const helper = require("./helper");
 const fhirTiming = require("../fhir/timing");
 
-/**
- * @deprecated
- * @param timing
- * @returns {{slots: {event: {confirmationStatus: string, name: string, value}}, confirmationStatus: string, name: string}}
- */
-function getDelegatedSetTimingIntent(timing) {
-    return {
-        name: 'SetTimingIntent',
-        confirmationStatus: "NONE",
-        slots: {
-            event: {
-                name: 'event',
-                value: timing,
-                confirmationStatus: 'NONE',
-            }
-        }
-    }
-}
-
 function getDelegatedSetStartDateIntent(startDate) {
     const slots = startDate ?
         {
@@ -82,30 +63,6 @@ function switchContextToStartDate(handlerInput, requestWithMissingDate, userTime
         .getResponse();
 }
 
-/**
- * @deprecated
- * @param handlerInput
- * @param requestWithMissingDate
- * @param userTimeZone
- * @returns {*}
- */
-function switchContextToTiming (handlerInput, requestWithMissingDate, userTimeZone) {
-    const localizedMessages = getLocalizedStrings(handlerInput);
-    const attributesManager = handlerInput.attributesManager;
-    const session = attributesManager.getSessionAttributes();
-    const nextTiming = localizedMessages.codeToString("ACM")
-
-    const intent = handlerInput.requestEnvelope.request.intent;
-    session[intent.name] = intent;
-    session[helper.sessionValues.requestMissingDate] = requestWithMissingDate;
-    attributesManager.setSessionAttributes(session);
-
-    return handlerInput.responseBuilder
-        .addDelegateDirective(getDelegatedSetTimingIntent(nextTiming))
-        .speak(localizedMessages.responses.SETUP_TIMINGS)
-        .getResponse()
-}
-
 function buildErrorResponse(handlerInput) {
     return handlerInput.responseBuilder
         .speak(localizedMessages.responses.ERROR)
@@ -115,6 +72,5 @@ function buildErrorResponse(handlerInput) {
 module.exports = {
     getLocalizedStrings,
     switchContextToStartDate,
-    switchContextToTiming,
     buildErrorResponse
 }
