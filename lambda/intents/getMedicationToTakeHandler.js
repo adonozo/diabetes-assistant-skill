@@ -16,8 +16,8 @@ async function handle(handlerInput, patient) {
             fhirTiming.timingEvent.ALL_DAY, userTimezone);
     } catch (errorResponse) {
         if (errorResponse.status !== 422) {
-            console.log("Unexpected error", errorResponse)
-            throw "Unexpected error";
+            console.log("Unexpected error", JSON.stringify(errorResponse))
+            throw new Error("Unexpected error");
         }
 
         const missingDataResource = errorResponse.resource;
@@ -31,7 +31,7 @@ async function handle(handlerInput, patient) {
             return intentUtil.switchContextToTiming(handlerInput, customNeedsStartDate, userTimezone)
         }
 
-        throw "Couldn't get the resource";
+        throw new Error("Couldn't get the resource");
     }
 
     const medicationRequests = fhirCarePlan.medicationsFromBundle(medicationRequest);

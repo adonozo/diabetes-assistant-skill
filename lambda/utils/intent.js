@@ -1,6 +1,5 @@
 const strings = require("../strings/strings");
 const helper = require("./helper");
-const {DateTime} = require("luxon");
 const fhirTiming = require("../fhir/timing");
 
 /**
@@ -22,11 +21,21 @@ function getDelegatedSetTimingIntent(timing) {
     }
 }
 
-function getDelegatedSetStartDateIntent() {
+function getDelegatedSetStartDateIntent(startDate) {
+    const slots = startDate ?
+        {
+            date: {
+                name: 'date',
+                value: startDate,
+                confirmationStatus: 'NONE'
+            }
+        }
+        : {};
+
     return {
         name: 'SetStartDateIntent',
         confirmationStatus: "NONE",
-        slots: {}
+        slots: slots
     }
 }
 
@@ -60,7 +69,11 @@ function switchContextToStartDate(handlerInput, requestWithMissingDate, userTime
     session[intent.name] = intent;
     session[helper.sessionValues.requestMissingDate] = requestWithMissingDate;
     attributesManager.setSessionAttributes(session);
-    const delegatedIntent = getDelegatedSetStartDateIntent(); // TODO set the date slot when date is set
+
+    const hasStartDate = !fhirTiming.timingNeedsStartDate(requestWithMissingDate.timing);
+    const delegatedIntent = hasStartDate ?
+        getDelegatedSetStartDateIntent(fhirTiming.getTimingStartDate(requestWithMissingDate.timing))
+        : getDelegatedSetStartDateIntent();
 
     const requiredSetup = localizedMessages.getStartDatePrompt(requestWithMissingDate);
     return handlerInput.responseBuilder
@@ -80,7 +93,6 @@ function switchContextToTiming (handlerInput, requestWithMissingDate, userTimeZo
     const localizedMessages = getLocalizedStrings(handlerInput);
     const attributesManager = handlerInput.attributesManager;
     const session = attributesManager.getSessionAttributes();
-    //const nextTimingCode = fhirTiming.relatedTimingCodeToString(timing);
     const nextTiming = localizedMessages.codeToString("ACM")
 
     const intent = handlerInput.requestEnvelope.request.intent;
