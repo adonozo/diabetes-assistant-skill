@@ -31,7 +31,12 @@ function timingNeedsStartTime(timing) {
 }
 
 function getTimingStartTime(timing) {
-    return fhir.getExtension(timing, TIMING_START_TIME);
+    const startTimeExtension = fhir.getExtension(timing, TIMING_START_TIME);
+    if (!startTimeExtension) {
+        return undefined;
+    }
+
+    return startTimeExtension.valueString;
 }
 
 const timingEvent = {
@@ -142,12 +147,13 @@ function getDatesFromTiming(timing) {
 
 /**
  * @param frequency {number}
- * @param date {string}
+ * @param startTime {string}
  * @param timezone {string}
  * @return {[]}
  */
-function getTimesFromTimingWithFrequency(frequency, date, timezone) {
-    const localDate = DateTime.fromISO(date).setZone(timezone);
+function getTimesFromTimingWithFrequency(frequency, startTime, timezone) {
+    const referenceDate = DateTime.utc().setZone(timezone).startOf('day');
+    const localDate = DateTime.fromISO(referenceDate.toISODate() + `T${startTime}`, {zone: timezone});
     const hoursDifference = 24 / frequency;
     const times = [];
     for (let i = 0; i < frequency; i++) {
@@ -218,5 +224,6 @@ module.exports = {
     tryParseDate,
     getTimingStartDate,
     timingNeedsStartDate,
+    getTimingStartTime,
     timingNeedsStartTime
 }

@@ -35,7 +35,7 @@ async function handle(handlerInput, patient) {
     if (medicationRequests.length === 0) {
         speakOutput = localizedMessages.getNoRecordsTextForDay(date, userTimezone);
     } else {
-        const medicationText = fhirMedicationRequest.getTextForMedicationRequests(medicationRequests, patient, userTimezone, localizedMessages);
+        const medicationText = fhirMedicationRequest.getTextForMedicationRequests(medicationRequests, userTimezone, localizedMessages);
         const datePreposition = localizedMessages.responses.DATE_PREPOSITION;
         speakOutput = `${localizedMessages.getTextForDay(date, userTimezone, datePreposition)}, ${medicationText}`;
     }

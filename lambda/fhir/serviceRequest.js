@@ -26,9 +26,9 @@ function getServiceText(request, patient, timezone) {
         serviceData.timings = repeat.when.sort(fhirTiming.compareWhen);
     } else if (repeat.timeOfDay && Array.isArray(repeat.timeOfDay)) {
         serviceData.timings = repeat.timeOfDay.sort();
-    } else if (repeat.frequency > 1) {
-        const startDate = getServiceRequestStartDate(request);
-        serviceData.timings = fhirTiming.getTimesFromTimingWithFrequency(repeat.frequency, startDate, timezone)
+    } else {
+        const startTime = fhirTiming.getTimingStartTime(request.occurrenceTiming);
+        serviceData.timings = fhirTiming.getTimesFromTimingWithFrequency(repeat.frequency, startTime, timezone)
             .sort();
     }
 

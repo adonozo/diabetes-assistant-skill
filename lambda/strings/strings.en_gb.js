@@ -174,7 +174,8 @@ function makeMedicationText(medicationData) {
         const timings = dose.time.map(time => timingTextFunction(time));
         return timings.map(time =>
             `${dose.value} ${unitsToStrings(dose.unit, +dose.value > 1)} ${preposition} ${time}`);
-    }).flat(1);
+        })
+        .flat(1);
     const doseText = helpers.listItems(doseTextArray, responses.CONCAT_WORD);
     return `Take ${medicationData.medication}, ${doseText}`;
 }
