@@ -1,32 +1,22 @@
 const strings = require("../strings/strings");
 const helper = require("./helper");
-const {DateTime} = require("luxon");
+const fhirTiming = require("../fhir/timing");
 
-function getDelegatedSetTimingIntent(timing) {
-    return {
-        name: 'SetTimingIntent',
-        confirmationStatus: "NONE",
-        slots: {
-            event: {
-                name: 'event',
-                value: timing,
-                confirmationStatus: 'NONE',
+function getDelegatedSetStartDateIntent(startDate) {
+    const slots = startDate ?
+        {
+            date: {
+                name: 'date',
+                value: startDate,
+                confirmationStatus: 'NONE'
             }
         }
-    }
-}
+        : {};
 
-function getDelegatedSetStartDateIntent(healthRequestName) {
     return {
         name: 'SetStartDateIntent',
         confirmationStatus: "NONE",
-        slots: {
-            healthRequest: {
-                name: 'healthRequest',
-                value: healthRequestName,
-                confirmationStatus: 'NONE',
-            }
-        }
+        slots: slots
     }
 }
 
@@ -60,14 +50,11 @@ function switchContextToStartDate(handlerInput, requestWithMissingDate, userTime
     session[intent.name] = intent;
     session[helper.sessionValues.requestMissingDate] = requestWithMissingDate;
     attributesManager.setSessionAttributes(session);
-    let delegatedIntent;
-    if (requestWithMissingDate.frequency > 1) {
-        delegatedIntent = getDelegatedSetStartDateIntent(requestWithMissingDate.name);
-    } else {
-        const userTime = DateTime.utc().setZone(userTimeZone);
-        const time = userTime.toISOTime({ suppressSeconds: true, includeOffset: false });
-        delegatedIntent= getDelegatedSetStartDateWithTimeIntent(requestWithMissingDate.name, time);
-    }
+
+    const hasStartDate = !fhirTiming.timingNeedsStartDate(requestWithMissingDate.timing);
+    const delegatedIntent = hasStartDate ?
+        getDelegatedSetStartDateIntent(fhirTiming.getTimingStartDate(requestWithMissingDate.timing))
+        : getDelegatedSetStartDateIntent();
 
     const requiredSetup = localizedMessages.getStartDatePrompt(requestWithMissingDate);
     return handlerInput.responseBuilder
@@ -76,8 +63,14 @@ function switchContextToStartDate(handlerInput, requestWithMissingDate, userTime
         .getResponse();
 }
 
+function buildErrorResponse(handlerInput) {
+    return handlerInput.responseBuilder
+        .speak(localizedMessages.responses.ERROR)
+        .getResponse();
+}
+
 module.exports = {
-    getDelegatedSetTimingIntent,
     getLocalizedStrings,
     switchContextToStartDate,
+    buildErrorResponse
 }

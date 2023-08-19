@@ -37,13 +37,19 @@ function getMedicationFromDosageId(dosageId, requests) {
     return result;
 }
 
-function getTextForMedicationRequests(requests, patient, timezone, localizedMessages) {
-    return requests.map(request => getMedicationText(request, patient, timezone))
+function getTextForMedicationRequests(requests, timezone, localizedMessages) {
+    return requests.map(request => getMedicationText(request, timezone))
         .map(data => localizedMessages.makeMedicationText(data))
         .join('. ');
 }
 
-function getMedicationText(request, patient, timezone) {
+/**
+ *
+ * @param request
+ * @param timezone
+ * @returns {{dose: *[], medication: string}}
+ */
+function getMedicationText(request, timezone) {
     const medicationData = {
         medication: '',
         dose: [],
@@ -51,14 +57,14 @@ function getMedicationText(request, patient, timezone) {
     medicationData.medication = request.medicationReference.display;
     request.dosageInstruction.forEach(dosage => {
         const {value, unit} = getMedicationValues(dosage);
-        let time = [];
+        let time;
         if (dosage.timing.repeat.when && Array.isArray(dosage.timing.repeat.when)) {
             time = dosage.timing.repeat.when.sort(fhirTiming.compareWhen);
         } else if (dosage.timing.repeat.timeOfDay && Array.isArray(dosage.timing.repeat.timeOfDay)) {
             time = dosage.timing.repeat.timeOfDay.sort();
-        } else if (dosage.timing.repeat.frequency > 1) {
-            const startDate = fhirTiming.getTimingStartDate(dosage.timing);
-            time = fhirTiming.getTimesFromTimingWithFrequency(dosage.timing.repeat.frequency, startDate, timezone)
+        } else {
+            const startTime = fhirTiming.getTimingStartTime(dosage.timing);
+            time = fhirTiming.getTimesFromTimingWithFrequency(dosage.timing.repeat.frequency, startTime, timezone)
                 .sort();
         }
 
@@ -117,7 +123,7 @@ function getMedicationTextData({
                 })
                 medicationData.push(processedText)
             });
-        } else if (dosage.timing.repeat.frequency && dosage.timing.repeat.frequency > 1) {
+        } else if (dosage.timing.repeat.frequency && dosage.timing.repeat.frequency > 0) {
             const startDate = fhirTiming.getTimingStartDate(dosage.timing); // This is in UTC
             const dateTime = DateTime.fromISO(startDate).setZone(timezone);
             const processedText = textProcessor({
@@ -148,9 +154,23 @@ function getMedicationValues(dosage) {
     }
 }
 
+function requestNeedsStartDate(request) {
+    return request.dosageInstruction
+        .map(dosage => fhirTiming.timingNeedsStartDate(dosage.timing))
+        .reduce((accumulator, current) => accumulator || current);
+}
+
+function requestNeedsStartTime(request) {
+    return request.dosageInstruction
+        .map(dosage => fhirTiming.timingNeedsStartTime(dosage.timing))
+        .reduce((accumulator, current) => accumulator || current);
+}
+
 module.exports = {
     requestListFromBundle,
     getMedicationFromDosageId,
     getTextForMedicationRequests,
     getMedicationTextData,
+    requestNeedsStartDate,
+    requestNeedsStartTime
 }

@@ -59,55 +59,8 @@
           ]
         },
         {
-          "name": "SetTimingIntent",
-          "slots": [
-            {
-              "name": "event",
-              "type": "timingEvent",
-              "samples": [
-                "it is for {event}",
-                "The time is for {event}",
-                "I want to set a time for {event}",
-                "I mean {event}",
-                "is for {event}",
-                "{event}"
-              ]
-            },
-            {
-              "name": "time",
-              "type": "AMAZON.TIME",
-              "samples": [
-                "when it's {time}",
-                "{time}",
-                "at {time}"
-              ]
-            }
-          ],
-          "samples": [
-            "Set {event} time",
-            "Set my {event} time",
-            "Update my {event} time",
-            "Update {event} at {time}",
-            "Set {event} at {time}",
-            "I take {event} at {time}",
-            "My {event} is at {time}",
-            "I take it at {time}",
-            "I have {event} at {time}",
-            "I have it at {time}",
-            "I eat {event} at {time}"
-          ]
-        },
-        {
           "name": "SetStartDateIntent",
           "slots": [
-            {
-              "name": "healthRequest",
-              "type": "healthRequestName",
-              "samples": [
-                "Start date for {healthRequest}",
-                "Initial date for {healthRequest}"
-              ]
-            },
             {
               "name": "date",
               "type": "AMAZON.DATE",
@@ -133,11 +86,7 @@
             }
           ],
           "samples": [
-            "I'll start taking {healthRequest} on {date}",
-            "I'll start taking {healthRequest} {date}",
-            "Set the start date for {healthRequest}",
-            "{healthRequest} start date",
-            "start date for {healthRequest}"
+            "I'll start taking the medication on {date}"
           ]
         },
         {
@@ -732,40 +681,10 @@
     "dialog": {
       "intents": [
         {
-          "name": "SetTimingIntent",
-          "confirmationRequired": false,
-          "slots": [
-            {
-              "name": "time",
-              "type": "AMAZON.TIME",
-              "confirmationRequired": true,
-              "elicitationRequired": true,
-              "prompts": {
-                "confirmation": "Confirm.Slot.1543037949542.877378806019",
-                "elicitation": "Elicit.Slot.1543037949542.877378806019"
-              }
-            },
-            {
-              "name": "event",
-              "type": "timingEvent",
-              "confirmationRequired": false,
-              "elicitationRequired": true,
-              "prompts": {
-                "elicitation": "Elicit.Slot.1543037949542.388844148382"
-              }
-            }
-          ]
-        },
-        {
           "name": "SetStartDateIntent",
           "confirmationRequired": false,
+          "delegationStrategy": "SKILL_RESPONSE",
           "slots": [
-            {
-              "name": "healthRequest",
-              "type": "healthRequestName",
-              "confirmationRequired": false,
-              "elicitationRequired": false
-            },
             {
               "name": "date",
               "type": "AMAZON.DATE",
@@ -866,41 +785,6 @@
       "delegationStrategy": "ALWAYS"
     },
     "prompts": [
-      {
-        "id": "Confirm.Slot.1543037949542.877378806019",
-        "variations": [
-          {
-            "type": "SSML",
-            "value": "<speak>I heard <say-as interpret-as=\"time\">{time}</say-as>, is that correct?</speak>"
-          },
-          {
-            "type": "SSML",
-            "value": "<speak>Is <say-as interpret-as=\"time\">{time}</say-as> correct?</speak>"
-          }
-        ]
-      },
-      {
-        "id": "Elicit.Slot.1543037949542.877378806019",
-        "variations": [
-          {
-            "type": "PlainText",
-            "value": "What time do you have {event}?"
-          }
-        ]
-      },
-      {
-        "id": "Elicit.Slot.1543037949542.388844148382",
-        "variations": [
-          {
-            "type": "PlainText",
-            "value": "The time {time} is for breakfast, lunch, or dinner?"
-          },
-          {
-            "type": "PlainText",
-            "value": "Do you want to set a time for breakfast, lunch, or dinner?"
-          }
-        ]
-      },
       {
         "id": "Elicit.Slot.getMedicationToTake.treatmentDate",
         "variations": [

@@ -13,7 +13,6 @@ const getGlucoseLevelHandler = require("./intents/getGlucoseLeveIHandler");
 const getMedicationToTakeHandler = require("./intents/getMedicationToTakeHandler");
 const registerGlucoseLevelHandler = require("./intents/registerGlucoseLevelHandler");
 const setStartDateHandler = require("./intents/setStartDateHandler");
-const setTimingHandler = require("./intents/setTimingHandler");
 const strings = require('./strings/strings');
 const remindersUtil = require('./utils/reminder');
 const timeUtil = require("./utils/time");
@@ -94,25 +93,11 @@ const GetMedicationToTakeIntentHandler = {
     }
 };
 
-const SetTimingInProgressIntentHandler = {
+const SetStartDateInProgressIntentInitialHandler = {
     canHandle(handlerInput) {
         return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
-            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'SetTimingIntent'
+            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'SetStartDateIntent'
             && Alexa.getDialogState(handlerInput.requestEnvelope) !== 'COMPLETED';
-    },
-    handle(handlerInput) {
-        const currentIntent = handlerInput.requestEnvelope.request.intent;
-        return handlerInput.responseBuilder
-            .addDelegateDirective(currentIntent)
-            .getResponse();
-    }
-}
-
-const SetTimingCompletedIntentHandler = {
-    canHandle(handlerInput) {
-        return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
-            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'SetTimingIntent'
-            && Alexa.getDialogState(handlerInput.requestEnvelope) === 'COMPLETED';
     },
     async handle(handlerInput) {
         const userInfo = await auth.getAuthorizedUser(handlerInput);
@@ -120,7 +105,27 @@ const SetTimingCompletedIntentHandler = {
             return requestAccountLink(handlerInput);
         }
 
-        return setTimingHandler.handle(handlerInput, userInfo.username)
+        return handlerInput.responseBuilder
+            .addDelegateDirective()
+            .getResponse();
+    }
+}
+
+const SetStartDateInProgressIntentHandler = {
+    canHandle(handlerInput) {
+        return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
+            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'SetStartDateIntent'
+            && handlerInput.requestEnvelope.request.intent.slots.date.value
+            && !handlerInput.requestEnvelope.request.intent.slots.healthRequestTime.value
+            && Alexa.getDialogState(handlerInput.requestEnvelope) !== 'COMPLETED';
+    },
+    async handle(handlerInput) {
+        const userInfo = await auth.getAuthorizedUser(handlerInput);
+        if (!userInfo) {
+            return requestAccountLink(handlerInput);
+        }
+
+        return setStartDateHandler.handleInProgress(handlerInput, userInfo.username);
     }
 }
 
@@ -446,8 +451,8 @@ exports.handler = Alexa.SkillBuilders.custom()
         HelpIntentHandler,
         CancelAndStopIntentHandler,
         SessionEndedRequestHandler,
-        SetTimingInProgressIntentHandler,
-        SetTimingCompletedIntentHandler,
+        SetStartDateInProgressIntentInitialHandler,
+        SetStartDateInProgressIntentHandler,
         SetStartDateCompletedIntentHandler,
         RegisterGlucoseLevelIntentInProgressWithValueHandler,
         RegisterGlucoseLevelIntentInProgressHandler,
@@ -458,7 +463,7 @@ exports.handler = Alexa.SkillBuilders.custom()
         GetGlucoseLevelIntentTimeHandler,
         GetGlucoseLevelIntentTimingHandler,
         IntentReflectorHandler, // make sure IntentReflectorHandler is last, so it doesn't override your custom intent handlers
-        ) 
+        )
     .addErrorHandlers(
         ErrorHandler,
         )

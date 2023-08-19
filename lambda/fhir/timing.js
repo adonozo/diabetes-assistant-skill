@@ -5,6 +5,8 @@ const fhir = require("./fhir");
 const DEFAULT_TIMEZONE = 'UTC'
 const TIMING_START_DATE = 'http://diabetes-assistant.com/fhir/StructureDefinition/TimingStartDate';
 const TIMING_NEEDS_START_DATE = 'http://diabetes-assistant.com/fhir/StructureDefinition/NeedsStartDateFlag';
+const TIMING_START_TIME = 'http://diabetes-assistant.com/fhir/StructureDefinition/TimingStartTime';
+const TIMING_NEEDS_START_TIME = 'http://diabetes-assistant.com/fhir/StructureDefinition/NeedsStartTimeFlag';
 
 function getTimingStartDate(timing) {
     const startDateExtension = fhir.getExtension(timing, TIMING_START_DATE);
@@ -22,6 +24,19 @@ function getTimingStartDate(timing) {
 
 function timingNeedsStartDate(timing) {
     return fhir.getExtension(timing, TIMING_NEEDS_START_DATE);
+}
+
+function timingNeedsStartTime(timing) {
+    return fhir.getExtension(timing, TIMING_NEEDS_START_TIME);
+}
+
+function getTimingStartTime(timing) {
+    const startTimeExtension = fhir.getExtension(timing, TIMING_START_TIME);
+    if (!startTimeExtension) {
+        return undefined;
+    }
+
+    return startTimeExtension.valueString;
 }
 
 const timingEvent = {
@@ -132,12 +147,13 @@ function getDatesFromTiming(timing) {
 
 /**
  * @param frequency {number}
- * @param date {string}
+ * @param startTime {string}
  * @param timezone {string}
  * @return {[]}
  */
-function getTimesFromTimingWithFrequency(frequency, date, timezone) {
-    const localDate = DateTime.fromISO(date).setZone(timezone);
+function getTimesFromTimingWithFrequency(frequency, startTime, timezone) {
+    const referenceDate = DateTime.utc().setZone(timezone).startOf('day');
+    const localDate = DateTime.fromISO(referenceDate.toISODate() + `T${startTime}`, {zone: timezone});
     const hoursDifference = 24 / frequency;
     const times = [];
     for (let i = 0; i < frequency; i++) {
@@ -207,5 +223,7 @@ module.exports = {
     dayToRruleDay,
     tryParseDate,
     getTimingStartDate,
-    timingNeedsStartDate
+    timingNeedsStartDate,
+    getTimingStartTime,
+    timingNeedsStartTime
 }

@@ -3,87 +3,26 @@ const {Settings, DateTime} = require("luxon");
 const fhirTiming = require("../fhir/timing");
 
 /**
- * Checks if there are missing timings, i.e., breakfast, lunch, dinner in medication or service requests.
- * @param patient The patient
- * @param requests {[]} The active medication or service request
- * @returns {Set<string>}
- */
-function getActiveMissingTimings(patient, requests) {
-    const timings = new Set();
-    requests.forEach(request => {
-        if (request.resourceType === 'MedicationRequest') {
-            request.dosageInstruction.forEach(instruction =>
-                instruction.timing?.repeat?.when?.forEach(timing => timings.add(timing)));
-        } else if (request.resourceType === 'ServiceRequest') {
-            request.occurrenceTiming?.repeat?.when?.forEach(timing => timings.add(timing));
-        }
-    });
-
-    const timingPreferences = fhirPatient.getTimingPreferences(patient);
-    if (!timingPreferences) {
-        return timings;
-    }
-
-    timingPreferences.forEach((datetime, timing) => {
-        timings.delete(timing)
-    })
-    return timings;
-}
-
-/**
  * Checks if there are medications without a specific start date, i.e., bound is duration rather than period.
  * @param requests {[]} The active medication requests
- * @returns {{type: string, id: string, name: string, duration: number, frequency: number} | undefined}
+ * @returns {{type: string, id: string, name: string, duration: number, frequency: number, timing: {}} | undefined}
  */
 function requestsNeedStartDate(requests) {
     for (const request of requests) {
         if (request.resourceType === 'MedicationRequest') {
-            for (const instruction of request.dosageInstruction) {
-                if (fhirTiming.timingNeedsStartDate(instruction.timing) && !isNaN(instruction.timing?.repeat?.boundsDuration.value)) {
-                    return {
-                        type: 'MedicationRequest',
-                        id: instruction.id,
-                        name: request.medicationReference.display,
-                        duration: instruction.timing?.repeat?.boundsDuration.value,
-                        frequency: instruction.timing?.repeat?.frequency
-                    };
-                }
+            const customResource = buildCustomMedicationRequest(request);
+            if (customResource) {
+                return customResource;
             }
         } else if (request.resourceType === 'ServiceRequest') {
-            if (fhirTiming.timingNeedsStartDate(request.occurrenceTiming) && !isNaN(request.occurrenceTiming?.repeat?.boundsDuration.value)) {
-                return {
-                    type: 'ServiceRequest',
-                    id: request.id,
-                    name: request.code.coding[0].display,
-                    duration: request.occurrenceTiming?.repeat?.boundsDuration.value,
-                    frequency: request.occurrenceTiming.repeat.frequency
-                }
+            const customResource = buildCustomServiceRequest(request)
+            if (customResource) {
+                return customResource;
             }
         }
     }
 
     return undefined;
-}
-
-/**
- * Checks if there are medications without a specific start date, i.e., bound is duration rather than period.
- * @param patient The patient
- * @param medicationRequests {[]} The active medication request
- * @returns {Set<string>}
- */
-function getMissingDates(patient, medicationRequests) {
-    const dates = new Set();
-    medicationRequests.forEach(request =>
-        request.dosageInstruction.forEach(instruction => {
-            const startDate = fhirTiming.getTimingStartDate(instruction.timing);
-            if (instruction.timing?.repeat?.boundsDuration
-                && !isNaN(instruction.timing?.repeat?.boundsDuration.value)
-                && !startDate
-            ) {
-                dates.add(instruction.id)
-            }
-        }));
-    return dates;
 }
 
 async function getTimezoneOrDefault(handlerInput) {
@@ -136,21 +75,43 @@ function getSuggestedTiming(patient) {
     return fhirTiming.relatedTimingCodeToString(suggestion);
 }
 
-/**
- * @param start {string} In ISO format
- * @param end {string} In ISO format
- */
-function getDaysDifference(start, end) {
-    const startDate = DateTime.fromISO(start);
-    const endDate = DateTime.fromISO(end);
-    const days = endDate.diff(startDate, ["hours"]).toObject().days;
-    return Math.abs(days);
+function buildCustomMedicationRequest(medicationRequest) {
+    for (const instruction of medicationRequest.dosageInstruction) {
+        if (fhirTiming.timingNeedsStartDate(instruction.timing) || fhirTiming.timingNeedsStartTime(instruction.timing)) {
+            return {
+                type: 'MedicationRequest',
+                id: instruction.id,
+                name: medicationRequest.medicationReference.display,
+                duration: instruction.timing?.repeat?.boundsDuration.value,
+                durationUnit: instruction.timing?.repeat?.boundsDuration.unit,
+                frequency: instruction.timing?.repeat?.frequency,
+                timing: instruction.timing
+            };
+        }
+    }
+
+    return undefined;
+}
+
+function buildCustomServiceRequest(serviceRequest) {
+    const timing = serviceRequest.occurrenceTiming;
+    if (fhirTiming.timingNeedsStartDate(timing) || fhirTiming.timingNeedsStartTime(timing) ) {
+        return {
+            type: 'ServiceRequest',
+            id: serviceRequest.id,
+            name: serviceRequest.code.coding[0].display,
+            duration: timing?.repeat?.boundsDuration.value,
+            durationUnit: timing?.repeat?.boundsDuration.unit,
+            frequency: timing?.repeat.frequency,
+            timing: timing
+        }
+    }
+
+    return undefined;
 }
 
 module.exports = {
-    getMissingDates,
     getTimezoneOrDefault,
-    getActiveMissingTimings,
     utcDateFromLocalDate,
     utcTimeFromLocalTime,
     utcDateTimeFromLocalDateAndTime,

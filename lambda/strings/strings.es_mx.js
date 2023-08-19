@@ -5,7 +5,7 @@ const helpers = require("./../utils/helper");
 const locale = 'es-MX'
 
 const responses = {
-    WELCOME: "Hola, puedes preguntarme tus medicamentos para mañana o puedo crear recordatorios",
+    WELCOME: "Hola, puedes preguntarme tus medicamentos para mañana",
     REMINDER_PERMISSIONS: "Necesito permisos para crear recordatorios",
     SUCCESSFUL_REMINDER_PERMISSION: `Ahora que tengo permisos, puedo crear recordatorios. Intenta diciendo: "crea recordatorios"`,
     SUCCESSFUL_REMINDER_PERMISSION_REPROMPT: 'Puedes intentar de nuevo diciendo: "setup reminders"',
@@ -39,8 +39,8 @@ function getMedicationReminderText(value, unit, medication, time) {
     return `Toma ${value} ${unit} de ${medication} ${timing}`;
 }
 
-function getConfirmationDateText(healthRequest) {
-    return `Has configurado la fecha de inicio para ${healthRequest}.`;
+function getConfirmationDateText(requestName) {
+    return `Has configurado la fecha de inicio para ${requestName}.`;
 }
 
 function getSuggestedTimeText(mealCode) {
@@ -76,12 +76,13 @@ function timingString(timing) {
 
 function getStartDatePrompt(missingDate) {
     const init = 'Primero necesito algunos datos.';
+    const unit = durationUnitToString(missingDate.durationUnit);
     if (missingDate.type === 'MedicationRequest') {
-        return `${init} Debes tomar ${missingDate.name} por ${missingDate.duration} días.`;
+        return `${init} Debes tomar ${missingDate.name} por ${missingDate.duration} ${unit}.`;
     }
 
     if (missingDate.type === 'ServiceRequest') {
-        return `${init} Debes ${missingDate.name} por ${missingDate.duration} días.`;
+        return `${init} Debes ${missingDate.name} por ${missingDate.duration} ${unit}.`;
     }
 
     return '';
@@ -173,7 +174,8 @@ function makeMedicationText(medicationData) {
         const timings = dose.time.map(time => timingTextFunction(time));
         return timings.map(time =>
             `${dose.value} ${unitsToStrings(dose.unit, +dose.value > 1)} ${preposition} ${time}`);
-    }).flat(1);
+        })
+        .flat(1);
     const doseText = helpers.listItems(doseTextArray, responses.CONCAT_WORD);
     return `Toma ${medicationData.medication}, ${doseText}`;
 }
@@ -304,6 +306,17 @@ function unitsToStrings(unit, isPlural) {
             return 'tableta' + (isPlural ? 's' : '');
         default:
             return unit;
+    }
+}
+
+function durationUnitToString(unit) {
+    switch (unit.toLowerCase()) {
+        case 'd':
+            return 'días';
+        case 'wk':
+            return 'semanas';
+        case 'mo':
+            return 'meses';
     }
 }
 

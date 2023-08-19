@@ -1,23 +1,15 @@
 const timeUtil = require("../utils/time");
 const reminders = require("../utils/reminder");
-const fhirTiming = require("../fhir/timing");
 const intentUtil = require("../utils/intent");
 
 async function handle(handlerInput, patient, requests) {
     const localizedMessages = intentUtil.getLocalizedStrings(handlerInput);
-
-    // Check if timing setup is needed.
-    const timingValidations = timeUtil.getActiveMissingTimings(patient, requests);
-    if (timingValidations.size > 0) {
-        return switchContextToTiming(handlerInput, timingValidations.values().next().value);
-    }
-
     const userTimeZone = await timeUtil.getTimezoneOrDefault(handlerInput);
 
     // Check if start date setup is needed.
-    const requestsNeedStartDate = timeUtil.requestsNeedStartDate(requests);
-    if (requestsNeedStartDate) {
-        return intentUtil.switchContextToStartDate(handlerInput, requestsNeedStartDate, userTimeZone, localizedMessages);
+    const customResource = timeUtil.requestsNeedStartDate(requests);
+    if (customResource) {
+        return intentUtil.switchContextToStartDate(handlerInput, customResource, userTimeZone, localizedMessages);
     }
 
     // Create reminders
@@ -42,23 +34,6 @@ async function handle(handlerInput, patient, requests) {
         .speak(speakOutput)
         .getResponse();
 }
-
-const switchContextToTiming = (handlerInput, timing) => {
-    const localizedMessages = intentUtil.getLocalizedStrings(handlerInput);
-    const attributesManager = handlerInput.attributesManager;
-    const session = attributesManager.getSessionAttributes();
-    const nextTimingCode = fhirTiming.relatedTimingCodeToString(timing);
-    const nextTiming = localizedMessages.codeToString(nextTimingCode)
-
-    const intent = handlerInput.requestEnvelope.request.intent;
-    session[intent.name] = intent;
-    attributesManager.setSessionAttributes(session);
-
-    return handlerInput.responseBuilder
-        .addDelegateDirective(intentUtil.getDelegatedSetTimingIntent(nextTiming))
-        .speak(localizedMessages.responses.SETUP_TIMINGS)
-        .getResponse()
-};
 
 module.exports = {
     handle
