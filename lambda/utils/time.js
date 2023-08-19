@@ -10,30 +10,14 @@ const fhirTiming = require("../fhir/timing");
 function requestsNeedStartDate(requests) {
     for (const request of requests) {
         if (request.resourceType === 'MedicationRequest') {
-            for (const instruction of request.dosageInstruction) {
-                if (fhirTiming.timingNeedsStartDate(instruction.timing) || fhirTiming.timingNeedsStartTime(instruction.timing)) {
-                    return {
-                        type: 'MedicationRequest',
-                        id: instruction.id,
-                        name: request.medicationReference.display,
-                        duration: instruction.timing?.repeat?.boundsDuration.value,
-                        durationUnit: instruction.timing?.repeat?.boundsDuration.unit,
-                        frequency: instruction.timing?.repeat?.frequency,
-                        timing: instruction.timing
-                    };
-                }
+            const customResource = buildCustomMedicationRequest(request);
+            if (customResource) {
+                return customResource;
             }
         } else if (request.resourceType === 'ServiceRequest') {
-            if (fhirTiming.timingNeedsStartDate(request.occurrenceTiming) || fhirTiming.timingNeedsStartTime(request.occurrenceTiming) ) {
-                return {
-                    type: 'ServiceRequest',
-                    id: request.id,
-                    name: request.code.coding[0].display,
-                    duration: request.occurrenceTiming?.repeat?.boundsDuration.value,
-                    durationUnit: request.occurrenceTiming?.repeat?.boundsDuration.unit,
-                    frequency: request.occurrenceTiming.repeat.frequency,
-                    timing: request.occurrenceTiming
-                }
+            const customResource = buildCustomServiceRequest(request)
+            if (customResource) {
+                return customResource;
             }
         }
     }
@@ -89,6 +73,41 @@ function getSuggestedTiming(patient) {
     })
 
     return fhirTiming.relatedTimingCodeToString(suggestion);
+}
+
+function buildCustomMedicationRequest(medicationRequest) {
+    for (const instruction of medicationRequest.dosageInstruction) {
+        if (fhirTiming.timingNeedsStartDate(instruction.timing) || fhirTiming.timingNeedsStartTime(instruction.timing)) {
+            return {
+                type: 'MedicationRequest',
+                id: instruction.id,
+                name: medicationRequest.medicationReference.display,
+                duration: instruction.timing?.repeat?.boundsDuration.value,
+                durationUnit: instruction.timing?.repeat?.boundsDuration.unit,
+                frequency: instruction.timing?.repeat?.frequency,
+                timing: instruction.timing
+            };
+        }
+    }
+
+    return undefined;
+}
+
+function buildCustomServiceRequest(serviceRequest) {
+    const timing = serviceRequest.occurrenceTiming;
+    if (fhirTiming.timingNeedsStartDate(timing) || fhirTiming.timingNeedsStartTime(timing) ) {
+        return {
+            type: 'ServiceRequest',
+            id: serviceRequest.id,
+            name: serviceRequest.code.coding[0].display,
+            duration: timing?.repeat?.boundsDuration.value,
+            durationUnit: timing?.repeat?.boundsDuration.unit,
+            frequency: timing?.repeat.frequency,
+            timing: timing
+        }
+    }
+
+    return undefined;
 }
 
 module.exports = {

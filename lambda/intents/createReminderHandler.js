@@ -7,9 +7,9 @@ async function handle(handlerInput, patient, requests) {
     const userTimeZone = await timeUtil.getTimezoneOrDefault(handlerInput);
 
     // Check if start date setup is needed.
-    const requestsNeedStartDate = timeUtil.requestsNeedStartDate(requests);
-    if (requestsNeedStartDate) {
-        return intentUtil.switchContextToStartDate(handlerInput, requestsNeedStartDate, userTimeZone, localizedMessages);
+    const customResource = timeUtil.requestsNeedStartDate(requests);
+    if (customResource) {
+        return intentUtil.switchContextToStartDate(handlerInput, customResource, userTimeZone, localizedMessages);
     }
 
     // Create reminders

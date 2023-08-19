@@ -120,8 +120,6 @@ const SetStartDateInProgressIntentHandler = {
             && Alexa.getDialogState(handlerInput.requestEnvelope) !== 'COMPLETED';
     },
     async handle(handlerInput) {
-        // TODO this handler is not called
-        console.log("Reached: SetStartDateInProgressIntentHandler")
         const userInfo = await auth.getAuthorizedUser(handlerInput);
         if (!userInfo) {
             return requestAccountLink(handlerInput);
