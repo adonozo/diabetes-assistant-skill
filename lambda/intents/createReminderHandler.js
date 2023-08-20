@@ -15,7 +15,6 @@ async function handle(handlerInput, patient, requests) {
     // Create reminders
     const requestReminders = reminders.getRemindersForRequests({
         requests: requests,
-        patient: patient,
         timezone: userTimeZone,
         localizedMessages});
     const remindersApiClient = handlerInput.serviceClientFactory.getReminderManagementServiceClient();

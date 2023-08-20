@@ -1,6 +1,5 @@
 const fhirTiming = require("./timing");
-const {DateTime} = require("luxon");
-const fhirPatient = require("./patient");
+const time = require("../utils/time")
 
 /**
  * Gets the list of medication requests from a bundle.
@@ -76,7 +75,6 @@ function getMedicationText(request, timezone) {
 
 function getMedicationTextData({
     request,
-    patient,
     timezone,
     textProcessor,
     localizedMessages
@@ -84,62 +82,22 @@ function getMedicationTextData({
     const medicationData = [];
     const medication = request.medicationReference.display;
     request.dosageInstruction.forEach(dosage => {
-        const {start, end} = fhirTiming.getDatesFromTiming(dosage.timing);
+        const {start, end} = fhirTiming.getDatesFromTiming(dosage.timing, timezone);
         const {value, unit} = getMedicationValues(dosage);
-        if (dosage.timing.repeat.when && Array.isArray(dosage.timing.repeat.when) && dosage.timing.repeat.when.length > 0) {
-            dosage.timing.repeat.when.forEach(timing => {
-                const timingPreferences = fhirPatient.getTimingPreferences(patient);
-                const patientDate = timingPreferences.get(timing);
-                const dateTime = DateTime.fromISO(patientDate).setZone(timezone); // Date already in UTC
-                const processedText = textProcessor({
-                    value: value,
-                    unit: unit,
-                    medication: medication,
-                    timing: timing,
-                    dateTime: dateTime,
-                    start: start,
-                    end: end,
-                    frequency: dosage.timing.repeat.frequency,
-                    dayOfWeek: dosage.timing.repeat.dayOfWeek,
-                    localizedMessages: localizedMessages
-                })
-                medicationData.push(processedText)
-            });
-        } else if (dosage.timing.repeat.timeOfDay && Array.isArray(dosage.timing.repeat.timeOfDay) && dosage.timing.repeat.timeOfDay.length > 0) {
-            dosage.timing.repeat.timeOfDay.forEach(time => {  // Timing is in local time
-                const date = DateTime.utc();
-                const dateTime = DateTime.fromISO(`${date.toISODate()}T${time}Z`);
-                const processedText = textProcessor({
-                    value: value,
-                    unit: unit,
-                    medication: medication,
-                    timing: time,
-                    dateTime: dateTime,
-                    start: start,
-                    end: end,
-                    frequency: dosage.timing.repeat.frequency,
-                    dayOfWeek: dosage.timing.repeat.dayOfWeek,
-                    localizedMessages: localizedMessages
-                })
-                medicationData.push(processedText)
-            });
-        } else if (dosage.timing.repeat.frequency && dosage.timing.repeat.frequency > 0) {
-            const startDate = fhirTiming.getTimingStartDate(dosage.timing); // This is in UTC
-            const dateTime = DateTime.fromISO(startDate).setZone(timezone);
-            const processedText = textProcessor({
-                value: value,
-                unit: unit,
-                medication: medication,
-                timing: dateTime.toISOTime({ suppressSeconds: true, includeOffset: false }),
-                dateTime: dateTime,
-                start: start,
-                end: end,
-                frequency: dosage.timing.repeat.frequency,
-                dayOfWeek: dosage.timing.repeat.dayOfWeek,
-                localizedMessages: localizedMessages
-            })
-            medicationData.push(processedText)
-        }
+
+        const times = time.timesStringArraysFromTiming(dosage.timing);
+
+        const processedText = textProcessor({
+            value: value,
+            unit: unit,
+            medication: medication,
+            times: times,
+            start: start,
+            end: end,
+            dayOfWeek: dosage.timing.repeat.dayOfWeek,
+            localizedMessages: localizedMessages
+        });
+        medicationData.push(processedText)
     });
 
     return medicationData;

@@ -33,10 +33,9 @@ const responses = {
     REMINDER_NOT_CREATED: "Lo siento, no pude crear los recordatorios. Intenta nuevamente.",
 }
 
-function getMedicationReminderText(value, unit, medication, time) {
-    const regex = new RegExp('^[0-2][0-9]');
-    const timing = regex.test(time) ? `a las ${time}` : timingToText(time);
-    return `Toma ${value} ${unit} de ${medication} ${timing}`;
+function getMedicationReminderText(value, unit, medication, times) {
+    const timeList = buildListTimesOrTimings(times);
+    return `Toma ${value} ${unit} de ${medication} ${timeList}`;
 }
 
 function getConfirmationDateText(requestName) {
@@ -48,30 +47,34 @@ function getSuggestedTimeText(mealCode) {
     return `¿Esta medida es antes ${meal}, después ${meal}, o ninguno?`
 }
 
-function getMedicationSsmlReminderText(value, unit, medication, time) {
-    const message = `Toma ${value} ${unit} de ${medication} ${timingString(time)}`;
+function getMedicationSsmlReminderText(value, unit, medication, times) {
+    const stringTimes = times.map((time, index) => timingString(time, index === 0 ? 'a las ' : ''));
+    const timeList = helpers.listItems(stringTimes, responses.CONCAT_WORD);
+    const message = `Toma ${value} ${unit} de ${medication} ${timeList}`;
     return helpers.wrapSpeakMessage(message);
 }
 
-function getServiceReminderText(action, time) {
-    const regex = new RegExp('^[0-2][0-9]');
-    const timing = regex.test(time) ? `a las ${time}` : timingToText(time);
-    return `${action} ${timing}`;
+function getServiceReminderText(action, times) {
+    const timeList = buildListTimesOrTimings(times);
+    return `${action} ${timeList}`;
 }
 
-function getServiceSsmlReminderText(action, time) {
-    const message = `${action} ${timingString(time)}`
+function getServiceSsmlReminderText(action, times) {
+    const stringTimes = times.map((time, index) => timingString(time, index === 0 ? 'a las ' : ''));
+    const timeList = helpers.listItems(stringTimes, responses.CONCAT_WORD);
+    const message = `${action} ${timeList}`;
     return helpers.wrapSpeakMessage(message);
 }
 
 /**
  * Convert a timing to a spoken string
  * @param timing: Can be a time (00:00 - 23:59) or an event date
+ * @param preposition
  * @returns {string}: The text Alexa will tell
  */
-function timingString(timing) {
+function timingString(timing, preposition) {
     const regex = new RegExp('^[0-2][0-9]');
-    return regex.test(timing) ? `a las <say-as interpret-as="time">${timing}</say-as>` : timingToText(timing);
+    return regex.test(timing) ? `${preposition}<say-as interpret-as="time">${timing}</say-as>` : timingToText(timing);
 }
 
 function getStartDatePrompt(missingDate) {
@@ -188,12 +191,18 @@ function getNoRecordsTextForDay(date, userTimezone) {
  * @param serviceData {{action: string, timings: [string]}}
  */
 function makeServiceText(serviceData) {
+    const timeList = buildListTimesOrTimings(serviceData.timings);
+    return `${serviceData.action} ${timeList}`;
+}
+
+function buildListTimesOrTimings(timings) {
     const regex = new RegExp('^[0-2][0-9]');
-    const serviceHasTime = serviceData.timings.length > 0 && regex.test(serviceData.timings[0]);
-    const timingTextFunction = serviceHasTime ? getHoursAndMinutesFromString : timingToText;
-    const preposition = serviceHasTime ? 'a las ' : '';
-    const timings = serviceData.timings.map(time => timingTextFunction(time));
-    return `${serviceData.action} ${preposition} ${helpers.listItems(timings, responses.CONCAT_WORD)}`;
+    const hasTime = timings.length > 0 && regex.test(timings[0]);
+    const timingTextFunction = hasTime ? getHoursAndMinutesFromString : timingToText;
+    const timeList = timings.map(time => timingTextFunction(time));
+
+    const preposition = hasTime ? 'a las ' : ' ';
+    return preposition + helpers.listItems(timeList, responses.CONCAT_WORD);
 }
 
 function timingToText(timing) {

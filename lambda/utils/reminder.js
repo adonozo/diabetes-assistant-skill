@@ -48,7 +48,6 @@ const absoluteReminderRequest = {
 
 function getRemindersForRequests({
     requests,
-    patient,
     timezone,
     localizedMessages
 }) {
@@ -57,13 +56,11 @@ function getRemindersForRequests({
     return [
         ...getRemindersForMedicationRequests({
             requests: medicationRequests,
-            patient,
             timezone,
             localizedMessages
         }),
         ...getRemindersForServiceRequests({
             requests: serviceRequests,
-            patient,
             timezone,
             localizedMessages
         })
@@ -72,18 +69,17 @@ function getRemindersForRequests({
 
 function getRemindersForMedicationRequests({
    requests,
-   patient,
    timezone,
    localizedMessages
 }) {
     const currentDateTime = DateTime.utc();
-    return requests.map(request => fhirMedicationRequest.getMedicationTextData({
-        request,
-        patient,
-        timezone,
-        textProcessor: getBaseMedicationReminder,
-        localizedMessages
-    }))
+    return requests
+        .map(request => fhirMedicationRequest.getMedicationTextData({
+            request,
+            timezone,
+            textProcessor: getBaseMedicationReminder,
+            localizedMessages
+        }))
         .flat(1)
         .filter(data => data.end > currentDateTime)
         .map(data => {
@@ -105,18 +101,17 @@ function getRemindersForMedicationRequests({
 
 function getRemindersForServiceRequests({
     requests,
-    patient,
     timezone,
     localizedMessages
 }) {
     const currentDateTime = DateTime.utc();
-    return requests.map(request => fhirServiceRequest.getServiceTextData({
-        request,
-        patient,
-        timezone,
-        textProcessor: getBaseServiceReminder,
-        localizedMessages
-    }))
+    return requests
+        .map(request => fhirServiceRequest.getServiceTextData({
+            request,
+            timezone,
+            textProcessor: getBaseServiceReminder,
+            localizedMessages
+        }))
         .flat(1)
         .filter(data => data.end > currentDateTime)
         .map(data => {
@@ -140,17 +135,15 @@ function getBaseMedicationReminder({
     value,
     unit,
     medication,
-    timing,
-    dateTime,
+    times,
     start,
     end,
-    frequency,
     dayOfWeek,
     localizedMessages
 }){
-    const text = localizedMessages.getMedicationReminderText(value, unit, medication, timing);
-    const ssml = localizedMessages.getMedicationSsmlReminderText(value, unit, medication, timing);
-    const rule = getRRule(dateTime, frequency, dayOfWeek);
+    const text = localizedMessages.getMedicationReminderText(value, unit, medication, times);
+    const ssml = localizedMessages.getMedicationSsmlReminderText(value, unit, medication, times);
+    const rule = getRRule(hour, minute, dayOfWeek); // TODO get hour & minute
 
     return {
         text: text,
@@ -164,17 +157,15 @@ function getBaseMedicationReminder({
 
 function getBaseServiceReminder({
     action,
-    timing,
-    dateTime,
+    times,
     start,
     end,
-    frequency,
     dayOfWeek,
     localizedMessages
 }) {
-    const text = localizedMessages.getServiceReminderText(action, timing);
-    const ssml = localizedMessages.getServiceSsmlReminderText(action, timing);
-    const rule = getRRule(dateTime, frequency, dayOfWeek);
+    const text = localizedMessages.getServiceReminderText(action, times);
+    const ssml = localizedMessages.getServiceSsmlReminderText(action, times);
+    const rule = getRRule(hour, minute, dayOfWeek); // TODO get hour & minute
     return {
         text: text,
         ssml: ssml,
@@ -185,52 +176,34 @@ function getBaseServiceReminder({
     };
 }
 
-function getRRule(dateTime, frequency, days) {
-    let rule;
-    if (frequency && frequency > 1) {
-        rule = getFrequencyRrule(dateTime, frequency)
-    } else if(days && Array.isArray(days) && days.length > 0) {
-        rule = getWeeklyRrule(dateTime, days);
-    } else {
-        rule = [getDailyRrule(dateTime)];
-    }
+// TODO hour and minute must be set from the dialog
+/**
+ * Gets a RRule at the specified time: {hour:minute}
+ * @param hour The reminder hour
+ * @param minute The reminder minute
+ * @param days The days when the reminder is valid. If empty, reminders are for all week
+ * @returns {*[]}
+ */
+const getRRule = (hour, minute, days = []) => days && Array.isArray(days) && days.length > 0 ?
+    specificDaysRrule(hour, minute, days)
+    : [everyDayRrule(hour, minute)]
 
-    return rule;
-}
-
-const getDailyRrule = (dateTime) => new RRule({
+const everyDayRrule = (hour, minute) => new RRule({
     freq: RRule.DAILY,
     interval: 1,
-    byhour: dateTime.hour,
-    byminute: dateTime.minute,
+    byhour: hour,
+    byminute: minute,
 }).toString().replace('RRULE:', '');
 
-const getFrequencyRrule = (dateTime, frequency) => {
-    const rules = [];
-    const hoursDifference = 24 / frequency;
-    for (let i = 0; i < frequency; i++) {
-        const frequencyDate = dateTime.plus({hours: i * hoursDifference});
-        const rule = new RRule({
-            freq: RRule.DAILY,
-            interval: 1,
-            byhour: frequencyDate.hour,
-            byminute: frequencyDate.minute,
-        }).toString().replace('RRULE:', '');
-        rules.push(rule);
-    }
-
-    return rules;
-}
-
-const getWeeklyRrule = (dateTime, days) => days.map(day => fhirTiming.dayToRruleDay(day))
-    .map(day =>
-        new RRule({
+const specificDaysRrule = (hour, minute, days) => days.map(day => fhirTiming.dayToRruleDay(day))
+    .map(day => new RRule({
             freq: RRule.WEEKLY,
             byweekday: day,
-            byhour: dateTime.hour,
-            byminute: dateTime.minute,
+            byhour: hour,
+            byminute: minute,
             interval: 1
-        }).toString().replace('RRULE:', '')
+        })
+        .toString().replace('RRULE:', '')
     );
 
 function createAbsoluteReminder({

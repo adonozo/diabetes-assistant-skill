@@ -110,11 +110,43 @@ function buildCustomServiceRequest(serviceRequest) {
     return undefined;
 }
 
+function timesStringArraysFromTiming(timing) {
+    let times;
+    if (timing.repeat.when && Array.isArray(timing.repeat.when) && timing.repeat.when.length > 0) {
+        times = timing.repeat.when;
+    } else if (timing.repeat.timeOfDay && Array.isArray(timing.repeat.timeOfDay) && timing.repeat.timeOfDay.length > 0) {
+        times = timing.repeat.timeOfDay;
+    } else {
+        const startTime = fhirTiming.getTimingStartTime(timing);
+        times = frequencyTimesStringArray(startTime, timing.repeat.frequency, timezone).sort();
+    }
+
+    return times;
+}
+
+/**
+ *
+ * @param startTime The event's start time
+ * @param frequency How many times in the day
+ * @param timezone Patient's timezone
+ * @return {string[]}
+ */
+function frequencyTimesStringArray(startTime, frequency, timezone) {
+    const now = DateTime.local({zone: timezone});
+    const startDateTime = DateTime.fromISO(`${now.toISODate()}T${startTime}`, {zone: timezone});
+    const hoursDifference = 24 / frequency;
+    return [Array(hoursDifference).keys()]
+        .map(index => startDateTime.plus({hours: index * hoursDifference}))
+        .map(dateTime => dateTime.toISOTime({ suppressSeconds: true, includeOffset: false }));
+}
+
 module.exports = {
     getTimezoneOrDefault,
     utcDateFromLocalDate,
     utcTimeFromLocalTime,
     utcDateTimeFromLocalDateAndTime,
     getSuggestedTiming,
-    requestsNeedStartDate
+    requestsNeedStartDate,
+    frequencyTimesStringArray,
+    timesStringArraysFromTiming
 }
