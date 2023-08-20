@@ -52,7 +52,7 @@ function getServiceTextData({
 
     request.contained.forEach(contained => {
         const timing = contained.occurrenceTiming;
-        const times = timeUtil.timesStringArraysFromTiming(timing);
+        const times = timeUtil.timesStringArraysFromTiming(timing, timezone);
 
         const processedText = textProcessor({
             time,

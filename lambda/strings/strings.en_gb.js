@@ -137,8 +137,9 @@ function getHoursAndMinutes(date) {
 }
 
 function getHoursAndMinutesFromString(time) {
-    const minutes = time.substring(3) === "00" ? "o'clock" : time.substring(3)
-    return `${+time.substring(0,2)} ${minutes}`;
+    const timeParts = time.split(':');
+    const minutes = timeParts[1] === "00" ? "o'clock" : timeParts[1]
+    return `${+timeParts[0]} ${minutes}`;
 }
 
 /**

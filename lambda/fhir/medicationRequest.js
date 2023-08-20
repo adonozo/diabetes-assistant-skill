@@ -86,7 +86,7 @@ function getMedicationTextData({
         const {start, end} = fhirTiming.getDatesFromTiming(dosage.timing, timezone);
         const {value, unit} = getMedicationValues(dosage);
 
-        const times = timeUtil.timesStringArraysFromTiming(dosage.timing);
+        const times = timeUtil.timesStringArraysFromTiming(dosage.timing, timezone);
 
         const processedText = textProcessor({
             time,

@@ -20,7 +20,7 @@ function getTimingStartDate(timing, timezone = DEFAULT_TIMEZONE) {
         return undefined;
     }
 
-    const date = tryParseDate(startDateExtension.valueDateTime, timezone);
+    const date = tryParseDate(startDateExtension.valueString, timezone);
     if (date) {
         return date;
     }
@@ -200,13 +200,13 @@ const compareWhen = (a, b) => {
 
 /**
  *
- * @param datetime
+ * @param date
  * @param timezone
  * @returns {undefined|DateTime}
  */
-const tryParseDate = (datetime, timezone = DEFAULT_TIMEZONE) => {
+const tryParseDate = (date, timezone = DEFAULT_TIMEZONE) => {
     try {
-        return DateTime.fromISO(datetime, {zone: timezone});
+        return DateTime.fromISO(date, {zone: timezone});
     } catch (e) {
         return undefined;
     }

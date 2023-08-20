@@ -94,23 +94,26 @@ function buildCustomMedicationRequest(medicationRequest) {
 }
 
 function buildCustomServiceRequest(serviceRequest) {
-    const timing = serviceRequest.occurrenceTiming;
-    if (fhirTiming.timingNeedsStartDate(timing) || fhirTiming.timingNeedsStartTime(timing) ) {
-        return {
-            type: 'ServiceRequest',
-            id: serviceRequest.id,
-            name: serviceRequest.code.coding[0].display,
-            duration: timing?.repeat?.boundsDuration.value,
-            durationUnit: timing?.repeat?.boundsDuration.unit,
-            frequency: timing?.repeat.frequency,
-            timing: timing
+    for (const request of serviceRequest.contained)
+    {
+        const timing = request.occurrenceTiming;
+        if (fhirTiming.timingNeedsStartDate(timing) || fhirTiming.timingNeedsStartTime(timing) ) {
+            return {
+                type: 'ServiceRequest',
+                id: serviceRequest.id,
+                name: serviceRequest.code.coding[0].display,
+                duration: timing?.repeat?.boundsDuration.value,
+                durationUnit: timing?.repeat?.boundsDuration.unit,
+                frequency: timing?.repeat.frequency,
+                timing: timing
+            }
         }
     }
 
     return undefined;
 }
 
-function timesStringArraysFromTiming(timing) {
+function timesStringArraysFromTiming(timing, timezone) {
     let times;
     if (timing.repeat.when && Array.isArray(timing.repeat.when) && timing.repeat.when.length > 0) {
         times = timing.repeat.when;
@@ -134,16 +137,20 @@ function timesStringArraysFromTiming(timing) {
 function frequencyTimesStringArray(startTime, frequency, timezone) {
     const now = DateTime.local({zone: timezone});
     const startDateTime = DateTime.fromISO(`${now.toISODate()}T${startTime}`, {zone: timezone});
+    if (frequency === 1) {
+        return [startDateTime.toISOTime({ suppressSeconds: true, includeOffset: false })]
+    }
+
     const hoursDifference = 24 / frequency;
-    return [Array(hoursDifference).keys()]
+
+    return [...Array(frequency).keys()]
         .map(index => startDateTime.plus({hours: index * hoursDifference}))
         .map(dateTime => dateTime.toISOTime({ suppressSeconds: true, includeOffset: false }));
 }
 
 function getHoursAndMinutes(stringTime) {
-    const now = DateTime.local({zone: timezone});
-    const dateTime = DateTime.fromISO(`${now.toISODate()}T${stringTime}`);
-    return {hour: dateTime.hour, minute: dateTime.minute};
+    const timeParts = stringTime.split(':');
+    return {hour: timeParts[0], minute: timeParts[1]};
 }
 
 module.exports = {

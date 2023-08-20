@@ -137,8 +137,9 @@ function getHoursAndMinutes(date) {
 }
 
 function getHoursAndMinutesFromString(time) {
-    const minutes = time.substring(3) === "00" ? "en punto" : time.substring(3)
-    return `${+time.substring(0,2)} ${minutes}`;
+    const timeParts = time.split(':');
+    const minutes = timeParts[1] === "00" ? "en punto" : timeParts[1]
+    return `${+timeParts[0]} ${minutes}`;
 }
 
 /**
@@ -195,13 +196,18 @@ function makeServiceText(serviceData) {
     return `${serviceData.action} ${timeList}`;
 }
 
+// TODO improve time listing :
+/*
+"text": "Toma 1 TAB de Metformin 500mg tablets a las  8 en punto y 20 en punto.",
+"ssml": "<speak>Toma 1 TAB de Metformin 500mg tablets  a las <say-as interpret-as=\"time\">08:00</say-as> y <say-as interpret-as=\"time\">20:00</say-as>.</speak>"
+ */
 function buildListTimesOrTimings(timings) {
     const regex = new RegExp('^[0-2][0-9]');
     const hasTime = timings.length > 0 && regex.test(timings[0]);
     const timingTextFunction = hasTime ? getHoursAndMinutesFromString : timingToText;
     const timeList = timings.map(time => timingTextFunction(time));
 
-    const preposition = hasTime ? 'a las ' : ' ';
+    const preposition = hasTime ? 'a las ' : '';
     return preposition + helpers.listItems(timeList, responses.CONCAT_WORD);
 }
 
