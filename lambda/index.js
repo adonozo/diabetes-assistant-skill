@@ -31,6 +31,10 @@ const LaunchRequestHandler = {
     }
 };
 
+/**
+ * @deprecated
+ * @type {{canHandle(*): *, handle(*): Promise<*>}}
+ */
 const CreateMedicationReminderIntentHandler = {
     canHandle(handlerInput) {
         return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
@@ -54,10 +58,11 @@ const CreateMedicationReminderIntentHandler = {
     }
 }
 
-const CreateRemindersIntentHandler = {
+const CreateRemindersInProgressIntentHandler = {
     canHandle(handlerInput) {
         return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
-            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'CreateRemindersIntent';
+            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'CreateRemindersIntent'
+            && Alexa.getDialogState(handlerInput.requestEnvelope) !== 'COMPLETED';
     },
     async handle(handlerInput) {
         const {permissions} = handlerInput.requestEnvelope.context.System.user;
@@ -70,10 +75,28 @@ const CreateRemindersIntentHandler = {
             return requestAccountLink(handlerInput);
         }
 
-        const self = await patientsApi.getSelf(userInfo.username);
-        const requestBundle = await carePlanApi.getActiveCarePlan(userInfo.username);
-        const requests = fhirCarePlan.requestListFromBundle(requestBundle);
-        return createReminderHandler.handle(handlerInput, self, requests);
+        return createReminderHandler.handleValidation(handlerInput, userInfo.username);
+    }
+}
+
+const CreateRemindersCompleteIntentHandler = {
+    canHandle(handlerInput) {
+        return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
+            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'CreateRemindersIntent'
+            && Alexa.getDialogState(handlerInput.requestEnvelope) === 'COMPLETED';
+    },
+    async handle(handlerInput) {
+        const {permissions} = handlerInput.requestEnvelope.context.System.user;
+        if (!permissions) {
+            return requestReminderPermission(handlerInput);
+        }
+
+        const userInfo = await auth.getAuthorizedUser(handlerInput);
+        if (!userInfo) {
+            return requestAccountLink(handlerInput);
+        }
+
+        return createReminderHandler.handle(handlerInput, userInfo.username);
     }
 }
 
@@ -445,7 +468,8 @@ exports.handler = Alexa.SkillBuilders.custom()
     .addRequestHandlers(
         LaunchRequestHandler,
         CreateMedicationReminderIntentHandler,
-        CreateRemindersIntentHandler,
+        CreateRemindersInProgressIntentHandler,
+        CreateRemindersCompleteIntentHandler,
         GetMedicationToTakeIntentHandler,
         ConnectionsResponseHandler,
         HelpIntentHandler,

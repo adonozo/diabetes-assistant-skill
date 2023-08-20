@@ -3,6 +3,11 @@ const fhir = require("./fhir");
 
 const TIMING_PREFERENCES = 'http://diabetes-assistant.com/fhir/StructureDefinition/TimingPreference'
 
+/**
+ * @deprecated patient preferences are no longer supported
+ * @param patient
+ * @returns {Map<any, any>}
+ */
 function getTimingPreferences(patient) {
     const timingExtension = fhir.getExtension(patient, TIMING_PREFERENCES);
     const preferences = new Map();

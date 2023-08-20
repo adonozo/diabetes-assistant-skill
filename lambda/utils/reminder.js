@@ -3,6 +3,7 @@ const {DateTime} = require("luxon");
 const fhirTiming = require("./../fhir/timing");
 const fhirMedicationRequest = require("./../fhir/medicationRequest");
 const fhirServiceRequest = require("./../fhir/serviceRequest");
+const timeUtil = require("./time");
 
 const reminderDirective = {
     type: "Connections.SendRequest",
@@ -48,6 +49,7 @@ const absoluteReminderRequest = {
 
 function getRemindersForRequests({
     requests,
+    time,
     timezone,
     localizedMessages
 }) {
@@ -56,11 +58,13 @@ function getRemindersForRequests({
     return [
         ...getRemindersForMedicationRequests({
             requests: medicationRequests,
+            time,
             timezone,
             localizedMessages
         }),
         ...getRemindersForServiceRequests({
             requests: serviceRequests,
+            time,
             timezone,
             localizedMessages
         })
@@ -68,14 +72,16 @@ function getRemindersForRequests({
 }
 
 function getRemindersForMedicationRequests({
-   requests,
-   timezone,
-   localizedMessages
+    requests,
+    time,
+    timezone,
+    localizedMessages
 }) {
     const currentDateTime = DateTime.utc();
     return requests
         .map(request => fhirMedicationRequest.getMedicationTextData({
             request,
+            time,
             timezone,
             textProcessor: getBaseMedicationReminder,
             localizedMessages
@@ -101,6 +107,7 @@ function getRemindersForMedicationRequests({
 
 function getRemindersForServiceRequests({
     requests,
+    time,
     timezone,
     localizedMessages
 }) {
@@ -108,6 +115,7 @@ function getRemindersForServiceRequests({
     return requests
         .map(request => fhirServiceRequest.getServiceTextData({
             request,
+            time,
             timezone,
             textProcessor: getBaseServiceReminder,
             localizedMessages
@@ -132,6 +140,7 @@ function getRemindersForServiceRequests({
 }
 
 function getBaseMedicationReminder({
+    time,
     value,
     unit,
     medication,
@@ -143,7 +152,8 @@ function getBaseMedicationReminder({
 }){
     const text = localizedMessages.getMedicationReminderText(value, unit, medication, times);
     const ssml = localizedMessages.getMedicationSsmlReminderText(value, unit, medication, times);
-    const rule = getRRule(hour, minute, dayOfWeek); // TODO get hour & minute
+    const {hour, minute} = timeUtil.getHoursAndMinutes(time);
+    const rule = getRRule(hour, minute, dayOfWeek);
 
     return {
         text: text,
@@ -156,6 +166,7 @@ function getBaseMedicationReminder({
 }
 
 function getBaseServiceReminder({
+    time,
     action,
     times,
     start,
@@ -165,7 +176,8 @@ function getBaseServiceReminder({
 }) {
     const text = localizedMessages.getServiceReminderText(action, times);
     const ssml = localizedMessages.getServiceSsmlReminderText(action, times);
-    const rule = getRRule(hour, minute, dayOfWeek); // TODO get hour & minute
+    const {hour, minute} = timeUtil.getHoursAndMinutes(time);
+    const rule = getRRule(hour, minute, dayOfWeek);
     return {
         text: text,
         ssml: ssml,
@@ -176,7 +188,6 @@ function getBaseServiceReminder({
     };
 }
 
-// TODO hour and minute must be set from the dialog
 /**
  * Gets a RRule at the specified time: {hour:minute}
  * @param hour The reminder hour

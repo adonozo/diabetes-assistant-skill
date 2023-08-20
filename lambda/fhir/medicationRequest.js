@@ -1,5 +1,5 @@
 const fhirTiming = require("./timing");
-const time = require("../utils/time")
+const timeUtil = require("../utils/time")
 
 /**
  * Gets the list of medication requests from a bundle.
@@ -75,6 +75,7 @@ function getMedicationText(request, timezone) {
 
 function getMedicationTextData({
     request,
+    time,
     timezone,
     textProcessor,
     localizedMessages
@@ -85,9 +86,10 @@ function getMedicationTextData({
         const {start, end} = fhirTiming.getDatesFromTiming(dosage.timing, timezone);
         const {value, unit} = getMedicationValues(dosage);
 
-        const times = time.timesStringArraysFromTiming(dosage.timing);
+        const times = timeUtil.timesStringArraysFromTiming(dosage.timing);
 
         const processedText = textProcessor({
+            time,
             value: value,
             unit: unit,
             medication: medication,

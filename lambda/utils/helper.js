@@ -10,7 +10,7 @@ function logMessage(name, object) {
 }
 
 const sessionValues = {
-    requestMissingDate: 'requestMissingDate',
+    requestMissingDate: 'RequestMissingDate',
     createMedicationReminderIntent: 'CreateMedicationReminderIntent',
     createRemindersIntent: 'CreateRemindersIntent',
     getMedicationToTakeIntent: 'GetMedicationToTakeIntent',

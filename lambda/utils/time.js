@@ -140,6 +140,12 @@ function frequencyTimesStringArray(startTime, frequency, timezone) {
         .map(dateTime => dateTime.toISOTime({ suppressSeconds: true, includeOffset: false }));
 }
 
+function getHoursAndMinutes(stringTime) {
+    const now = DateTime.local({zone: timezone});
+    const dateTime = DateTime.fromISO(`${now.toISODate()}T${stringTime}`);
+    return {hour: dateTime.hour, minute: dateTime.minute};
+}
+
 module.exports = {
     getTimezoneOrDefault,
     utcDateFromLocalDate,
@@ -148,5 +154,6 @@ module.exports = {
     getSuggestedTiming,
     requestsNeedStartDate,
     frequencyTimesStringArray,
-    timesStringArraysFromTiming
+    timesStringArraysFromTiming,
+    getHoursAndMinutes
 }

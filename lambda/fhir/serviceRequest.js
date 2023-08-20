@@ -1,6 +1,6 @@
 const fhirTiming = require("./timing");
 const fhir = require("./fhir");
-const time = require("../utils/time");
+const timeUtil = require("../utils/time");
 
 const SERVICE_REQUEST_START_DATE = 'http://diabetes-assistant.com/fhir/StructureDefinition/ServiceRequestStartDate';
 
@@ -36,6 +36,7 @@ function getServiceText(request, patient, timezone) {
 
 function getServiceTextData({
     request,
+    time,
     timezone,
     textProcessor,
     localizedMessages
@@ -51,9 +52,10 @@ function getServiceTextData({
 
     request.contained.forEach(contained => {
         const timing = contained.occurrenceTiming;
-        const times = time.timesStringArraysFromTiming(timing);
+        const times = timeUtil.timesStringArraysFromTiming(timing);
 
         const processedText = textProcessor({
+            time,
             action: action,
             times: times,
             start: start,
