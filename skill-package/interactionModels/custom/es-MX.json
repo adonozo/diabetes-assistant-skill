@@ -119,13 +119,27 @@
         },
         {
           "name": "CreateRemindersIntent",
-          "slots": [],
+          "slots": [
+            {
+              "name": "time",
+              "type": "AMAZON.TIME",
+              "samples": [
+                "a las {time}",
+                "a la {time}",
+                "{time}"
+              ]
+            }
+          ],
           "samples": [
             "Crea recordatorios",
+            "Crea recordatorios a las {time}",
+            "Crear recordatorios",
+            "Crear recordatorios a las {time}",
             "Recuérdame",
-            "Pon alarmas",
+            "Recuérdame a las {time}",
             "Pon recordatorios",
-            "Haz recordatorios"
+            "Haz recordatorios",
+            "Haz recordatorios a las {time}"
           ]
         },
         {
@@ -750,6 +764,23 @@
           ]
         },
         {
+          "name": "CreateRemindersIntent",
+          "confirmationRequired": false,
+          "delegationStrategy": "SKILL_RESPONSE",
+          "slots": [
+            {
+              "name": "time",
+              "type": "AMAZON.TIME",
+              "confirmationRequired": true,
+              "elicitationRequired": true,
+              "prompts": {
+                "confirmation": "Confirm.Slot.createRemindersIntent.time",
+                "elicitation": "Elicit.Slot.createRemindersIntent.time"
+              }
+            }
+          ]
+        },
+        {
           "name": "GetMedicationToTakeIntent",
           "confirmationRequired": false,
           "slots": [
@@ -865,6 +896,28 @@
           {
             "type": "PlainText",
             "value": "¿A qué hora?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.createRemindersIntent.time",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "¿A qué hora?"
+          }
+        ]
+      },
+      {
+        "id": "Confirm.Slot.createRemindersIntent.time",
+        "variations": [
+          {
+            "type": "SSML",
+            "value": "<speak>Escuché <say-as interpret-as=\"time\">{time}</say-as>, ¿es correcto?</speak>"
+          },
+          {
+            "type": "SSML",
+            "value": "<speak>¿Es <say-as interpret-as=\"time\">{time}</say-as> correcto?</speak>"
           }
         ]
       },
