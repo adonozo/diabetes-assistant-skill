@@ -54,28 +54,6 @@ function utcDateTimeFromLocalDateAndTime(date, time, timezone) {
     return utcDate.toISO();
 }
 
-// TODO update this to not use timing preferences
-function getSuggestedTiming(patient) {
-    const date = DateTime.utc();
-    let suggestion = fhirTiming.timingEvent.C;
-    let minHourDiff = 10;
-    const timingPreferences = fhirPatient.getTimingPreferences(patient);
-    if (!timingPreferences) {
-        return fhirTiming.relatedTimingCodeToString(suggestion);
-    }
-
-    timingPreferences.forEach((datetime, timing) => {
-        let hoursDifference = date.diff(datetime, ["days", "hours"]).toObject().hours;
-        hoursDifference = Math.abs(hoursDifference);
-        if (hoursDifference < 3 && hoursDifference < minHourDiff) {
-            minHourDiff = hoursDifference;
-            suggestion = timing;
-        }
-    })
-
-    return fhirTiming.relatedTimingCodeToString(suggestion);
-}
-
 function buildCustomMedicationRequest(medicationRequest) {
     for (const instruction of medicationRequest.dosageInstruction) {
         if (fhirTiming.timingNeedsStartDate(instruction.timing) || fhirTiming.timingNeedsStartTime(instruction.timing)) {
@@ -159,7 +137,6 @@ module.exports = {
     utcDateFromLocalDate,
     utcTimeFromLocalTime,
     utcDateTimeFromLocalDateAndTime,
-    getSuggestedTiming,
     requestsNeedStartDate,
     timesStringArraysFromTiming,
     getHoursAndMinutes

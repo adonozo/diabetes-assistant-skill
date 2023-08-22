@@ -171,8 +171,7 @@ const RegisterGlucoseLevelIntentInProgressWithValueHandler = {
         }
 
         const localizedMessages = getLocalizedStrings(handlerInput);
-        const self = await patientsApi.getSelf(userInfo.username);
-        const mealCode = timeUtil.getSuggestedTiming(self);
+        const mealCode = fhirTiming.relatedTimingCodeToString(fhirTiming.timingEvent.C); // TODO use a different text
         const message = localizedMessages.getSuggestedTimeText(mealCode);
         return handlerInput.responseBuilder
             .speak(message)
