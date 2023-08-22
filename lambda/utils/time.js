@@ -54,6 +54,7 @@ function utcDateTimeFromLocalDateAndTime(date, time, timezone) {
     return utcDate.toISO();
 }
 
+// TODO update this to not use timing preferences
 function getSuggestedTiming(patient) {
     const date = DateTime.utc();
     let suggestion = fhirTiming.timingEvent.C;
@@ -160,7 +161,6 @@ module.exports = {
     utcDateTimeFromLocalDateAndTime,
     getSuggestedTiming,
     requestsNeedStartDate,
-    frequencyTimesStringArray,
     timesStringArraysFromTiming,
     getHoursAndMinutes
 }

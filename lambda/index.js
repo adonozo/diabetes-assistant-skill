@@ -2,11 +2,7 @@ const Alexa = require('ask-sdk-core');
 const {DateTime} = require("luxon");
 const auth = require('./auth');
 
-const carePlanApi = require("./api/carePlan")
-const medicationRequests = require("./api/medicationRequest");
 const patientsApi = require("./api/patients");
-const fhirCarePlan = require("./fhir/carePlan");
-const fhirMedicationRequest = require("./fhir/medicationRequest");
 const fhirTiming = require("./fhir/timing");
 const createReminderHandler = require("./intents/createReminderHandler");
 const getGlucoseLevelHandler = require("./intents/getGlucoseLeveIHandler");
@@ -30,33 +26,6 @@ const LaunchRequestHandler = {
             .getResponse();
     }
 };
-
-/**
- * @deprecated
- * @type {{canHandle(*): *, handle(*): Promise<*>}}
- */
-const CreateMedicationReminderIntentHandler = {
-    canHandle(handlerInput) {
-        return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
-            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'CreateMedicationReminderIntent';
-    },
-    async handle(handlerInput) {
-        const {permissions} = handlerInput.requestEnvelope.context.System.user;
-        if (!permissions) {
-            return requestReminderPermission(handlerInput);
-        }
-
-        const userInfo = await auth.getAuthorizedUser(handlerInput);
-        if (!userInfo) {
-            return requestAccountLink(handlerInput);
-        }
-
-        const self = await patientsApi.getSelf(userInfo.username);
-        const medicationBundle = await medicationRequests.getActiveMedicationRequests(self.id);
-        const requests = fhirMedicationRequest.requestListFromBundle(medicationBundle);
-        return createReminderHandler.handle(handlerInput, self, requests);
-    }
-}
 
 const CreateRemindersInProgressIntentHandler = {
     canHandle(handlerInput) {
@@ -467,7 +436,6 @@ const ErrorHandler = {
 exports.handler = Alexa.SkillBuilders.custom()
     .addRequestHandlers(
         LaunchRequestHandler,
-        CreateMedicationReminderIntentHandler,
         CreateRemindersInProgressIntentHandler,
         CreateRemindersCompleteIntentHandler,
         GetMedicationToTakeIntentHandler,

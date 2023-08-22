@@ -10,21 +10,6 @@ function getSelf(email) {
     });
 }
 
-function updateTiming(email, timingUpdate) {
-    return new Promise((resolve, reject) => {
-        const data = JSON.stringify(timingUpdate);
-        const path = `/patients/${email}/timing`
-        const options = api.getOptionsFor(path, 'PUT');
-        options.headers = {
-            'Content-Type': 'application/json',
-            'Content-Length': data.length
-        }
-        const request = http.request(options, response => api.createJsonResponse(resolve, reject, response));
-        request.write(data);
-        request.end();
-    });
-}
-
 /**
  *
  * @param email {string} The patient's email
@@ -99,7 +84,6 @@ function getMedicationRequests(email, date, timing, timezone) {
 
 module.exports = {
     getSelf,
-    updateTiming,
     setDosageStartDate,
     setServiceRequestStartDate,
     saveBloodGlucoseLevel,

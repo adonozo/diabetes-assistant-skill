@@ -127,8 +127,6 @@ function requestNeedsStartTime(request) {
 }
 
 module.exports = {
-    requestListFromBundle,
-    getMedicationFromDosageId,
     getTextForMedicationRequests,
     getMedicationTextData,
     requestNeedsStartDate,

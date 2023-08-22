@@ -48,17 +48,6 @@
           ]
         },
         {
-          "name": "CreateMedicationReminderIntent",
-          "slots": [],
-          "samples": [
-            "Remind me to take my medications",
-            "Remind me my medications",
-            "Please remind me to take my medications",
-            "Remind me to take my pills",
-            "Please remind me my medications"
-          ]
-        },
-        {
           "name": "SetStartDateIntent",
           "slots": [
             {

@@ -61,19 +61,6 @@
           ]
         },
         {
-          "name": "CreateMedicationReminderIntent",
-          "slots": [],
-          "samples": [
-            "Recuérdame tomar mis medicamentos",
-            "Recuérdame tomar mis medicinas",
-            "Recuérdame mis medicinas",
-            "Recuérdame mis medicamentos",
-            "Házme recuerdo de tomar mis medicinas",
-            "Házme recuerdo de tomar mis medicamentos",
-            "Recuérdame tomar mis pastillas"
-          ]
-        },
-        {
           "name": "SetStartDateIntent",
           "slots": [
             {
