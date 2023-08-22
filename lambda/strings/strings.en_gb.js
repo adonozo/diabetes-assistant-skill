@@ -16,7 +16,6 @@ const responses = {
     ACCOUNT_LINK: "Your account is not linked. Add your account first in the Alexa app.",
     UPDATED_TIMING: "You have updated your timing for",
     SUCCESSFUL_REMINDERS: "Your reminders have been created, check the Alexa app to verify them.",
-    MEDICATIONS_REMINDERS_SETUP: 'Say "remind me my medications" if you want to continue setting up your reminders.',
     REQUESTS_REMINDERS_SETUP: 'Say "setup reminders" if you want to continue setting up your reminders.',
     SETUP_TIMINGS: "You need to set some timings first.",
     INVALID_BLOOD_GLUCOSE: "Sorry, I had trouble doing what you asked. Try again by saying: save my blood glucose level.",

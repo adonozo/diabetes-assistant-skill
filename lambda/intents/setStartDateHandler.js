@@ -75,9 +75,7 @@ function getStartDateConfirmedResponse(handlerInput, session, requestName) {
     let speakOutput = localizedMessages.getConfirmationDateText(requestName);
 
     let reprompt = localizedMessages.responses.HELP;
-    if (session[helper.sessionValues.createMedicationReminderIntent]) {
-        reprompt = localizedMessages.responses.MEDICATIONS_REMINDERS_SETUP;
-    } else if (session[helper.sessionValues.createRemindersIntent]) {
+    if (session[helper.sessionValues.createRemindersIntent]) {
         reprompt = localizedMessages.responses.REQUESTS_REMINDERS_SETUP;
     } else if (session[helper.sessionValues.carePlanIntent] || session[helper.sessionValues.getMedicationToTakeIntent]) {
         reprompt = localizedMessages.responses.QUERY_SETUP;

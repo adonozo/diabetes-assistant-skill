@@ -16,7 +16,6 @@ const responses = {
     ACCOUNT_LINK: "Tu cuenta no está enlazada. Primero añade tu cuenta en la applicación de Alexa en tu celular.",
     UPDATED_TIMING: "Has actualizado el tiempo para ",
     SUCCESSFUL_REMINDERS: "Tus recordatorios han sido creados. Mira la aplicación de Alexa en tu celular para verificar.",
-    MEDICATIONS_REMINDERS_SETUP: 'Dí "recuérdame tomar mis medicamentos" si deseas continuar creando tus recordatorios.',
     REQUESTS_REMINDERS_SETUP: 'Dí "crea recordatorios" si deseas continuar creando tus recordatorios.',
     SETUP_TIMINGS: "Primero necesito saber la hora para algunos eventos.",
     INVALID_BLOOD_GLUCOSE: 'Lo siento, tuve problemas para hacer lo que pediste. Intenta de nuevo diciéndo: "Registra mi nivel de azúcar en sangre"',
