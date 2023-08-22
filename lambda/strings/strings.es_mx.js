@@ -47,7 +47,7 @@ function getSuggestedTimeText(mealCode) {
 }
 
 function getMedicationSsmlReminderText(value, unit, medication, times) {
-    const stringTimes = times.map((time, index) => timingString(time, 'a las '));
+    const stringTimes = times.map((time) => timingString(time, 'a las '));
     const timeList = helpers.listItems(stringTimes, responses.CONCAT_WORD);
     const message = `Toma ${value} ${unit} de ${medication} ${timeList}`;
     return helpers.wrapSpeakMessage(message);
@@ -59,7 +59,7 @@ function getServiceReminderText(action, times) {
 }
 
 function getServiceSsmlReminderText(action, times) {
-    const stringTimes = times.map((time, index) => timingString(time, 'a las '));
+    const stringTimes = times.map((time) => timingString(time, 'a las '));
     const timeList = helpers.listItems(stringTimes, responses.CONCAT_WORD);
     const message = `${action} ${timeList}`;
     return helpers.wrapSpeakMessage(message);
