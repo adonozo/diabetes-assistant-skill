@@ -37,8 +37,8 @@ function listItems(values, concatWord) {
     }
 
     const joinComma = values.length > 2 ? ',' : ''
-    return values.map((value, index) =>
-        index === values.length - 1 ? ` ${concatWord} ${value}.` : ` ${value}`)
+    return values
+        .map((value, index) => index === values.length - 1 ? ` ${concatWord} ${value}.` : ` ${value}`)
         .join(joinComma)
 }
 

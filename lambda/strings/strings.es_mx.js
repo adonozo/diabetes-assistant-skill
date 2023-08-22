@@ -48,7 +48,7 @@ function getSuggestedTimeText(mealCode) {
 }
 
 function getMedicationSsmlReminderText(value, unit, medication, times) {
-    const stringTimes = times.map((time, index) => timingString(time, index === 0 ? 'a las ' : ''));
+    const stringTimes = times.map((time, index) => timingString(time, 'a las '));
     const timeList = helpers.listItems(stringTimes, responses.CONCAT_WORD);
     const message = `Toma ${value} ${unit} de ${medication} ${timeList}`;
     return helpers.wrapSpeakMessage(message);
@@ -60,7 +60,7 @@ function getServiceReminderText(action, times) {
 }
 
 function getServiceSsmlReminderText(action, times) {
-    const stringTimes = times.map((time, index) => timingString(time, index === 0 ? 'a las ' : ''));
+    const stringTimes = times.map((time, index) => timingString(time, 'a las '));
     const timeList = helpers.listItems(stringTimes, responses.CONCAT_WORD);
     const message = `${action} ${timeList}`;
     return helpers.wrapSpeakMessage(message);
@@ -139,7 +139,9 @@ function getHoursAndMinutes(date) {
 function getHoursAndMinutesFromString(time) {
     const timeParts = time.split(':');
     const minutes = timeParts[1] === "00" ? "en punto" : timeParts[1]
-    return `${+timeParts[0]} ${minutes}`;
+    let preposition = timeParts[1] === "01" ? 'a la' : 'a las';
+
+    return `${preposition} ${+timeParts[0]} ${minutes}`;
 }
 
 /**
@@ -163,7 +165,7 @@ function getTextForDay(date, timezone, datePreposition) {
 
     const month = referenceDate.month < 10 ? `0${referenceDate.month}` : referenceDate.month;
     const day = referenceDate.day < 10 ? `0${referenceDate.day}` : referenceDate.day;
-    return `${datePreposition} <say-as interpret-as="date">????${month}${day}</say-as>`;
+    return `${datePreposition} <say-as interpret-as="date">${month}${day}</say-as>`;
 }
 
 /**
@@ -196,11 +198,6 @@ function makeServiceText(serviceData) {
     return `${serviceData.action} ${timeList}`;
 }
 
-// TODO improve time listing :
-/*
-"text": "Toma 1 TAB de Metformin 500mg tablets a las  8 en punto y 20 en punto.",
-"ssml": "<speak>Toma 1 TAB de Metformin 500mg tablets  a las <say-as interpret-as=\"time\">08:00</say-as> y <say-as interpret-as=\"time\">20:00</say-as>.</speak>"
- */
 function buildListTimesOrTimings(timings) {
     const regex = new RegExp('^[0-2][0-9]');
     const hasTime = timings.length > 0 && regex.test(timings[0]);
