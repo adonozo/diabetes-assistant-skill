@@ -151,7 +151,7 @@ function getDatesFromTiming(timing, timezone = DEFAULT_TIMEZONE) {
 }
 
 /**
- * @deprecated Use the version in time.js instead
+ * Gets an array of times within a day given a frequency and start time
  * @param frequency {number}
  * @param startTime {string}
  * @param timezone {string}
@@ -161,12 +161,10 @@ function getTimesFromTimingWithFrequency(frequency, startTime, timezone) {
     const referenceDate = DateTime.utc().setZone(timezone).startOf('day');
     const localDate = DateTime.fromISO(referenceDate.toISODate() + `T${startTime}`, {zone: timezone});
     const hoursDifference = 24 / frequency;
-    const times = [];
-    for (let i = 0; i < frequency; i++) {
-        times.push(localDate.plus({hours: i * hoursDifference}).toISOTime({ suppressSeconds: true, includeOffset: false }));
-    }
 
-    return times;
+    return [...Array(frequency).keys()]
+        .map(index => localDate.plus({hours: index * hoursDifference}))
+        .map(dateTime => dateTime.toISOTime({ suppressSeconds: true, includeOffset: false }));
 }
 
 function dayToRruleDay(day) {

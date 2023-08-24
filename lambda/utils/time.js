@@ -1,4 +1,3 @@
-const fhirPatient = require("../fhir/patient");
 const {Settings, DateTime} = require("luxon");
 const fhirTiming = require("../fhir/timing");
 
@@ -9,16 +8,11 @@ const fhirTiming = require("../fhir/timing");
  */
 function requestsNeedStartDate(requests) {
     for (const request of requests) {
-        if (request.resourceType === 'MedicationRequest') {
-            const customResource = buildCustomMedicationRequest(request);
-            if (customResource) {
-                return customResource;
-            }
-        } else if (request.resourceType === 'ServiceRequest') {
-            const customResource = buildCustomServiceRequest(request)
-            if (customResource) {
-                return customResource;
-            }
+        if (request.resourceType === 'MedicationRequest' && getDosageNeedingSetup(request) !== undefined) {
+            const dosage = getDosageNeedingSetup(request)
+            return buildCustomMedicationRequest(dosage, request.medicationReference.display);
+        } else if (request.resourceType === 'ServiceRequest' && serviceNeedsDateTimeSetup(request)) {
+            return buildCustomServiceRequest(request);
         }
     }
 
@@ -54,42 +48,29 @@ function utcDateTimeFromLocalDateAndTime(date, time, timezone) {
     return utcDate.toISO();
 }
 
-function buildCustomMedicationRequest(medicationRequest) {
-    for (const instruction of medicationRequest.dosageInstruction) {
-        if (fhirTiming.timingNeedsStartDate(instruction.timing) || fhirTiming.timingNeedsStartTime(instruction.timing)) {
-            return {
-                type: 'MedicationRequest',
-                id: instruction.id,
-                name: medicationRequest.medicationReference.display,
-                duration: instruction.timing?.repeat?.boundsDuration.value,
-                durationUnit: instruction.timing?.repeat?.boundsDuration.unit,
-                frequency: instruction.timing?.repeat?.frequency,
-                timing: instruction.timing
-            };
-        }
-    }
-
-    return undefined;
+function buildCustomMedicationRequest(dosageInstruction, medicationName) {
+    return {
+        type: 'MedicationRequest',
+        id: dosageInstruction.id,
+        name: medicationName,
+        duration: dosageInstruction.timing?.repeat?.boundsDuration.value,
+        durationUnit: dosageInstruction.timing?.repeat?.boundsDuration.unit,
+        frequency: dosageInstruction.timing?.repeat?.frequency,
+        timing: dosageInstruction.timing
+    };
 }
 
 function buildCustomServiceRequest(serviceRequest) {
-    for (const request of serviceRequest.contained)
-    {
-        const timing = request.occurrenceTiming;
-        if (fhirTiming.timingNeedsStartDate(timing) || fhirTiming.timingNeedsStartTime(timing) ) {
-            return {
-                type: 'ServiceRequest',
-                id: serviceRequest.id,
-                name: serviceRequest.code.coding[0].display,
-                duration: timing?.repeat?.boundsDuration.value,
-                durationUnit: timing?.repeat?.boundsDuration.unit,
-                frequency: timing?.repeat.frequency,
-                timing: timing
-            }
-        }
+    const timing = serviceRequest.occurrenceTiming;
+    return {
+        type: 'ServiceRequest',
+        id: serviceRequest.id,
+        name: serviceRequest.code.coding[0].display,
+        duration: timing?.repeat?.boundsDuration.value,
+        durationUnit: timing?.repeat?.boundsDuration.unit,
+        frequency: timing?.repeat.frequency,
+        timing: timing
     }
-
-    return undefined;
 }
 
 function timesStringArraysFromTiming(timing, timezone) {
@@ -100,36 +81,24 @@ function timesStringArraysFromTiming(timing, timezone) {
         times = timing.repeat.timeOfDay;
     } else {
         const startTime = fhirTiming.getTimingStartTime(timing);
-        times = frequencyTimesStringArray(startTime, timing.repeat.frequency, timezone).sort();
+        times = fhirTiming.getTimesFromTimingWithFrequency(timing.repeat.frequency, startTime, timezone).sort();
     }
 
     return times;
 }
 
-/**
- *
- * @param startTime The event's start time
- * @param frequency How many times in the day
- * @param timezone Patient's timezone
- * @return {string[]}
- */
-function frequencyTimesStringArray(startTime, frequency, timezone) {
-    const now = DateTime.local({zone: timezone});
-    const startDateTime = DateTime.fromISO(`${now.toISODate()}T${startTime}`, {zone: timezone});
-    if (frequency === 1) {
-        return [startDateTime.toISOTime({ suppressSeconds: true, includeOffset: false })]
-    }
-
-    const hoursDifference = 24 / frequency;
-
-    return [...Array(frequency).keys()]
-        .map(index => startDateTime.plus({hours: index * hoursDifference}))
-        .map(dateTime => dateTime.toISOTime({ suppressSeconds: true, includeOffset: false }));
-}
-
 function getHoursAndMinutes(stringTime) {
     const timeParts = stringTime.split(':');
     return {hour: timeParts[0], minute: timeParts[1]};
+}
+
+function serviceNeedsDateTimeSetup(serviceRequest) {
+    return fhirTiming.timingNeedsStartDate(serviceRequest.occurrenceTiming) || fhirTiming.timingNeedsStartTime(serviceRequest.occurrenceTiming);
+}
+
+function getDosageNeedingSetup(medicationRequest) {
+    return medicationRequest.dosageInstruction
+        .find(dosage => fhirTiming.timingNeedsStartDate(dosage.timing) || fhirTiming.timingNeedsStartTime(dosage.timing));
 }
 
 module.exports = {
