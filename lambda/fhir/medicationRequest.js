@@ -1,41 +1,6 @@
 const fhirTiming = require("./timing");
 const timeUtil = require("../utils/time")
 
-/**
- * Gets the list of medication requests from a bundle.
- * @param bundle
- * @returns {*[]}
- */
-function requestListFromBundle(bundle) {
-    if (!bundle.entry || bundle.entry.length === 0) {
-        return [];
-    }
-
-    return bundle.entry.filter(entry => entry.resource.resourceType === "MedicationRequest").map(item => item.resource)
-}
-
-/**
- * Gets the medication name from a dosage ID, to present it to the patient
- * @param dosageId {string} The dosage ID to look for.
- * @param requests {[]} The list of medication requests.
- * @returns {{name: string, duration: number}}
- */
-function getMedicationFromDosageId(dosageId, requests) {
-    let result = {name: '', duration: 0};
-    requests.forEach(request =>
-        request.dosageInstruction.forEach(instruction =>
-        {
-            if (instruction.id === dosageId) {
-                result = {
-                    name: request.medicationReference.display,
-                    duration: instruction.timing?.repeat?.boundsDuration.value
-                }
-            }
-        }));
-
-    return result;
-}
-
 function getTextForMedicationRequests(requests, timezone, localizedMessages) {
     return requests.map(request => getMedicationText(request, timezone))
         .map(data => localizedMessages.makeMedicationText(data))
