@@ -175,10 +175,9 @@ function makeMedicationText(medicationData) {
     const doseTextArray = medicationData.dose.map(dose => {
         const doseHasTime = dose.time.length > 0 && regex.test(dose.time[0]);
         const timingTextFunction = doseHasTime ? getHoursAndMinutesFromString: timingToText;
-        const preposition = doseHasTime ? 'a las' : '';
         const timings = dose.time.map(time => timingTextFunction(time));
         return timings.map(time =>
-            `${dose.value} ${unitsToStrings(dose.unit, +dose.value > 1)} ${preposition} ${time}`);
+            `${dose.value} ${unitsToStrings(dose.unit, +dose.value > 1)} ${time}`);
         })
         .flat(1);
     const doseText = helpers.listItems(doseTextArray, responses.CONCAT_WORD);
