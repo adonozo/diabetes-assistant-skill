@@ -48,17 +48,6 @@
           ]
         },
         {
-          "name": "CreateMedicationReminderIntent",
-          "slots": [],
-          "samples": [
-            "Remind me to take my medications",
-            "Remind me my medications",
-            "Please remind me to take my medications",
-            "Remind me to take my pills",
-            "Please remind me my medications"
-          ]
-        },
-        {
           "name": "SetStartDateIntent",
           "slots": [
             {
@@ -91,15 +80,29 @@
         },
         {
           "name": "CreateRemindersIntent",
-          "slots": [],
+          "slots": [
+            {
+              "name": "time",
+              "type": "AMAZON.TIME",
+              "samples": [
+                "at {time}",
+                "{time}",
+                "around {time}"
+              ]
+            }
+          ],
           "samples": [
             "Create reminders",
+            "Create reminders at {time}",
             "Set up reminders",
             "Set reminders",
+            "Set reminders at {time}",
             "Make reminders",
+            "Make reminders at {time}",
             "I want you create reminders",
             "I want you to setup reminders",
-            "Please create reminders"
+            "Please create reminders",
+            "Please create reminders at {time}"
           ]
         },
         {
@@ -707,6 +710,23 @@
           ]
         },
         {
+          "name": "CreateRemindersIntent",
+          "confirmationRequired": false,
+          "delegationStrategy": "SKILL_RESPONSE",
+          "slots": [
+            {
+              "name": "time",
+              "type": "AMAZON.TIME",
+              "confirmationRequired": true,
+              "elicitationRequired": true,
+              "prompts": {
+                "confirmation": "Confirm.Slot.createRemindersIntent.time",
+                "elicitation": "Elicit.Slot.createRemindersIntent.time"
+              }
+            }
+          ]
+        },
+        {
           "name": "GetMedicationToTakeIntent",
           "confirmationRequired": false,
           "slots": [
@@ -826,6 +846,28 @@
           {
             "type": "PlainText",
             "value": "At what time are your starting or have you started taking it?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.createRemindersIntent.time",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "At what time?"
+          }
+        ]
+      },
+      {
+        "id": "Confirm.Slot.createRemindersIntent.time",
+        "variations": [
+          {
+            "type": "SSML",
+            "value": "<speak>I heard <say-as interpret-as=\"time\">{time}</say-as>, is that correct?</speak>"
+          },
+          {
+            "type": "SSML",
+            "value": "<speak>Is <say-as interpret-as=\"time\">{time}</say-as> correct?</speak>"
           }
         ]
       },

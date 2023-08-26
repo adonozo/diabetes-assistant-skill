@@ -1,4 +1,3 @@
-const fhirPatient = require("../fhir/patient");
 const {Settings, DateTime} = require("luxon");
 const fhirTiming = require("../fhir/timing");
 
@@ -9,16 +8,11 @@ const fhirTiming = require("../fhir/timing");
  */
 function requestsNeedStartDate(requests) {
     for (const request of requests) {
-        if (request.resourceType === 'MedicationRequest') {
-            const customResource = buildCustomMedicationRequest(request);
-            if (customResource) {
-                return customResource;
-            }
-        } else if (request.resourceType === 'ServiceRequest') {
-            const customResource = buildCustomServiceRequest(request)
-            if (customResource) {
-                return customResource;
-            }
+        if (request.resourceType === 'MedicationRequest' && getDosageNeedingSetup(request) !== undefined) {
+            const dosage = getDosageNeedingSetup(request)
+            return buildCustomMedicationRequest(dosage, request.medicationReference.display);
+        } else if (request.resourceType === 'ServiceRequest' && serviceNeedsDateTimeSetup(request)) {
+            return buildCustomServiceRequest(request);
         }
     }
 
@@ -54,60 +48,57 @@ function utcDateTimeFromLocalDateAndTime(date, time, timezone) {
     return utcDate.toISO();
 }
 
-function getSuggestedTiming(patient) {
-    const date = DateTime.utc();
-    let suggestion = fhirTiming.timingEvent.C;
-    let minHourDiff = 10;
-    const timingPreferences = fhirPatient.getTimingPreferences(patient);
-    if (!timingPreferences) {
-        return fhirTiming.relatedTimingCodeToString(suggestion);
-    }
-
-    timingPreferences.forEach((datetime, timing) => {
-        let hoursDifference = date.diff(datetime, ["days", "hours"]).toObject().hours;
-        hoursDifference = Math.abs(hoursDifference);
-        if (hoursDifference < 3 && hoursDifference < minHourDiff) {
-            minHourDiff = hoursDifference;
-            suggestion = timing;
-        }
-    })
-
-    return fhirTiming.relatedTimingCodeToString(suggestion);
-}
-
-function buildCustomMedicationRequest(medicationRequest) {
-    for (const instruction of medicationRequest.dosageInstruction) {
-        if (fhirTiming.timingNeedsStartDate(instruction.timing) || fhirTiming.timingNeedsStartTime(instruction.timing)) {
-            return {
-                type: 'MedicationRequest',
-                id: instruction.id,
-                name: medicationRequest.medicationReference.display,
-                duration: instruction.timing?.repeat?.boundsDuration.value,
-                durationUnit: instruction.timing?.repeat?.boundsDuration.unit,
-                frequency: instruction.timing?.repeat?.frequency,
-                timing: instruction.timing
-            };
-        }
-    }
-
-    return undefined;
+function buildCustomMedicationRequest(dosageInstruction, medicationName) {
+    return {
+        type: 'MedicationRequest',
+        id: dosageInstruction.id,
+        name: medicationName,
+        duration: dosageInstruction.timing?.repeat?.boundsDuration.value,
+        durationUnit: dosageInstruction.timing?.repeat?.boundsDuration.unit,
+        frequency: dosageInstruction.timing?.repeat?.frequency,
+        timing: dosageInstruction.timing
+    };
 }
 
 function buildCustomServiceRequest(serviceRequest) {
     const timing = serviceRequest.occurrenceTiming;
-    if (fhirTiming.timingNeedsStartDate(timing) || fhirTiming.timingNeedsStartTime(timing) ) {
-        return {
-            type: 'ServiceRequest',
-            id: serviceRequest.id,
-            name: serviceRequest.code.coding[0].display,
-            duration: timing?.repeat?.boundsDuration.value,
-            durationUnit: timing?.repeat?.boundsDuration.unit,
-            frequency: timing?.repeat.frequency,
-            timing: timing
-        }
+    return {
+        type: 'ServiceRequest',
+        id: serviceRequest.id,
+        name: serviceRequest.code.coding[0].display,
+        duration: timing?.repeat?.boundsDuration.value,
+        durationUnit: timing?.repeat?.boundsDuration.unit,
+        frequency: timing?.repeat.frequency,
+        timing: timing
+    }
+}
+
+function timesStringArraysFromTiming(timing, timezone) {
+    let times;
+    if (timing.repeat.when && Array.isArray(timing.repeat.when) && timing.repeat.when.length > 0) {
+        times = timing.repeat.when;
+    } else if (timing.repeat.timeOfDay && Array.isArray(timing.repeat.timeOfDay) && timing.repeat.timeOfDay.length > 0) {
+        times = timing.repeat.timeOfDay;
+    } else {
+        const startTime = fhirTiming.getTimingStartTime(timing);
+        times = fhirTiming.getTimesFromTimingWithFrequency(timing.repeat.frequency, startTime, timezone).sort();
     }
 
-    return undefined;
+    return times;
+}
+
+function getHoursAndMinutes(stringTime) {
+    const timeParts = stringTime.split(':');
+    return {hour: timeParts[0], minute: timeParts[1]};
+}
+
+function serviceNeedsDateTimeSetup(serviceRequest) {
+    return fhirTiming.timingNeedsStartDate(serviceRequest.occurrenceTiming) || fhirTiming.timingNeedsStartTime(serviceRequest.occurrenceTiming);
+}
+
+function getDosageNeedingSetup(medicationRequest) {
+    return medicationRequest.dosageInstruction
+        .find(dosage => fhirTiming.timingNeedsStartDate(dosage.timing) || fhirTiming.timingNeedsStartTime(dosage.timing));
 }
 
 module.exports = {
@@ -115,6 +106,7 @@ module.exports = {
     utcDateFromLocalDate,
     utcTimeFromLocalTime,
     utcDateTimeFromLocalDateAndTime,
-    getSuggestedTiming,
-    requestsNeedStartDate
+    requestsNeedStartDate,
+    timesStringArraysFromTiming,
+    getHoursAndMinutes
 }

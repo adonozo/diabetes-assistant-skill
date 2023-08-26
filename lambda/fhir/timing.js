@@ -8,13 +8,19 @@ const TIMING_NEEDS_START_DATE = 'http://diabetes-assistant.com/fhir/StructureDef
 const TIMING_START_TIME = 'http://diabetes-assistant.com/fhir/StructureDefinition/TimingStartTime';
 const TIMING_NEEDS_START_TIME = 'http://diabetes-assistant.com/fhir/StructureDefinition/NeedsStartTimeFlag';
 
-function getTimingStartDate(timing) {
+/**
+ *
+ * @param timing
+ * @param timezone
+ * @returns {undefined|DateTime}
+ */
+function getTimingStartDate(timing, timezone = DEFAULT_TIMEZONE) {
     const startDateExtension = fhir.getExtension(timing, TIMING_START_DATE);
     if (!startDateExtension) {
         return undefined;
     }
 
-    const date = tryParseDate(startDateExtension.valueDateTime);
+    const date = tryParseDate(startDateExtension.valueString, timezone);
     if (date) {
         return date;
     }
@@ -120,18 +126,17 @@ function alexaTimingToFhirTiming(alexaTiming) {
     }
 }
 
-function getDatesFromTiming(timing) {
+function getDatesFromTiming(timing, timezone = DEFAULT_TIMEZONE) {
     if (timing.repeat.boundsPeriod) {
-        const startDate = DateTime.fromISO(timing.repeat.boundsPeriod.start);
-        const endDate = DateTime.fromISO(timing.repeat.boundsPeriod.end)
-            .plus({days: 1}); // Adds 1 to include the end date.
+        const startDate = DateTime.fromISO(timing.repeat.boundsPeriod.start, {zone: timezone});
+        const endDate = DateTime.fromISO(timing.repeat.boundsPeriod.end, {zone: timezone})
+            .plus({days: 1}); // End date inclusive
         return {
             start: startDate.toUTC(),
             end: endDate.toUTC()
         }
     } else if (timing.repeat.boundsDuration) {
-        const start = getTimingStartDate(timing);
-        const startDate = DateTime.fromISO(start, {zone: 'utc'});
+        const startDate = getTimingStartDate(timing, timezone);
         const endDate = addDurationToDate(startDate, timing.repeat.boundsDuration)
         return {
             start: startDate.toUTC(),
@@ -146,6 +151,7 @@ function getDatesFromTiming(timing) {
 }
 
 /**
+ * Gets an array of times within a day given a frequency and start time
  * @param frequency {number}
  * @param startTime {string}
  * @param timezone {string}
@@ -155,12 +161,10 @@ function getTimesFromTimingWithFrequency(frequency, startTime, timezone) {
     const referenceDate = DateTime.utc().setZone(timezone).startOf('day');
     const localDate = DateTime.fromISO(referenceDate.toISODate() + `T${startTime}`, {zone: timezone});
     const hoursDifference = 24 / frequency;
-    const times = [];
-    for (let i = 0; i < frequency; i++) {
-        times.push(localDate.plus({hours: i * hoursDifference}).toISOTime({ suppressSeconds: true, includeOffset: false }));
-    }
 
-    return times;
+    return [...Array(frequency).keys()]
+        .map(index => localDate.plus({hours: index * hoursDifference}))
+        .map(dateTime => dateTime.toISOTime({ suppressSeconds: true, includeOffset: false }));
 }
 
 function dayToRruleDay(day) {
@@ -192,9 +196,15 @@ const compareWhen = (a, b) => {
     return 0;
 }
 
-const tryParseDate = (datetime) => {
+/**
+ *
+ * @param date
+ * @param timezone
+ * @returns {undefined|DateTime}
+ */
+const tryParseDate = (date, timezone = DEFAULT_TIMEZONE) => {
     try {
-        return DateTime.fromISO(datetime, {zone: DEFAULT_TIMEZONE});
+        return DateTime.fromISO(date, {zone: timezone});
     } catch (e) {
         return undefined;
     }
