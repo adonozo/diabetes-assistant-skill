@@ -18,12 +18,12 @@ function getSelf(email) {
  * @return {Promise<any>} An empty response if successful
  */
 function setDosageStartDate(email, dosageId, startDateTime) {
-    const path = `/patients/${email}/dosage/${dosageId}/startDate`;
+    const path = `/patients/${email}/dosage/${dosageId}/start-date`;
     return setResourceStartDate(email, dosageId, startDateTime, path);
 }
 
 function setServiceRequestStartDate(email, serviceRequestId, startDate) {
-    const path = `/patients/${email}/serviceRequest/${serviceRequestId}/startDate`;
+    const path = `/patients/${email}/service-request/${serviceRequestId}/start-date`;
     return setResourceStartDate(email, serviceRequestId, startDate, path);
 }
 
@@ -75,7 +75,7 @@ function getMedicationRequests(email, date, timing, timezone) {
         params.append("date", date)
         params.append("timing", timing)
         params.append("timezone", timezone)
-        const path = `/alexa/${email}/medicationRequests?${params.toString()}`
+        const path = `/alexa/${email}/medication-requests?${params.toString()}`
         const options = api.getOptionsFor(path, 'GET');
         const request = http.request(options, response => api.createJsonResponse(resolve, reject, response));
         request.end();
