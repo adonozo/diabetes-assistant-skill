@@ -5,7 +5,7 @@ const helpers = require("./../utils/helper");
 const locale = 'es-MX'
 
 const responses = {
-    WELCOME: "Hola, puedes preguntarme tus medicamentos para mañana o puedo crear recordatorios",
+    WELCOME: "Hola, puedes preguntarme tus medicamentos para mañana",
     REMINDER_PERMISSIONS: "Necesito permisos para crear recordatorios",
     SUCCESSFUL_REMINDER_PERMISSION: `Ahora que tengo permisos, puedo crear recordatorios. Intenta diciendo: "crea recordatorios"`,
     SUCCESSFUL_REMINDER_PERMISSION_REPROMPT: 'Puedes intentar de nuevo diciendo: "setup reminders"',
@@ -16,7 +16,6 @@ const responses = {
     ACCOUNT_LINK: "Tu cuenta no está enlazada. Primero añade tu cuenta en la applicación de Alexa en tu celular.",
     UPDATED_TIMING: "Has actualizado el tiempo para ",
     SUCCESSFUL_REMINDERS: "Tus recordatorios han sido creados. Mira la aplicación de Alexa en tu celular para verificar.",
-    MEDICATIONS_REMINDERS_SETUP: 'Dí "recuérdame tomar mis medicamentos" si deseas continuar creando tus recordatorios.',
     REQUESTS_REMINDERS_SETUP: 'Dí "crea recordatorios" si deseas continuar creando tus recordatorios.',
     SETUP_TIMINGS: "Primero necesito saber la hora para algunos eventos.",
     INVALID_BLOOD_GLUCOSE: 'Lo siento, tuve problemas para hacer lo que pediste. Intenta de nuevo diciéndo: "Registra mi nivel de azúcar en sangre"',
@@ -33,14 +32,13 @@ const responses = {
     REMINDER_NOT_CREATED: "Lo siento, no pude crear los recordatorios. Intenta nuevamente.",
 }
 
-function getMedicationReminderText(value, unit, medication, time) {
-    const regex = new RegExp('^[0-2][0-9]');
-    const timing = regex.test(time) ? `a las ${time}` : timingToText(time);
-    return `Toma ${value} ${unit} de ${medication} ${timing}`;
+function getMedicationReminderText(value, unit, medication, times) {
+    const timeList = buildListTimesOrTimings(times);
+    return `Toma ${value} ${unit} de ${medication} ${timeList}`;
 }
 
-function getConfirmationDateText(healthRequest) {
-    return `Has configurado la fecha de inicio para ${healthRequest}.`;
+function getConfirmationDateText(requestName) {
+    return `Has configurado la fecha de inicio para ${requestName}.`;
 }
 
 function getSuggestedTimeText(mealCode) {
@@ -48,40 +46,45 @@ function getSuggestedTimeText(mealCode) {
     return `¿Esta medida es antes ${meal}, después ${meal}, o ninguno?`
 }
 
-function getMedicationSsmlReminderText(value, unit, medication, time) {
-    const message = `Toma ${value} ${unit} de ${medication} ${timingString(time)}`;
+function getMedicationSsmlReminderText(value, unit, medication, times) {
+    const stringTimes = times.map((time) => timingString(time, 'a las '));
+    const timeList = helpers.listItems(stringTimes, responses.CONCAT_WORD);
+    const message = `Toma ${value} ${unit} de ${medication} ${timeList}`;
     return helpers.wrapSpeakMessage(message);
 }
 
-function getServiceReminderText(action, time) {
-    const regex = new RegExp('^[0-2][0-9]');
-    const timing = regex.test(time) ? `a las ${time}` : timingToText(time);
-    return `${action} ${timing}`;
+function getServiceReminderText(action, times) {
+    const timeList = buildListTimesOrTimings(times);
+    return `${action} ${timeList}`;
 }
 
-function getServiceSsmlReminderText(action, time) {
-    const message = `${action} ${timingString(time)}`
+function getServiceSsmlReminderText(action, times) {
+    const stringTimes = times.map((time) => timingString(time, 'a las '));
+    const timeList = helpers.listItems(stringTimes, responses.CONCAT_WORD);
+    const message = `${action} ${timeList}`;
     return helpers.wrapSpeakMessage(message);
 }
 
 /**
  * Convert a timing to a spoken string
  * @param timing: Can be a time (00:00 - 23:59) or an event date
+ * @param preposition
  * @returns {string}: The text Alexa will tell
  */
-function timingString(timing) {
+function timingString(timing, preposition) {
     const regex = new RegExp('^[0-2][0-9]');
-    return regex.test(timing) ? `a las <say-as interpret-as="time">${timing}</say-as>` : timingToText(timing);
+    return regex.test(timing) ? `${preposition}<say-as interpret-as="time">${timing}</say-as>` : timingToText(timing);
 }
 
 function getStartDatePrompt(missingDate) {
     const init = 'Primero necesito algunos datos.';
+    const unit = durationUnitToString(missingDate.durationUnit);
     if (missingDate.type === 'MedicationRequest') {
-        return `${init} Debes tomar ${missingDate.name} por ${missingDate.duration} días.`;
+        return `${init} Debes tomar ${missingDate.name} por ${missingDate.duration} ${unit}.`;
     }
 
     if (missingDate.type === 'ServiceRequest') {
-        return `${init} Debes ${missingDate.name} por ${missingDate.duration} días.`;
+        return `${init} Debes ${missingDate.name} por ${missingDate.duration} ${unit}.`;
     }
 
     return '';
@@ -133,8 +136,11 @@ function getHoursAndMinutes(date) {
 }
 
 function getHoursAndMinutesFromString(time) {
-    const minutes = time.substring(3) === "00" ? "en punto" : time.substring(3)
-    return `${+time.substring(0,2)} ${minutes}`;
+    const timeParts = time.split(':');
+    const minutes = timeParts[1] === "00" ? "en punto" : timeParts[1]
+    let preposition = timeParts[1] === "01" ? 'a la' : 'a las';
+
+    return `${preposition} ${+timeParts[0]} ${minutes}`;
 }
 
 /**
@@ -158,7 +164,7 @@ function getTextForDay(date, timezone, datePreposition) {
 
     const month = referenceDate.month < 10 ? `0${referenceDate.month}` : referenceDate.month;
     const day = referenceDate.day < 10 ? `0${referenceDate.day}` : referenceDate.day;
-    return `${datePreposition} <say-as interpret-as="date">????${month}${day}</say-as>`;
+    return `${datePreposition} <say-as interpret-as="date">${month}${day}</say-as>`;
 }
 
 /**
@@ -169,11 +175,11 @@ function makeMedicationText(medicationData) {
     const doseTextArray = medicationData.dose.map(dose => {
         const doseHasTime = dose.time.length > 0 && regex.test(dose.time[0]);
         const timingTextFunction = doseHasTime ? getHoursAndMinutesFromString: timingToText;
-        const preposition = doseHasTime ? 'a las' : '';
         const timings = dose.time.map(time => timingTextFunction(time));
         return timings.map(time =>
-            `${dose.value} ${unitsToStrings(dose.unit, +dose.value > 1)} ${preposition} ${time}`);
-    }).flat(1);
+            `${dose.value} ${unitsToStrings(dose.unit, +dose.value > 1)} ${time}`);
+        })
+        .flat(1);
     const doseText = helpers.listItems(doseTextArray, responses.CONCAT_WORD);
     return `Toma ${medicationData.medication}, ${doseText}`;
 }
@@ -186,12 +192,18 @@ function getNoRecordsTextForDay(date, userTimezone) {
  * @param serviceData {{action: string, timings: [string]}}
  */
 function makeServiceText(serviceData) {
+    const timeList = buildListTimesOrTimings(serviceData.timings);
+    return `${serviceData.action} ${timeList}`;
+}
+
+function buildListTimesOrTimings(timings) {
     const regex = new RegExp('^[0-2][0-9]');
-    const serviceHasTime = serviceData.timings.length > 0 && regex.test(serviceData.timings[0]);
-    const timingTextFunction = serviceHasTime ? getHoursAndMinutesFromString : timingToText;
-    const preposition = serviceHasTime ? 'a las ' : '';
-    const timings = serviceData.timings.map(time => timingTextFunction(time));
-    return `${serviceData.action} ${preposition} ${helpers.listItems(timings, responses.CONCAT_WORD)}`;
+    const hasTime = timings.length > 0 && regex.test(timings[0]);
+    const timingTextFunction = hasTime ? getHoursAndMinutesFromString : timingToText;
+    const timeList = timings.map(time => timingTextFunction(time));
+
+    const preposition = hasTime ? 'a las ' : '';
+    return preposition + helpers.listItems(timeList, responses.CONCAT_WORD);
 }
 
 function timingToText(timing) {
@@ -304,6 +316,17 @@ function unitsToStrings(unit, isPlural) {
             return 'tableta' + (isPlural ? 's' : '');
         default:
             return unit;
+    }
+}
+
+function durationUnitToString(unit) {
+    switch (unit.toLowerCase()) {
+        case 'd':
+            return 'días';
+        case 'wk':
+            return 'semanas';
+        case 'mo':
+            return 'meses';
     }
 }
 

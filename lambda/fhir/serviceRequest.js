@@ -1,7 +1,6 @@
 const fhirTiming = require("./timing");
-const {DateTime} = require("luxon");
 const fhir = require("./fhir");
-const fhirPatient = require("./patient");
+const timeUtil = require("../utils/time");
 
 const SERVICE_REQUEST_START_DATE = 'http://diabetes-assistant.com/fhir/StructureDefinition/ServiceRequestStartDate';
 
@@ -26,9 +25,9 @@ function getServiceText(request, patient, timezone) {
         serviceData.timings = repeat.when.sort(fhirTiming.compareWhen);
     } else if (repeat.timeOfDay && Array.isArray(repeat.timeOfDay)) {
         serviceData.timings = repeat.timeOfDay.sort();
-    } else if (repeat.frequency > 1) {
-        const startDate = getServiceRequestStartDate(request);
-        serviceData.timings = fhirTiming.getTimesFromTimingWithFrequency(repeat.frequency, startDate, timezone)
+    } else {
+        const startTime = fhirTiming.getTimingStartTime(request.occurrenceTiming);
+        serviceData.timings = fhirTiming.getTimesFromTimingWithFrequency(repeat.frequency, startTime, timezone)
             .sort();
     }
 
@@ -37,7 +36,7 @@ function getServiceText(request, patient, timezone) {
 
 function getServiceTextData({
     request,
-    patient,
+    time,
     timezone,
     textProcessor,
     localizedMessages
@@ -49,44 +48,22 @@ function getServiceTextData({
         return serviceData;
     }
 
-    const {start, end} = fhirTiming.getDatesFromTiming(request.occurrenceTiming);
+    const {start, end} = fhirTiming.getDatesFromTiming(request.occurrenceTiming, timezone);
 
-    request.contained.forEach(req => {
-        const repeat = req.occurrenceTiming.repeat;
-        if (repeat.when && Array.isArray(repeat.when) && repeat.when.length > 0) {
-            repeat.when.forEach(timing => {
-                const timingPreferences = fhirPatient.getTimingPreferences(patient);
-                const patientDate = timingPreferences.get(timing);
-                const dateTime = DateTime.fromISO(patientDate).setZone(timezone);
-                const processedText = textProcessor({
-                    action: action,
-                    timing: timing,
-                    dateTime: dateTime,
-                    start: start,
-                    end: end,
-                    frequency: repeat.frequency,
-                    dayOfWeek: repeat.dayOfWeek,
-                    localizedMessages: localizedMessages
-                })
-                serviceData.push(processedText)
-            });
-        } else if (repeat.timeOfDay && Array.isArray(repeat.timeOfDay) && repeat.timeOfDay.length > 0) {
-            repeat.timeOfDay.forEach(timing => {  // Timing is in local time (hh:mm)
-                const date = DateTime.utc();
-                const dateTime = DateTime.fromISO(`${date.toISODate()}T${timing}Z`);
-                const processedText = textProcessor({
-                    action: action,
-                    timing: timing,
-                    dateTime: dateTime, // RRULE uses local time, should not convert to UTC
-                    start: start,
-                    end: end,
-                    frequency: repeat.frequency,
-                    dayOfWeek: repeat.dayOfWeek,
-                    localizedMessages: localizedMessages
-                })
-                serviceData.push(processedText)
-            });
-        }
+    request.contained.forEach(contained => {
+        const timing = contained.occurrenceTiming;
+        const times = timeUtil.timesStringArraysFromTiming(timing, timezone);
+
+        const processedText = textProcessor({
+            time,
+            action: action,
+            times: times,
+            start: start,
+            end: end,
+            dayOfWeek: timing.repeat.dayOfWeek,
+            localizedMessages: localizedMessages
+        })
+        serviceData.push(processedText)
     })
 
     return serviceData;

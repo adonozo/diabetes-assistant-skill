@@ -61,75 +61,8 @@
           ]
         },
         {
-          "name": "CreateMedicationReminderIntent",
-          "slots": [],
-          "samples": [
-            "Recuérdame tomar mis medicamentos",
-            "Recuérdame tomar mis medicinas",
-            "Recuérdame mis medicinas",
-            "Recuérdame mis medicamentos",
-            "Házme recuerdo de tomar mis medicinas",
-            "Házme recuerdo de tomar mis medicamentos",
-            "Recuérdame tomar mis pastillas"
-          ]
-        },
-        {
-          "name": "SetTimingIntent",
-          "slots": [
-            {
-              "name": "event",
-              "type": "timingEvent",
-              "samples": [
-                "es para {event}",
-                "la hora es para {event}",
-                "Quiero fijar el tiempo para {event}",
-                "Quiero fijar la hora para {event}",
-                "Quiero fijar la hora para {event}",
-                "para {event}",
-                "{event}"
-              ]
-            },
-            {
-              "name": "time",
-              "type": "AMAZON.TIME",
-              "samples": [
-                "cuando sean las {time}",
-                "cuando sea la {time}",
-                "{time}",
-                "a las {time}",
-                "a {time}"
-              ]
-            }
-          ],
-          "samples": [
-            "Fija la hora para {event}",
-            "Actualiza la hora para {event}",
-            "Tomo {event} a las {time}",
-            "Tomo {event} a la {time}",
-            "Tengo mi {event} a la {time}",
-            "Mi {event} es a las {time}",
-            "Mi {event} es a la {time}",
-            "Lo tomo a las {time}",
-            "Lo tomo a la {time}",
-            "Como el {event} a las {time}",
-            "Como el {event} a la {time}",
-            "{event} a las {time}",
-            "{event} a la {time}"
-          ]
-        },
-        {
           "name": "SetStartDateIntent",
           "slots": [
-            {
-              "name": "healthRequest",
-              "type": "healthRequestName",
-              "samples": [
-                "Fecha de inicio para {healthRequest}",
-                "Inicia la fecha de {healthRequest}",
-                "Inicia {healthRequest}",
-                "Inicio de {healthRequest}"
-              ]
-            },
             {
               "name": "date",
               "type": "AMAZON.DATE",
@@ -168,23 +101,32 @@
             }
           ],
           "samples": [
-            "Empezaré {healthRequest} {date}",
-            "Empezaré {healthRequest} el {date}",
-            "Fija la fecha de inicio para {healthRequest}",
-            "Fecha de inicio para {healthRequest}",
-            "Inicio para {healthRequest}",
-            "Día de inicio para {healthRequest}"
+            "Empezaré la medicacion el {date}"
           ]
         },
         {
           "name": "CreateRemindersIntent",
-          "slots": [],
+          "slots": [
+            {
+              "name": "time",
+              "type": "AMAZON.TIME",
+              "samples": [
+                "a las {time}",
+                "a la {time}",
+                "{time}"
+              ]
+            }
+          ],
           "samples": [
             "Crea recordatorios",
+            "Crea recordatorios a las {time}",
+            "Crear recordatorios",
+            "Crear recordatorios a las {time}",
             "Recuérdame",
-            "Pon alarmas",
+            "Recuérdame a las {time}",
             "Pon recordatorios",
-            "Haz recordatorios"
+            "Haz recordatorios",
+            "Haz recordatorios a las {time}"
           ]
         },
         {
@@ -783,40 +725,10 @@
     "dialog": {
       "intents": [
         {
-          "name": "SetTimingIntent",
-          "confirmationRequired": false,
-          "slots": [
-            {
-              "name": "time",
-              "type": "AMAZON.TIME",
-              "confirmationRequired": true,
-              "elicitationRequired": true,
-              "prompts": {
-                "confirmation": "Confirm.Slot.1543037949542.877378806019",
-                "elicitation": "Elicit.Slot.1543037949542.877378806019"
-              }
-            },
-            {
-              "name": "event",
-              "type": "timingEvent",
-              "confirmationRequired": false,
-              "elicitationRequired": true,
-              "prompts": {
-                "elicitation": "Elicit.Slot.1543037949542.388844148382"
-              }
-            }
-          ]
-        },
-        {
           "name": "SetStartDateIntent",
           "confirmationRequired": false,
+          "delegationStrategy": "SKILL_RESPONSE",
           "slots": [
-            {
-              "name": "healthRequest",
-              "type": "healthRequestName",
-              "confirmationRequired": false,
-              "elicitationRequired": false
-            },
             {
               "name": "date",
               "type": "AMAZON.DATE",
@@ -834,6 +746,23 @@
               "prompts": {
                 "confirmation": "Confirm.Slot.startHealthRequestDate.healthRequestTime",
                 "elicitation": "Elicit.Slot.startHealthRequestDate.healthRequestTime"
+              }
+            }
+          ]
+        },
+        {
+          "name": "CreateRemindersIntent",
+          "confirmationRequired": false,
+          "delegationStrategy": "SKILL_RESPONSE",
+          "slots": [
+            {
+              "name": "time",
+              "type": "AMAZON.TIME",
+              "confirmationRequired": true,
+              "elicitationRequired": true,
+              "prompts": {
+                "confirmation": "Confirm.Slot.createRemindersIntent.time",
+                "elicitation": "Elicit.Slot.createRemindersIntent.time"
               }
             }
           ]
@@ -918,41 +847,6 @@
     },
     "prompts": [
       {
-        "id": "Confirm.Slot.1543037949542.877378806019",
-        "variations": [
-          {
-            "type": "SSML",
-            "value": "<speak>Escuché <say-as interpret-as=\"time\">{time}</say-as>, ¿es correcto?</speak>"
-          },
-          {
-            "type": "SSML",
-            "value": "<speak>¿Es <say-as interpret-as=\"time\">{time}</say-as> correcto?</speak>"
-          }
-        ]
-      },
-      {
-        "id": "Elicit.Slot.1543037949542.877378806019",
-        "variations": [
-          {
-            "type": "PlainText",
-            "value": "¿A qué hora tienes el {event}?"
-          }
-        ]
-      },
-      {
-        "id": "Elicit.Slot.1543037949542.388844148382",
-        "variations": [
-          {
-            "type": "PlainText",
-            "value": "La hora {time} ¿es para el desayuno, almuerzo, o cena?"
-          },
-          {
-            "type": "PlainText",
-            "value": "¿Quieres fijar la hora para el desayuno, almuerzo o cena?"
-          }
-        ]
-      },
-      {
         "id": "Elicit.Slot.getMedicationToTake.treatmentDate",
         "variations": [
           {
@@ -989,6 +883,28 @@
           {
             "type": "PlainText",
             "value": "¿A qué hora?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.createRemindersIntent.time",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "¿A qué hora?"
+          }
+        ]
+      },
+      {
+        "id": "Confirm.Slot.createRemindersIntent.time",
+        "variations": [
+          {
+            "type": "SSML",
+            "value": "<speak>Escuché <say-as interpret-as=\"time\">{time}</say-as>, ¿es correcto?</speak>"
+          },
+          {
+            "type": "SSML",
+            "value": "<speak>¿Es <say-as interpret-as=\"time\">{time}</say-as> correcto?</speak>"
           }
         ]
       },

@@ -1,21 +1,3 @@
-const fhirTiming = require('./timing')
-const fhir = require("./fhir");
-
-const TIMING_PREFERENCES = 'http://diabetes-assistant.com/fhir/StructureDefinition/TimingPreference'
-
-function getTimingPreferences(patient) {
-    const timingExtension = fhir.getExtension(patient, TIMING_PREFERENCES);
-    const preferences = new Map();
-    timingExtension.extension.map(ext => {
-        const date = fhirTiming.tryParseDate(ext.valueDateTime);
-        if (date) {
-            preferences.set(ext.url, ext.valueDateTime);
-        }
-    });
-
-    return preferences;
-}
-
 function getPatientSubject(patient) {
     return {
         reference: `Patient/${patient.id}`,
@@ -35,6 +17,5 @@ function getPatientFullName(patient) {
 }
 
 module.exports = {
-    getTimingPreferences,
     getPatientSubject,
 }

@@ -10,8 +10,7 @@ function logMessage(name, object) {
 }
 
 const sessionValues = {
-    requestMissingDate: 'requestMissingDate',
-    createMedicationReminderIntent: 'CreateMedicationReminderIntent',
+    requestMissingDate: 'RequestMissingDate',
     createRemindersIntent: 'CreateRemindersIntent',
     getMedicationToTakeIntent: 'GetMedicationToTakeIntent',
     carePlanIntent: 'CarePlanIntent',
@@ -37,8 +36,8 @@ function listItems(values, concatWord) {
     }
 
     const joinComma = values.length > 2 ? ',' : ''
-    return values.map((value, index) =>
-        index === values.length - 1 ? ` ${concatWord} ${value}.` : ` ${value}`)
+    return values
+        .map((value, index) => index === values.length - 1 ? ` ${concatWord} ${value}.` : ` ${value}`)
         .join(joinComma)
 }
 

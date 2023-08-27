@@ -2,18 +2,13 @@ const Alexa = require('ask-sdk-core');
 const {DateTime} = require("luxon");
 const auth = require('./auth');
 
-const carePlanApi = require("./api/carePlan")
-const medicationRequests = require("./api/medicationRequest");
 const patientsApi = require("./api/patients");
-const fhirCarePlan = require("./fhir/carePlan");
-const fhirMedicationRequest = require("./fhir/medicationRequest");
 const fhirTiming = require("./fhir/timing");
 const createReminderHandler = require("./intents/createReminderHandler");
 const getGlucoseLevelHandler = require("./intents/getGlucoseLeveIHandler");
 const getMedicationToTakeHandler = require("./intents/getMedicationToTakeHandler");
 const registerGlucoseLevelHandler = require("./intents/registerGlucoseLevelHandler");
 const setStartDateHandler = require("./intents/setStartDateHandler");
-const setTimingHandler = require("./intents/setTimingHandler");
 const strings = require('./strings/strings');
 const remindersUtil = require('./utils/reminder');
 const timeUtil = require("./utils/time");
@@ -32,10 +27,11 @@ const LaunchRequestHandler = {
     }
 };
 
-const CreateMedicationReminderIntentHandler = {
+const CreateRemindersInProgressIntentHandler = {
     canHandle(handlerInput) {
         return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
-            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'CreateMedicationReminderIntent';
+            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'CreateRemindersIntent'
+            && Alexa.getDialogState(handlerInput.requestEnvelope) !== 'COMPLETED';
     },
     async handle(handlerInput) {
         const {permissions} = handlerInput.requestEnvelope.context.System.user;
@@ -48,17 +44,15 @@ const CreateMedicationReminderIntentHandler = {
             return requestAccountLink(handlerInput);
         }
 
-        const self = await patientsApi.getSelf(userInfo.username);
-        const medicationBundle = await medicationRequests.getActiveMedicationRequests(self.id);
-        const requests = fhirMedicationRequest.requestListFromBundle(medicationBundle);
-        return createReminderHandler.handle(handlerInput, self, requests);
+        return createReminderHandler.handleValidation(handlerInput, userInfo.username);
     }
 }
 
-const CreateRemindersIntentHandler = {
+const CreateRemindersCompleteIntentHandler = {
     canHandle(handlerInput) {
         return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
-            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'CreateRemindersIntent';
+            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'CreateRemindersIntent'
+            && Alexa.getDialogState(handlerInput.requestEnvelope) === 'COMPLETED';
     },
     async handle(handlerInput) {
         const {permissions} = handlerInput.requestEnvelope.context.System.user;
@@ -71,10 +65,7 @@ const CreateRemindersIntentHandler = {
             return requestAccountLink(handlerInput);
         }
 
-        const self = await patientsApi.getSelf(userInfo.username);
-        const requestBundle = await carePlanApi.getActiveCarePlan(userInfo.username);
-        const requests = fhirCarePlan.requestListFromBundle(requestBundle);
-        return createReminderHandler.handle(handlerInput, self, requests);
+        return createReminderHandler.handle(handlerInput, userInfo.username);
     }
 }
 
@@ -94,25 +85,11 @@ const GetMedicationToTakeIntentHandler = {
     }
 };
 
-const SetTimingInProgressIntentHandler = {
+const SetStartDateInProgressIntentInitialHandler = {
     canHandle(handlerInput) {
         return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
-            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'SetTimingIntent'
+            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'SetStartDateIntent'
             && Alexa.getDialogState(handlerInput.requestEnvelope) !== 'COMPLETED';
-    },
-    handle(handlerInput) {
-        const currentIntent = handlerInput.requestEnvelope.request.intent;
-        return handlerInput.responseBuilder
-            .addDelegateDirective(currentIntent)
-            .getResponse();
-    }
-}
-
-const SetTimingCompletedIntentHandler = {
-    canHandle(handlerInput) {
-        return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
-            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'SetTimingIntent'
-            && Alexa.getDialogState(handlerInput.requestEnvelope) === 'COMPLETED';
     },
     async handle(handlerInput) {
         const userInfo = await auth.getAuthorizedUser(handlerInput);
@@ -120,7 +97,27 @@ const SetTimingCompletedIntentHandler = {
             return requestAccountLink(handlerInput);
         }
 
-        return setTimingHandler.handle(handlerInput, userInfo.username)
+        return handlerInput.responseBuilder
+            .addDelegateDirective()
+            .getResponse();
+    }
+}
+
+const SetStartDateInProgressIntentHandler = {
+    canHandle(handlerInput) {
+        return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
+            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'SetStartDateIntent'
+            && handlerInput.requestEnvelope.request.intent.slots.date.value
+            && !handlerInput.requestEnvelope.request.intent.slots.healthRequestTime.value
+            && Alexa.getDialogState(handlerInput.requestEnvelope) !== 'COMPLETED';
+    },
+    async handle(handlerInput) {
+        const userInfo = await auth.getAuthorizedUser(handlerInput);
+        if (!userInfo) {
+            return requestAccountLink(handlerInput);
+        }
+
+        return setStartDateHandler.handleInProgress(handlerInput, userInfo.username);
     }
 }
 
@@ -174,8 +171,7 @@ const RegisterGlucoseLevelIntentInProgressWithValueHandler = {
         }
 
         const localizedMessages = getLocalizedStrings(handlerInput);
-        const self = await patientsApi.getSelf(userInfo.username);
-        const mealCode = timeUtil.getSuggestedTiming(self);
+        const mealCode = fhirTiming.relatedTimingCodeToString(fhirTiming.timingEvent.C); // TODO use a different text
         const message = localizedMessages.getSuggestedTimeText(mealCode);
         return handlerInput.responseBuilder
             .speak(message)
@@ -439,15 +435,15 @@ const ErrorHandler = {
 exports.handler = Alexa.SkillBuilders.custom()
     .addRequestHandlers(
         LaunchRequestHandler,
-        CreateMedicationReminderIntentHandler,
-        CreateRemindersIntentHandler,
+        CreateRemindersInProgressIntentHandler,
+        CreateRemindersCompleteIntentHandler,
         GetMedicationToTakeIntentHandler,
         ConnectionsResponseHandler,
         HelpIntentHandler,
         CancelAndStopIntentHandler,
         SessionEndedRequestHandler,
-        SetTimingInProgressIntentHandler,
-        SetTimingCompletedIntentHandler,
+        SetStartDateInProgressIntentInitialHandler,
+        SetStartDateInProgressIntentHandler,
         SetStartDateCompletedIntentHandler,
         RegisterGlucoseLevelIntentInProgressWithValueHandler,
         RegisterGlucoseLevelIntentInProgressHandler,
@@ -458,7 +454,7 @@ exports.handler = Alexa.SkillBuilders.custom()
         GetGlucoseLevelIntentTimeHandler,
         GetGlucoseLevelIntentTimingHandler,
         IntentReflectorHandler, // make sure IntentReflectorHandler is last, so it doesn't override your custom intent handlers
-        ) 
+        )
     .addErrorHandlers(
         ErrorHandler,
         )

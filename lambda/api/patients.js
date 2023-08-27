@@ -10,41 +10,26 @@ function getSelf(email) {
     });
 }
 
-function updateTiming(email, timingUpdate) {
-    return new Promise((resolve, reject) => {
-        const data = JSON.stringify(timingUpdate);
-        const path = `/patients/${email}/timing`
-        const options = api.getOptionsFor(path, 'PUT');
-        options.headers = {
-            'Content-Type': 'application/json',
-            'Content-Length': data.length
-        }
-        const request = http.request(options, response => api.createJsonResponse(resolve, reject, response));
-        request.write(data);
-        request.end();
-    });
-}
-
 /**
  *
  * @param email {string} The patient's email
  * @param dosageId {string} The dosage ID to set the start date for
- * @param startDate {{startDate: string}} The medication start date
+ * @param startDateTime {{startDate: string, startTime: string}} The medication start date
  * @return {Promise<any>} An empty response if successful
  */
-function setDosageStartDate(email, dosageId, startDate) {
-    const path = `/patients/${email}/dosage/${dosageId}/startDate`;
-    return setResourceStartDate(email, serviceRequestId, startDate, path);
+function setDosageStartDate(email, dosageId, startDateTime) {
+    const path = `/patients/${email}/dosage/${dosageId}/start-date`;
+    return setResourceStartDate(email, dosageId, startDateTime, path);
 }
 
 function setServiceRequestStartDate(email, serviceRequestId, startDate) {
-    const path = `/patients/${email}/serviceRequest/${serviceRequestId}/startDate`;
+    const path = `/patients/${email}/service-request/${serviceRequestId}/start-date`;
     return setResourceStartDate(email, serviceRequestId, startDate, path);
 }
 
-function setResourceStartDate(email, serviceRequestId, startDate, path) {
+function setResourceStartDate(email, serviceRequestId, startDateTime, path) {
     return new Promise((resolve, reject) => {
-        const data = JSON.stringify({startDate: startDate});
+        const data = JSON.stringify(startDateTime);
         const options = api.getOptionsFor(path, 'PUT');
         options.headers = {
             'Content-Type': 'application/json',
@@ -90,7 +75,7 @@ function getMedicationRequests(email, date, timing, timezone) {
         params.append("date", date)
         params.append("timing", timing)
         params.append("timezone", timezone)
-        const path = `/alexa/${email}/medicationRequests?${params.toString()}`
+        const path = `/alexa/${email}/medication-requests?${params.toString()}`
         const options = api.getOptionsFor(path, 'GET');
         const request = http.request(options, response => api.createJsonResponse(resolve, reject, response));
         request.end();
@@ -99,7 +84,6 @@ function getMedicationRequests(email, date, timing, timezone) {
 
 module.exports = {
     getSelf,
-    updateTiming,
     setDosageStartDate,
     setServiceRequestStartDate,
     saveBloodGlucoseLevel,

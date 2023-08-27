@@ -5,7 +5,7 @@ const helpers = require("./../utils/helper");
 const locale = 'en-GB'
 
 const responses = {
-    WELCOME: "Welcome, I can set up reminders or tell you your medications for tomorrow. Which would you like to try?",
+    WELCOME: "Hi, I can tell you your medications for tomorrow",
     REMINDER_PERMISSIONS: "I need permission to access your reminders.",
     SUCCESSFUL_REMINDER_PERMISSION: `Now that you've provided permission, you can try again by saying "setup reminders"`,
     SUCCESSFUL_REMINDER_PERMISSION_REPROMPT: 'You can try again by saying "setup reminders"',
@@ -16,7 +16,6 @@ const responses = {
     ACCOUNT_LINK: "Your account is not linked. Add your account first in the Alexa app.",
     UPDATED_TIMING: "You have updated your timing for",
     SUCCESSFUL_REMINDERS: "Your reminders have been created, check the Alexa app to verify them.",
-    MEDICATIONS_REMINDERS_SETUP: 'Say "remind me my medications" if you want to continue setting up your reminders.',
     REQUESTS_REMINDERS_SETUP: 'Say "setup reminders" if you want to continue setting up your reminders.',
     SETUP_TIMINGS: "You need to set some timings first.",
     INVALID_BLOOD_GLUCOSE: "Sorry, I had trouble doing what you asked. Try again by saying: save my blood glucose level.",
@@ -33,14 +32,13 @@ const responses = {
     REMINDER_NOT_CREATED: "Sorry, I couldn't create the reminders. Please try again.",
 }
 
-function getMedicationReminderText(value, unit, medication, time) {
-    const regex = new RegExp('^[0-2][0-9]');
-    const timing = regex.test(time) ? `at ${time}` : timingToText(time);
-    return `Take ${value} ${unit} of ${medication} ${timing}`;
+function getMedicationReminderText(value, unit, medication, times) {
+    const timeList = buildListTimesOrTimings(times);
+    return `Take ${value} ${unit} of ${medication} ${timeList}`;
 }
 
-function getConfirmationDateText(healthRequest) {
-    return `You have set the start date for ${healthRequest}.`;
+function getConfirmationDateText(requestName) {
+    return `You have set the start date for ${requestName}.`;
 }
 
 function getSuggestedTimeText(mealCode) {
@@ -48,40 +46,45 @@ function getSuggestedTimeText(mealCode) {
     return `Is this measure before ${meal}, after ${meal}, or none?`
 }
 
-function getMedicationSsmlReminderText(value, unit, medication, time) {
-    const message = `Take ${value} ${unit} of ${medication} ${timingString(time)}`;
+function getMedicationSsmlReminderText(value, unit, medication, times) {
+    const stringTimes = times.map((time, index) => timingString(time, index === 0 ? 'at ' : ''));
+    const timeList = helpers.listItems(stringTimes, responses.CONCAT_WORD);
+    const message = `Take ${value} ${unit} of ${medication} ${timeList}`;
     return helpers.wrapSpeakMessage(message);
 }
 
-function getServiceReminderText(action, time) {
-    const regex = new RegExp('^[0-2][0-9]');
-    const timing = regex.test(time) ? `at ${time}` : timingToText(time);
-    return `${action} ${timing}`;
+function getServiceReminderText(action, times) {
+    const timeList = buildListTimesOrTimings(times);
+    return `${action} ${timeList}`;
 }
 
-function getServiceSsmlReminderText(action, time) {
-    const message = `${action} ${timingString(time)}`
+function getServiceSsmlReminderText(action, times) {
+    const stringTimes = times.map((time, index) => timingString(time, index === 0 ? 'at ' : ''));
+    const timeList = helpers.listItems(stringTimes, responses.CONCAT_WORD);
+    const message = `${action} ${timeList}`;
     return helpers.wrapSpeakMessage(message);
 }
 
 /**
  * Convert a timing to a spoken string
  * @param timing: Can be a time (00:00 - 23:59) or an event date
+ * @param preposition
  * @returns {string}: The text Alexa will tell
  */
-function timingString(timing) {
+function timingString(timing, preposition) {
     const regex = new RegExp('^[0-2][0-9]');
-    return regex.test(timing) ? `at <say-as interpret-as="time">${timing}</say-as>` : timingToText(timing);
+    return regex.test(timing) ? `${preposition}<say-as interpret-as="time">${timing}</say-as>` : timingToText(timing);
 }
 
 function getStartDatePrompt(missingDate) {
     const init = 'I need some information first.';
+    const unit = durationUnitToString(missingDate.durationUnit);
     if (missingDate.type === 'MedicationRequest') {
-        return `${init} You need to take ${missingDate.name} for ${missingDate.duration} days.`;
+        return `${init} You need to take ${missingDate.name} for ${missingDate.duration} ${unit}.`;
     }
 
     if (missingDate.type === 'ServiceRequest') {
-        return `${init} Your plan includes: ${missingDate.name} for ${missingDate.duration} days.`;
+        return `${init} Your plan includes: ${missingDate.name} for ${missingDate.duration} ${unit}.`;
     }
 
     return '';
@@ -133,8 +136,9 @@ function getHoursAndMinutes(date) {
 }
 
 function getHoursAndMinutesFromString(time) {
-    const minutes = time.substring(3) === "00" ? "o'clock" : time.substring(3)
-    return `${+time.substring(0,2)} ${minutes}`;
+    const timeParts = time.split(':');
+    const minutes = timeParts[1] === "00" ? "o'clock" : timeParts[1]
+    return `${+timeParts[0]} ${minutes}`;
 }
 
 /**
@@ -173,7 +177,8 @@ function makeMedicationText(medicationData) {
         const timings = dose.time.map(time => timingTextFunction(time));
         return timings.map(time =>
             `${dose.value} ${unitsToStrings(dose.unit, +dose.value > 1)} ${preposition} ${time}`);
-    }).flat(1);
+        })
+        .flat(1);
     const doseText = helpers.listItems(doseTextArray, responses.CONCAT_WORD);
     return `Take ${medicationData.medication}, ${doseText}`;
 }
@@ -186,12 +191,18 @@ function getNoRecordsTextForDay(date, userTimezone) {
  * @param serviceData {{action: string, timings: [string]}}
  */
 function makeServiceText(serviceData) {
+    const timeList = buildListTimesOrTimings(serviceData.timings);
+    return `Do a ${serviceData.action} ${timeList}`;
+}
+
+function buildListTimesOrTimings(timings) {
     const regex = new RegExp('^[0-2][0-9]');
-    const serviceHasTime = serviceData.timings.length > 0 && regex.test(serviceData.timings[0]);
-    const timingTextFunction = serviceHasTime ? getHoursAndMinutesFromString: timingToText;
-    const preposition = serviceHasTime ? 'at ' : '';
-    const timings = serviceData.timings.map(time => timingTextFunction(time));
-    return `Do a ${serviceData.action} ${preposition} ${helpers.listItems(timings, responses.CONCAT_WORD)}`;
+    const hasTime = timings.length > 0 && regex.test(timings[0]);
+    const timingTextFunction = hasTime ? getHoursAndMinutesFromString : timingToText;
+    const timeList = timings.map(time => timingTextFunction(time));
+
+    const preposition = hasTime ? 'at ' : '';
+    return preposition + helpers.listItems(timeList, responses.CONCAT_WORD);
 }
 
 function timingToText(timing) {
@@ -303,6 +314,17 @@ function unitsToStrings(unit, isPlural) {
             return 'tablet' + (isPlural ? 's' : '');
         default:
             return unit;
+    }
+}
+
+function durationUnitToString(unit) {
+    switch (unit.toLowerCase()) {
+        case 'd':
+            return 'days';
+        case 'wk':
+            return 'weeks';
+        case 'mo':
+            return 'months';
     }
 }
 
