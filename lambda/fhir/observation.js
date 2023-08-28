@@ -15,7 +15,6 @@ const observationBase = {
     },
     subject: {},
     effectiveDateTime: "2020-01-01T10:00:00Z",
-    issued: "2020-01-01T10:00:00Z",
     performer: [],
     valueQuantity: {
         value: 1.0,
@@ -56,7 +55,6 @@ function createObservationObject(patient, level, timing, localizedMessages) {
     observation.subject = subject;
     observation.performer[0] = subject;
     observation.effectiveDateTime = date;
-    observation.issued = date;
     observation.extension[0].valueCode = observationTiming;
     return observation;
 }

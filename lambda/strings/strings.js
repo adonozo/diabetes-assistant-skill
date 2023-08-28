@@ -16,8 +16,8 @@ function getLocalizedStrings(locale) {
 function makeTextFromObservations(observations, timezone, localizedMessages) {
     const dateMap = new Map();
     observations.forEach(observation => {
-        const date = DateTime.fromISO(observation.issued).setZone(timezone);
-        const dayKey = localizedMessages.getTextForDay(observation.issued, timezone, localizedMessages.responses.DATE_PREPOSITION);
+        const date = DateTime.fromISO(observation.effectiveDateTime).setZone(timezone);
+        const dayKey = localizedMessages.getTextForDay(observation.effectiveDateTime, timezone, localizedMessages.responses.DATE_PREPOSITION);
         const time = localizedMessages.getHoursAndMinutes(date);
         const observationValue = {time: time, value: observation.valueQuantity.value, timing: observation.extension[0]?.valueCode};
         if (dateMap.has(dayKey)) {
