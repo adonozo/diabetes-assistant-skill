@@ -9,10 +9,14 @@
   "author": "Alvaro Donozo",
   "license": "ISC",
   "dependencies": {
-    "ask-sdk-core": "^2.10.2",
-    "ask-sdk-model": "^1.35.1",
-    "aws-sdk": "^2.935.0",
-    "luxon": "^2.0.1",
-    "rrule": "^2.6.8"
+    "ask-sdk-core": "^2.14.0",
+    "ask-sdk-model": "^1.86.0",
+    "aws-sdk": "^2.1469.0",
+    "luxon": "^3.4.3",
+    "rrule": "^2.7.2"
+  },
+  "devDependencies": {
+    "@types/node": "^18.15.3",
+    "typescript": "^5.2.2"
   }
 }
