@@ -17,6 +17,8 @@
   },
   "devDependencies": {
     "@types/node": "^18.15.3",
+    "@types/luxon": "^3.3.2",
+    "@types/fhir": "^0.0.37",
     "typescript": "^5.2.2"
   }
 }
