@@ -1,13 +1,13 @@
 import { BackboneType, DomainResource, Extension } from "fhir/r5";
 
-export function getExtension(resource: DomainResource | BackboneType, extensionUrl: string): Extension | undefined {
-    if (!resource.extension || !Array.isArray(resource.extension)) {
-        return undefined;
+export function getExtension(resource: DomainResource | BackboneType | undefined, extensionUrl: string): Extension | undefined {
+    if (!resource?.extension || !Array.isArray(resource.extension)) {
+        return;
     }
 
     const extension = resource.extension.find(ext => ext.url === extensionUrl);
     if (!extension) {
-        return undefined;
+        return;
     }
 
     return extension;

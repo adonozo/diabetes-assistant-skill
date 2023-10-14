@@ -31,11 +31,11 @@ export function getTimingStartDate(timing: Timing, timezone: string = DEFAULT_TI
     return undefined;
 }
 
-export function timingNeedsStartDate(timing: Timing): Extension {
+export function timingNeedsStartDate(timing: Timing | undefined): Extension | undefined {
     return getExtension(timing, TIMING_NEEDS_START_DATE);
 }
 
-export function timingNeedsStartTime(timing: Timing): Extension {
+export function timingNeedsStartTime(timing: Timing | undefined): Extension | undefined {
     return getExtension(timing, TIMING_NEEDS_START_TIME);
 }
 
@@ -130,7 +130,7 @@ export function alexaTimingToFhirTiming(alexaTiming: string): TimingEvent {
 }
 
 export function getDatesFromTiming(timing: Timing, timezone: string = DEFAULT_TIMEZONE): StartEndDateTime {
-    if (timing.repeat?.boundsPeriod) {
+    if (timing.repeat?.boundsPeriod?.start && timing.repeat?.boundsPeriod?.end) {
         const startDate = DateTime.fromISO(timing.repeat.boundsPeriod.start, {zone: timezone});
         const endDate = DateTime.fromISO(timing.repeat.boundsPeriod.end, {zone: timezone})
             .plus({days: 1}); // End date inclusive
@@ -139,7 +139,7 @@ export function getDatesFromTiming(timing: Timing, timezone: string = DEFAULT_TI
             end: endDate.toUTC()
         }
     } else if (timing.repeat?.boundsDuration) {
-        const startDate = getTimingStartDate(timing, timezone);
+        const startDate = getTimingStartDate(timing, timezone)!;
         const endDate = addDurationToDate(startDate, timing.repeat.boundsDuration)
         return {
             start: startDate.toUTC(),
@@ -167,10 +167,11 @@ export function getTimesFromTimingWithFrequency(frequency: number, startTime: st
 
     return [...Array(frequency).keys()]
         .map(index => localDate.plus({hours: index * hoursDifference}))
-        .map(dateTime => dateTime.toISOTime({ suppressSeconds: true, includeOffset: false }));
+        .map(dateTime => dateTime.toISOTime({ suppressSeconds: true, includeOffset: false }))
+        .filter((times): times is string => times == null);
 }
 
-export function dayToRruleDay(day: string): Weekday | string {
+export function dayToRruleDay(day: string): Weekday | undefined {
     switch (day.toLowerCase()) {
         case 'mon':
             return RRule.MO;
@@ -187,7 +188,7 @@ export function dayToRruleDay(day: string): Weekday | string {
         case 'sun':
             return RRule.SU;
         default:
-            return '';
+            return undefined;
     }
 }
 
@@ -205,7 +206,11 @@ export const compareWhen = (a: string, b: string): number => {
  * @param timezone
  * @returns {undefined|DateTime}
  */
-export const tryParseDate = (date: string, timezone: string = DEFAULT_TIMEZONE): DateTime | undefined => {
+export const tryParseDate = (date: string | undefined, timezone: string = DEFAULT_TIMEZONE): DateTime | undefined => {
+    if (!date) {
+        return undefined;
+    }
+
     try {
         return DateTime.fromISO(date, {zone: timezone});
     } catch (e) {

@@ -32,17 +32,17 @@ export function getMedicationText(request: MedicationRequest, timezone: string):
         medication: '',
         dose: [],
     };
-    medicationData.medication = request.medication.reference.display;
-    request.dosageInstruction.forEach(dosage => {
+    medicationData.medication = request.medication.reference?.display!;
+    request.dosageInstruction?.forEach(dosage => {
         const {value, unit} = getMedicationValues(dosage);
         let time;
-        if (dosage.timing.repeat.when && Array.isArray(dosage.timing.repeat.when)) {
+        if (dosage.timing?.repeat?.when && Array.isArray(dosage.timing.repeat.when)) {
             time = dosage.timing.repeat.when.sort(compareWhen);
-        } else if (dosage.timing.repeat.timeOfDay && Array.isArray(dosage.timing.repeat.timeOfDay)) {
+        } else if (dosage.timing?.repeat?.timeOfDay && Array.isArray(dosage.timing.repeat.timeOfDay)) {
             time = dosage.timing.repeat.timeOfDay.sort();
         } else {
-            const startTime = getTimingStartTime(dosage.timing);
-            time = getTimesFromTimingWithFrequency(dosage.timing.repeat.frequency, startTime, timezone)
+            const startTime = getTimingStartTime(dosage.timing!)!;
+            time = getTimesFromTimingWithFrequency(dosage.timing?.repeat?.frequency ?? 0, startTime, timezone)
                 .sort();
         }
 
@@ -62,12 +62,12 @@ export function getMedicationTextData(
     }: MedicationRequestInputData
 ): ResourceReminderData[] {
     const medicationData = [];
-    const medication = request.medication.reference.display;
-    request.dosageInstruction.forEach(dosage => {
-        const {start, end} = getDatesFromTiming(dosage.timing, timezone);
+    const medication = request.medication.reference?.display ?? '';
+    request.dosageInstruction?.forEach(dosage => {
+        const {start, end} = getDatesFromTiming(dosage.timing!, timezone);
         const {value, unit} = getMedicationValues(dosage);
 
-        const times = timesStringArraysFromTiming(dosage.timing, timezone);
+        const times = timesStringArraysFromTiming(dosage.timing!, timezone);
 
         const processedText = textProcessor({
             time,
@@ -77,7 +77,7 @@ export function getMedicationTextData(
             times: times,
             start: start,
             end: end,
-            dayOfWeek: dosage.timing.repeat.dayOfWeek,
+            dayOfWeek: dosage.timing?.repeat?.dayOfWeek ?? [],
             localizedMessages: localizedMessages
         });
         medicationData.push(processedText)
@@ -87,22 +87,22 @@ export function getMedicationTextData(
 }
 
 export function getMedicationValues(dosage: Dosage): DoseValue {
-    const doseValue = dosage.doseAndRate[0].doseQuantity.value;
-    const doseUnit = dosage.doseAndRate[0].doseQuantity.unit;
+    const doseValue = dosage.doseAndRate && dosage.doseAndRate[0].doseQuantity?.value ?? 0;
+    const doseUnit = dosage.doseAndRate && dosage.doseAndRate[0].doseQuantity?.unit ?? '';
     return {
         value: doseValue,
         unit: doseUnit
     }
 }
 
-export function requestNeedsStartDate(request: MedicationRequest): Extension {
-    return request.dosageInstruction
+export function requestNeedsStartDate(request: MedicationRequest): Extension | undefined {
+    return request.dosageInstruction && request.dosageInstruction
         .map(dosage => timingNeedsStartDate(dosage.timing))
-        .reduce((accumulator, current) => accumulator || current);
+        .reduce((accumulator, current) => accumulator || current) ?? undefined;
 }
 
-export function requestNeedsStartTime(request: MedicationRequest): Extension {
-    return request.dosageInstruction
+export function requestNeedsStartTime(request: MedicationRequest): Extension | undefined {
+    return request.dosageInstruction && request.dosageInstruction
         .map(dosage => timingNeedsStartTime(dosage.timing))
-        .reduce((accumulator, current) => accumulator || current);
+        .reduce((accumulator, current) => accumulator || current) ?? undefined;
 }

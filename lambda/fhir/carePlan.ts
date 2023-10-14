@@ -6,13 +6,13 @@ export function requestListFromBundle(bundle: Bundle): FhirResource[] {
     }
 
     const medicationRequests = bundle.entry
-        .filter(entry => entry.resource.resourceType === "MedicationRequest")
+        .filter(entry => entry.resource?.resourceType === "MedicationRequest")
         .map(item => item.resource)
     const serviceRequests = bundle.entry
-        .filter(entry => entry.resource.resourceType === "ServiceRequest")
+        .filter(entry => entry.resource?.resourceType === "ServiceRequest")
         .map(item => item.resource)
 
-    return [...medicationRequests, ...serviceRequests]
+    return [...medicationRequests as FhirResource[], ...serviceRequests as FhirResource[]]
 }
 
 export function medicationsFromBundle(bundle: Bundle): MedicationRequest[] {
@@ -21,7 +21,7 @@ export function medicationsFromBundle(bundle: Bundle): MedicationRequest[] {
     }
 
     return bundle.entry
-        .filter(entry => entry.resource.resourceType === "MedicationRequest")
+        .filter(entry => entry.resource?.resourceType === "MedicationRequest")
         .map(item => item.resource as MedicationRequest);
 }
 
@@ -31,6 +31,6 @@ export function serviceRequestsFromBundle(bundle: Bundle): ServiceRequest[] {
     }
 
     return bundle.entry
-        .filter(entry => entry.resource.resourceType === "ServiceRequest")
+        .filter(entry => entry.resource?.resourceType === "ServiceRequest")
         .map(item => item.resource as ServiceRequest);
 }

@@ -34,19 +34,19 @@ export function getServiceText(
         action: '',
         timings: [],
     };
-    serviceData.action = request.code.concept.coding[0].display;
+    serviceData.action = request.code?.concept?.coding && request.code.concept.coding[0].display ?? '';
     if (!request.occurrenceTiming) {
         return serviceData;
     }
 
     const repeat = request.occurrenceTiming.repeat;
-    if (repeat.when && Array.isArray(repeat.when)) {
+    if (repeat?.when && Array.isArray(repeat.when)) {
         serviceData.timings = repeat.when.sort(compareWhen);
-    } else if (repeat.timeOfDay && Array.isArray(repeat.timeOfDay)) {
+    } else if (repeat?.timeOfDay && Array.isArray(repeat.timeOfDay)) {
         serviceData.timings = repeat.timeOfDay.sort();
     } else {
-        const startTime = getTimingStartTime(request.occurrenceTiming);
-        serviceData.timings = getTimesFromTimingWithFrequency(repeat.frequency, startTime, timezone)
+        const startTime = getTimingStartTime(request.occurrenceTiming)!;
+        serviceData.timings = getTimesFromTimingWithFrequency(repeat?.frequency ?? 0, startTime, timezone)
             .sort();
     }
 
@@ -63,7 +63,7 @@ export function getServiceTextData(
     }: ServiceRequestInputData
 ): ResourceReminderData[] {
     const serviceData = [];
-    const action = request.code.concept.coding[0].display;
+    const action = request.code?.concept?.coding && request.code.concept.coding[0].display ?? '';
 
     if (!request.occurrenceTiming) {
         return serviceData;
@@ -71,8 +71,8 @@ export function getServiceTextData(
 
     const {start, end} = getDatesFromTiming(request.occurrenceTiming, timezone);
 
-    request.contained.forEach((contained: ServiceRequest) => {
-        const timing = contained.occurrenceTiming;
+    request.contained?.forEach((contained: ServiceRequest) => {
+        const timing = contained.occurrenceTiming!;
         const times = timesStringArraysFromTiming(timing, timezone);
 
         const processedText = textProcessor({
@@ -81,7 +81,7 @@ export function getServiceTextData(
             times: times,
             start: start,
             end: end,
-            dayOfWeek: timing.repeat.dayOfWeek,
+            dayOfWeek: timing?.repeat?.dayOfWeek ?? [],
             localizedMessages: localizedMessages
         })
         serviceData.push(processedText)
