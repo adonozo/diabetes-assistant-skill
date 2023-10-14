@@ -6,7 +6,7 @@ export type HttpResolvePromise<T> = (value: PromiseLike<T>) => void;
 
 export type StartEndDateTime = { start: DateTime, end: DateTime };
 
-export type HoursAndMinutes = { hour: string, minute: string };
+export type HoursAndMinutes = { hour: number, minute: number };
 
 export type ServiceData = { action: string, timings: string[] };
 
@@ -77,8 +77,8 @@ export type MedicationRequestTextProcessor = {
 export type ResourceReminderData = {
     text: string,
     ssml: string,
-    rule: string,
-    start: string,
-    end: string,
+    rule: string[],
+    start: DateTime,
+    end: DateTime,
     locale: string
 };

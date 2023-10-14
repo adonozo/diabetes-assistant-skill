@@ -6,7 +6,7 @@
       "ES2022"
     ],
     "moduleResolution": "node",
-    "rootDir": "lambda",
+    "rootDir": "../lambda",
     "outDir": "dist",
     "sourceMap": false,
     "allowJs": false,
@@ -24,5 +24,5 @@
     "/**/node_modules",
     "**/*.spec.ts",
   ],
-  "include": ["lambda"]
+  "include": ["../lambda"]
 }
