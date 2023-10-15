@@ -109,4 +109,4 @@ export function getMedicationRequests(
     })
 }
 
-export type DosageStartDateTime = { startDate: string, startTime: string }
+export type DosageStartDateTime = { startDate: string, startTime?: string }

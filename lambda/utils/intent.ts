@@ -3,7 +3,7 @@ import { HandlerInput } from "ask-sdk-core";
 import * as strings from "../strings/strings"
 import { sessionValues } from "./helper";
 import { getTimingStartDate, timingNeedsStartDate } from "../fhir/timing";
-import { RequestNeedingTiming } from "../types";
+import { CustomRequest } from "../types";
 import { MessagesInterface } from "../strings/messages-interface";
 import { DateTime } from "luxon";
 
@@ -50,7 +50,7 @@ export function getLocalizedStrings(handlerInput: HandlerInput): MessagesInterfa
 
 export function switchContextToStartDate(
     handlerInput: HandlerInput,
-    requestWithMissingDate: RequestNeedingTiming,
+    requestWithMissingDate: CustomRequest,
     userTimeZone: string,
     localizedMessages: MessagesInterface
 ): Response {

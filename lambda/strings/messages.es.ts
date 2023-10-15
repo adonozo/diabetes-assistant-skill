@@ -5,7 +5,7 @@ import { TimingEvent } from "../enums";
 import { CustomRequest, MedicationData, ServiceData } from "../types";
 
 export class MessagesEs implements MessagesInterface {
-    locale = 'en-GB'
+    static locale = 'en-GB'
 
     responses = {
         WELCOME: "Hi, I can tell you your medications for tomorrow",
@@ -300,5 +300,4 @@ export class MessagesEs implements MessagesInterface {
                 return unit;
         }
     }
-
 }

@@ -9,11 +9,11 @@ import { Dosage, Extension, FhirResource, MedicationRequest, ServiceRequest, Tim
 import { HandlerInput } from "ask-sdk-core";
 import { CustomRequest, HoursAndMinutes } from "../types";
 
-export function requestsNeedStartDate(requests: FhirResource): CustomRequest | undefined {
+export function requestsNeedStartDate(requests: FhirResource[]): CustomRequest | undefined {
     for (const request of requests) {
-        const dosage = getDosageNeedingSetup(request)
-        if (request.resourceType === 'MedicationRequest' && dosage) {
-            return buildCustomMedicationRequest(dosage, request.medicationReference.display);
+        if (request.resourceType === 'MedicationRequest') {
+            const dosage = getDosageNeedingSetup(request);
+            return dosage && buildCustomMedicationRequest(dosage, request.medication.reference?.display ?? '');
         } else if (request.resourceType === 'ServiceRequest' && serviceNeedsDateTimeSetup(request)) {
             return buildCustomServiceRequest(request);
         }

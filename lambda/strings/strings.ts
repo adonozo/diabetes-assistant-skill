@@ -1,21 +1,20 @@
+import { DateTime } from "luxon";
 import { MessagesInterface } from "./messages-interface";
-
-const {DateTime} = require("luxon");
-const enGb = require("./strings.en_gb");
-const esMx = require("./strings.es_mx");
+import { MessagesEs } from "./messages.es";
+import { MessagesEn } from "./messages.en";
 
 export function getLocalizedStrings(locale): MessagesInterface {
     switch (locale) {
-        case enGb.locale:
-            return enGb;
-        case esMx.locale:
-            return esMx;
+        case MessagesEs.locale:
+            return new MessagesEs();
+        case MessagesEn.locale:
+            return new MessagesEn();
         default:
             throw 'Locale not supported.';
     }
 }
 
-function makeTextFromObservations(observations, timezone, localizedMessages) {
+export function makeTextFromObservations(observations, timezone, localizedMessages) {
     const dateMap = new Map();
     observations.forEach(observation => {
         const date = DateTime.fromISO(observation.issued).setZone(timezone);

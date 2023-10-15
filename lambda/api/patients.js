@@ -1,11 +1,11 @@
-const http = require("https");
+const https = require("https");
 const api = require("./api");
 
 function getSelf(email) {
     return new Promise((resolve, reject) => {
         const path = `/patients/${email}`
         const options = api.getOptionsFor(path, 'GET');
-        const request = http.request(options, response => api.createJsonResponse(resolve, reject, response));
+        const request = https.request(options, response => api.createJsonResponse(resolve, reject, response));
         request.end();
     });
 }
@@ -35,7 +35,7 @@ function setResourceStartDate(email, serviceRequestId, startDateTime, path) {
             'Content-Type': 'application/json',
             'Content-Length': data.length
         }
-        const request = http.request(options, response => api.createJsonResponse(resolve, reject, response));
+        const request = https.request(options, response => api.createJsonResponse(resolve, reject, response));
         request.write(data);
         request.end();
     });
@@ -50,7 +50,7 @@ function saveBloodGlucoseLevel(email, observation) {
             'Content-Type': 'application/json',
             'Content-Length': data.length
         }
-        const request = http.request(options, response => api.createJsonResponse(resolve, reject, response));
+        const request = https.request(options, response => api.createJsonResponse(resolve, reject, response));
         request.write(data);
         request.end();
     })
@@ -64,7 +64,7 @@ function getObservationsOnDate(email, date, timing, timezone) {
         params.append("timezone", timezone);
         const path = `/alexa/${email}/observations/?${params.toString()}`
         const options = api.getOptionsFor(path, 'GET');
-        const request = http.request(options, response => api.createJsonResponse(resolve, reject, response));
+        const request = https.request(options, response => api.createJsonResponse(resolve, reject, response));
         request.end();
     });
 }
@@ -77,7 +77,7 @@ function getMedicationRequests(email, date, timing, timezone) {
         params.append("timezone", timezone)
         const path = `/alexa/${email}/medication-requests?${params.toString()}`
         const options = api.getOptionsFor(path, 'GET');
-        const request = http.request(options, response => api.createJsonResponse(resolve, reject, response));
+        const request = https.request(options, response => api.createJsonResponse(resolve, reject, response));
         request.end();
     })
 }
