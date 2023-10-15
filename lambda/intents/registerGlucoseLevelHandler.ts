@@ -5,6 +5,9 @@ import { createObservationObject } from "../fhir/observation";
 import { getBloodGlucoseAlert } from "../utils/helper";
 import { HandlerInput } from "ask-sdk-core";
 
+/**
+ * @deprecated functionality to be removed
+ */
 export async function handle(handlerInput: HandlerInput, patientEmail: string): Promise<Response> {
     const localizedMessages = getLocalizedStrings(handlerInput);
     const request = handlerInput.requestEnvelope.request as IntentRequest;
