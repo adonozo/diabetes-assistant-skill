@@ -10,7 +10,7 @@ export abstract class BaseIntentHandler implements RequestHandler {
 
     abstract handle(input: HandlerInput): Promise<Response> | Response;
 
-    requestAccountLink = (handlerInput: HandlerInput): Response => {
+    protected requestAccountLink = (handlerInput: HandlerInput): Response => {
         const localizedMessages = getLocalizedStrings(handlerInput);
         return handlerInput.responseBuilder
             .speak(localizedMessages.responses.ACCOUNT_LINK)
@@ -18,7 +18,7 @@ export abstract class BaseIntentHandler implements RequestHandler {
             .getResponse();
     }
 
-    requestReminderPermission = (handlerInput: HandlerInput): Response => {
+    protected requestReminderPermission = (handlerInput: HandlerInput): Response => {
         const localizedMessages = getLocalizedStrings(handlerInput);
         return handlerInput.responseBuilder
             .speak(localizedMessages.responses.REMINDER_PERMISSIONS)
