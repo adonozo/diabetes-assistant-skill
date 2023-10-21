@@ -21,16 +21,36 @@ The ASK CLI must be installed first with a valid AWS IAM account. There is more 
 The REST API service must be running with a valid HTTP URL. Take note of this URL and port, then, edit the `api.js` file to update the service URL. The file is located in:
 
 ```
-./lambda/api/api.js
+./src/api/api.ts
 ```
 
-For account linking, there is a configuration file located in `./skill-package/account-linking.json`. It should be updated if using a different identity provider. There is more information in the [Alexa documentation](https://developer.amazon.com/en-US/docs/alexa/account-linking/configure-authorization-code-grant.html)
+Since all functionalities are bounded to a patient's data, it is required to use authentication. For account linking, there is a configuration file located in `./skill-package/account-linking.json`. It should be updated if using a different identity provider. 
+
+Credentials are defined in `auth.ts`. These should also be set before deploying the skill.
+
+More information in the [Alexa documentation](https://developer.amazon.com/en-US/docs/alexa/account-linking/configure-authorization-code-grant.html)
+
+### Build the project
+
+The project uses [esbuild](https://esbuild.github.io). Run these commands:
+
+```bash
+cd ./src
+npm run build
+```
 
 ### Deploying the project
 
 With the ASK CLI correctly configured, run in the project's root folder:
 
 ```bash
+ask deploy
+```
+
+Alternatively, build and deploy the project:
+
+```bash
+cd ./src && npm run build && cd ../
 ask deploy
 ```
 
