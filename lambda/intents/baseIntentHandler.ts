@@ -1,7 +1,7 @@
 import { HandlerInput, RequestHandler } from "ask-sdk-core";
 import { Response } from "ask-sdk-model";
-import { getLocalizedStrings } from "../strings/strings";
 import { reminderDirective } from "../utils/reminder";
+import { getLocalizedStrings } from "../utils/intent";
 
 export abstract class BaseIntentHandler implements RequestHandler {
     abstract intentName: string;

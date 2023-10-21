@@ -1,8 +1,8 @@
 import { BaseIntentHandler } from "./baseIntentHandler";
 import { getRequestType, HandlerInput } from "ask-sdk-core";
 import { interfaces, Response } from "ask-sdk-model";
-import { getLocalizedStrings } from "../strings/strings";
 import ConnectionsResponse = interfaces.connections.ConnectionsResponse;
+import { getLocalizedStrings } from "../utils/intent";
 
 export class ConnectionsResponseHandler extends BaseIntentHandler {
     intentName: string = "Connections.Response";

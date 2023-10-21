@@ -6,6 +6,7 @@ import { CustomRequest, MedicationData, ServiceData } from "../types";
 
 export class MessagesEn implements MessagesInterface {
     static locale = 'en-GB'
+    locale = MessagesEn.locale;
 
     responses = {
         WELCOME: "Hi, I can tell you your medications for tomorrow",
@@ -303,11 +304,13 @@ export class MessagesEn implements MessagesInterface {
     codeToString(timingCode: string): string {
         switch (timingCode) {
             case 'CM':
-                return 'breakfast'
+                return 'breakfast';
             case 'CD':
-                return 'lunch'
+                return 'lunch';
             case 'CV':
-                return 'dinner'
+                return 'dinner';
+            default:
+                throw new Error(`Invalid timing code ${timingCode}`);
         }
     }
 
@@ -330,6 +333,8 @@ export class MessagesEn implements MessagesInterface {
                 return 'weeks';
             case 'mo':
                 return 'months';
+            default:
+                throw new Error(`Invalid unit code ${unit}`);
         }
     }
 }

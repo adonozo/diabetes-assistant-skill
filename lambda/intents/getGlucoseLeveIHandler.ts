@@ -18,7 +18,7 @@ import { TimingEvent } from "../enums";
 import { DateTime } from "luxon";
 
 export class GetGlucoseLevelIntentDateAndTimingHandler extends BaseIntentHandler {
-    intentName: 'GetGlucoseLevelIntent';
+    intentName = 'GetGlucoseLevelIntent';
 
     canHandle(handlerInput : HandlerInput) : boolean {
         const request = handlerInput.requestEnvelope.request;
@@ -51,7 +51,7 @@ export class GetGlucoseLevelIntentDateAndTimingHandler extends BaseIntentHandler
 }
 
 export class GetGlucoseLevelIntentDateHandler extends BaseIntentHandler {
-    intentName: 'GetGlucoseLevelIntent';
+    intentName = 'GetGlucoseLevelIntent';
 
     canHandle(handlerInput : HandlerInput) : boolean {
         const request = handlerInput.requestEnvelope.request;
@@ -84,7 +84,7 @@ export class GetGlucoseLevelIntentDateHandler extends BaseIntentHandler {
 }
 
 export class GetGlucoseLevelIntentTimeHandler extends BaseIntentHandler {
-    intentName: 'GetGlucoseLevelIntent';
+    intentName = 'GetGlucoseLevelIntent';
 
     canHandle(handlerInput : HandlerInput) : boolean {
         const request = handlerInput.requestEnvelope.request;
@@ -112,7 +112,7 @@ export class GetGlucoseLevelIntentTimeHandler extends BaseIntentHandler {
 }
 
 export class GetGlucoseLevelIntentDateAndTimeHandler extends BaseIntentHandler {
-    intentName: 'GetGlucoseLevelIntent';
+    intentName = 'GetGlucoseLevelIntent';
 
     canHandle(handlerInput : HandlerInput) : boolean {
         const request = handlerInput.requestEnvelope.request;

@@ -13,7 +13,7 @@ export async function handle(handlerInput: HandlerInput, patientEmail: string): 
     const request = handlerInput.requestEnvelope.request as IntentRequest;
     const currentIntent = request.intent;
 
-    const value = +currentIntent.slots?.level.value;
+    const value = +(currentIntent.slots?.level?.value ?? 0);
     const timing = currentIntent.slots?.glucoseTiming.value;
     if (isNaN(value) || value <= 0 || value > 20 || !timing) {
         return handlerInput.responseBuilder

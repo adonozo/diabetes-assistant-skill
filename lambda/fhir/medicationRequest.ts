@@ -28,7 +28,7 @@ export function getTextForMedicationRequests(
  * @returns {{dose: *[], medication: string}}
  */
 export function getMedicationText(request: MedicationRequest, timezone: string): MedicationData {
-    const medicationData = {
+    const medicationData: MedicationData = {
         medication: '',
         dose: [],
     };
@@ -61,7 +61,7 @@ export function getMedicationTextData(
         localizedMessages
     }: MedicationRequestInputData
 ): ResourceReminderData[] {
-    const medicationData = [];
+    const medicationData: ResourceReminderData[] = [];
     const medication = request.medication.reference?.display ?? '';
     request.dosageInstruction?.forEach(dosage => {
         const {start, end} = getDatesFromTiming(dosage.timing!, timezone);
@@ -87,8 +87,8 @@ export function getMedicationTextData(
 }
 
 export function getMedicationValues(dosage: Dosage): DoseValue {
-    const doseValue = dosage.doseAndRate && dosage.doseAndRate[0].doseQuantity?.value ?? 0;
-    const doseUnit = dosage.doseAndRate && dosage.doseAndRate[0].doseQuantity?.unit ?? '';
+    const doseValue = (dosage.doseAndRate && dosage.doseAndRate[0].doseQuantity?.value) ?? 0;
+    const doseUnit = (dosage.doseAndRate && dosage.doseAndRate[0].doseQuantity?.unit) ?? '';
     return {
         value: doseValue,
         unit: doseUnit
@@ -96,13 +96,15 @@ export function getMedicationValues(dosage: Dosage): DoseValue {
 }
 
 export function requestNeedsStartDate(request: MedicationRequest): Extension | undefined {
-    return request.dosageInstruction && request.dosageInstruction
+    const extension = request.dosageInstruction && request.dosageInstruction
         .map(dosage => timingNeedsStartDate(dosage.timing))
-        .reduce((accumulator, current) => accumulator || current) ?? undefined;
+        .reduce((accumulator, current) => accumulator || current);
+    return extension ?? undefined;
 }
 
 export function requestNeedsStartTime(request: MedicationRequest): Extension | undefined {
-    return request.dosageInstruction && request.dosageInstruction
+    const extension = request.dosageInstruction && request.dosageInstruction
         .map(dosage => timingNeedsStartTime(dosage.timing))
-        .reduce((accumulator, current) => accumulator || current) ?? undefined;
+        .reduce((accumulator, current) => accumulator || current);
+    return extension ?? undefined;
 }

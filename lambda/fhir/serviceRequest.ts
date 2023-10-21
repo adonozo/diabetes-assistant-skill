@@ -1,4 +1,4 @@
-import { Patient, ServiceRequest } from "fhir/r5";
+import { FhirResource, Patient, ServiceRequest } from "fhir/r5";
 import { MessagesInterface } from "../strings/messages-interface";
 import { ResourceReminderData, ServiceData, ServiceRequestInputData } from "../types";
 import {
@@ -30,11 +30,11 @@ export function getServiceText(
     patient: Patient,
     timezone: string
 ): ServiceData {
-    const serviceData = {
+    const serviceData: ServiceData = {
         action: '',
         timings: [],
     };
-    serviceData.action = request.code?.concept?.coding && request.code.concept.coding[0].display ?? '';
+    serviceData.action = (request.code?.concept?.coding && request.code.concept.coding[0].display) ?? '';
     if (!request.occurrenceTiming) {
         return serviceData;
     }
@@ -62,8 +62,8 @@ export function getServiceTextData(
         localizedMessages
     }: ServiceRequestInputData
 ): ResourceReminderData[] {
-    const serviceData = [];
-    const action = request.code?.concept?.coding && request.code.concept.coding[0].display ?? '';
+    const serviceData: ResourceReminderData[] = [];
+    const action = (request.code?.concept?.coding && request.code.concept.coding[0].display) ?? '';
 
     if (!request.occurrenceTiming) {
         return serviceData;
@@ -71,8 +71,9 @@ export function getServiceTextData(
 
     const {start, end} = getDatesFromTiming(request.occurrenceTiming, timezone);
 
-    request.contained?.forEach((contained: ServiceRequest) => {
-        const timing = contained.occurrenceTiming!;
+    request.contained?.forEach((contained: FhirResource) => {
+        const innerRequest = contained as ServiceRequest;
+        const timing = innerRequest.occurrenceTiming!;
         const times = timesStringArraysFromTiming(timing, timezone);
 
         const processedText = textProcessor({

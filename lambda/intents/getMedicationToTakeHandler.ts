@@ -1,5 +1,5 @@
 import { IntentRequest, Response } from "ask-sdk-model";
-import { getLocalizedStrings, switchContextToStartDate } from "../utils/intent";
+import { getLocalizedStrings, switchContextToStartDate, throwWithMessage } from "../utils/intent";
 import { getTimezoneOrDefault, requestsNeedStartDate } from "../utils/time";
 import { getMedicationRequests, getSelf } from "../api/patients";
 import { timingEvent } from "../fhir/timing";
@@ -11,7 +11,7 @@ import { BaseIntentHandler } from "./baseIntentHandler";
 import { getAuthorizedUser } from "../auth";
 
 export class MedicationToTakeHandler extends BaseIntentHandler {
-    intentName: 'GetMedicationToTakeIntent';
+    intentName = 'GetMedicationToTakeIntent';
 
     canHandle(handlerInput : HandlerInput) : boolean {
         const request = handlerInput.requestEnvelope.request;
@@ -32,13 +32,13 @@ export class MedicationToTakeHandler extends BaseIntentHandler {
     private async handleIntent(handlerInput: HandlerInput, patient: Patient): Promise<Response> {
         const localizedMessages = getLocalizedStrings(handlerInput);
         const request = handlerInput.requestEnvelope.request as IntentRequest;
-        const date = request.intent.slots?.treatmentDate.value ?? throw Error('Date was not set on intent');
+        const date = request.intent.slots?.treatmentDate.value ?? throwWithMessage('Date was not set on intent');
         const userTimezone = await getTimezoneOrDefault(handlerInput);
 
         let medicationRequest;
         try {
             medicationRequest = await getMedicationRequests(patient.id!, date, timingEvent.ALL_DAY, userTimezone);
-        } catch (errorResponse) {
+        } catch (errorResponse: any) {
             if (errorResponse.status !== 422) {
                 console.log("Unexpected error", JSON.stringify(errorResponse))
                 throw new Error("Unexpected error");

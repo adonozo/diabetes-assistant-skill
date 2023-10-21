@@ -5,34 +5,35 @@ import { TimingEvent } from "../enums";
 import { CustomRequest, MedicationData, ServiceData } from "../types";
 
 export class MessagesEs implements MessagesInterface {
-    static locale = 'en-GB'
+    static locale = 'es-MX'
+    locale = MessagesEs.locale
 
     responses = {
-        WELCOME: "Hi, I can tell you your medications for tomorrow",
-        REMINDER_PERMISSIONS: "I need permission to access your reminders.",
-        SUCCESSFUL_REMINDER_PERMISSION: `Now that you've provided permission, you can try again by saying "setup reminders"`,
-        SUCCESSFUL_REMINDER_PERMISSION_REPROMPT: 'You can try again by saying "setup reminders"',
-        REPROMPT_REMINDER_PERMISSIONS: "Say ok if you want to grant me permission.",
-        HELP: "You can ask me your medications for today or ask me to create medication reminders.",
-        ERROR: "Sorry, I had trouble doing what you asked. Please try again.",
-        STOP: "Goodbye!",
-        ACCOUNT_LINK: "Your account is not linked. Add your account first in the Alexa app.",
-        UPDATED_TIMING: "You have updated your timing for",
-        SUCCESSFUL_REMINDERS: "Your reminders have been created, check the Alexa app to verify them.",
-        REQUESTS_REMINDERS_SETUP: 'Say "setup reminders" if you want to continue setting up your reminders.',
-        SETUP_TIMINGS: "You need to set some timings first.",
-        INVALID_BLOOD_GLUCOSE: "Sorry, I had trouble doing what you asked. Try again by saying: save my blood glucose level.",
-        INVALID_BLOOD_GLUCOSE_REPROMPT: "Try again by saying: save my blood glucose level.",
-        BLOOD_GLUCOSE_SUCCESS: "Your blood glucose level was registered.",
-        NO_GLUCOSE_RECORDS_FOUND: "I didn't find records for that date",
-        NO_RECORDS_FOUND: "I didn't find records",
-        QUERY_SETUP: 'Now, try asking me about your care plan for a date again.',
-        LOW_GLUCOSE: 'Your blood glucose level is lower than the recommended value. Please consider consulting to your GP or to a health provider.',
-        HIGH_GLUCOSE: 'Your blood glucose level is higher than the recommended value. Please consider consulting to your GP or to a health provider.',
-        PERMISSIONS_REQUIRED: "Without permissions, I can't set a reminder.",
-        DATE_PREPOSITION: "On",
-        CONCAT_WORD: "and",
-        REMINDER_NOT_CREATED: "Sorry, I couldn't create the reminders. Please try again.",
+        WELCOME: "Hola, puedes preguntarme tus medicamentos para mañana",
+        REMINDER_PERMISSIONS: "Necesito permisos para crear recordatorios",
+        SUCCESSFUL_REMINDER_PERMISSION: `Ahora que tengo permisos, puedo crear recordatorios. Intenta diciendo: "crea recordatorios"`,
+        SUCCESSFUL_REMINDER_PERMISSION_REPROMPT: 'Puedes intentar de nuevo diciendo: "setup reminders"',
+        REPROMPT_REMINDER_PERMISSIONS: `Dí "sí" para otorgarme permisos.`,
+        HELP: "Puedes preguntarme qué medicamentos debes tomar, registrar tu nivel de azúcar en sangre, o crear recordatorios.",
+        ERROR: "Lo siento, tuve problemas para hacer lo que pediste. Intenta de nuevo",
+        STOP: "¡Hasta pronto!",
+        ACCOUNT_LINK: "Tu cuenta no está enlazada. Primero añade tu cuenta en la applicación de Alexa en tu celular.",
+        UPDATED_TIMING: "Has actualizado el tiempo para ",
+        SUCCESSFUL_REMINDERS: "Tus recordatorios han sido creados. Mira la aplicación de Alexa en tu celular para verificar.",
+        REQUESTS_REMINDERS_SETUP: 'Dí "crea recordatorios" si deseas continuar creando tus recordatorios.',
+        SETUP_TIMINGS: "Primero necesito saber la hora para algunos eventos.",
+        INVALID_BLOOD_GLUCOSE: 'Lo siento, tuve problemas para hacer lo que pediste. Intenta de nuevo diciéndo: "Registra mi nivel de azúcar en sangre"',
+        INVALID_BLOOD_GLUCOSE_REPROMPT: 'Intenta de nuevo diciéndo: "Registra mi nivel de azúcar en sangre"',
+        BLOOD_GLUCOSE_SUCCESS: "Tu nivel de azúcar en sangre se ha registrado.",
+        NO_GLUCOSE_RECORDS_FOUND: "No encontré registros para esa fecha.",
+        NO_RECORDS_FOUND: "No encontré registros",
+        QUERY_SETUP: "Ahora, intenta preguntarme sobre tus medicamentos para una fecha de nuevo",
+        LOW_GLUCOSE: "Tu nivel de azúcar en sangre es más bajo de lo recomendado. Considera consultar con tu médico.",
+        HIGH_GLUCOSE: "Tu nivel de azúcar en sangre es más alto de lo recomendado. Considera consultar con tu médico.",
+        PERMISSIONS_REQUIRED: "Sin permisos, no puedo crear recordatorios para tus medicamentos.",
+        DATE_PREPOSITION: "El",
+        CONCAT_WORD: "y",
+        REMINDER_NOT_CREATED: "Lo siento, no pude crear los recordatorios. Intenta nuevamente.",
     }
 
     buildListTimesOrTimings(timings: string[]): string {
@@ -48,11 +49,13 @@ export class MessagesEs implements MessagesInterface {
     codeToString(timingCode: string): string {
         switch (timingCode) {
             case 'CM':
-                return 'desayuno'
+                return 'desayuno';
             case 'CD':
-                return 'almuerzo'
+                return 'almuerzo';
             case 'CV':
-                return 'cena'
+                return 'cena';
+            default:
+                throw new Error(`Invalid timing code ${timingCode}`);
         }
     }
 
@@ -64,6 +67,8 @@ export class MessagesEs implements MessagesInterface {
                 return 'semanas';
             case 'mo':
                 return 'meses';
+            default:
+                throw new Error(`Invalid unit code ${unit}`);
         }
     }
 

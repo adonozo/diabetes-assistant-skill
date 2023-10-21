@@ -12,7 +12,7 @@ export function getPatientFullName(patient: Patient): string {
         return '';
     }
 
-    let name = patient.name[0].given?.join(' ')
+    let name = patient.name[0].given?.join(' ') ?? '';
     name += patient.name[0].family;
     return name;
 }

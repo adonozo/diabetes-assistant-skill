@@ -79,3 +79,7 @@ export function buildErrorResponse(handlerInput: HandlerInput, localizedMessages
         .speak(localizedMessages.responses.ERROR)
         .getResponse();
 }
+
+export function throwWithMessage(message: string): never {
+    throw new Error(message);
+}

@@ -19,7 +19,7 @@ export async function getAuthorizedUser (handlerInput: HandlerInput): Promise<an
     return userInfo;
 }
 
-function validateToken(token): Promise<any> {
+function validateToken(token: string): Promise<any> {
     const auth = "Basic " + new Buffer(clientId + ":" + clientSecret).toString("base64");
     const tokenParam = `?token=${token}`;
     const tokenHintParam = '&token_type_hint=access_token';

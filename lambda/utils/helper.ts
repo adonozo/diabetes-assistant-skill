@@ -1,10 +1,11 @@
 import { TimingEvent } from "../enums";
+import { MessagesInterface } from "../strings/messages-interface";
 
 export const minBloodGlucoseValue = 4;
 export const maxFastingGlucoseValue = 7;
 export const maxAfterMealGlucoseValue = 8.5;
 
-export function logMessage(name, object) {
+export function logMessage(name: string, object: any): void {
     console.log(`===== ${name} =====`);
     console.log(JSON.stringify(object));
 }
@@ -16,7 +17,11 @@ export const sessionValues = {
     carePlanIntent: 'CarePlanIntent',
 }
 
-export function getBloodGlucoseAlert(value, stringTiming, localizedMessages) {
+export function getBloodGlucoseAlert(
+    value: number,
+    stringTiming: string,
+    localizedMessages: MessagesInterface
+): string {
     if (value < minBloodGlucoseValue) {
         return localizedMessages.responses.LOW_GLUCOSE;
     }
@@ -30,7 +35,7 @@ export function getBloodGlucoseAlert(value, stringTiming, localizedMessages) {
     return '';
 }
 
-export function listItems(values, concatWord) {
+export function listItems(values: string[], concatWord: string): string {
     if (values.length === 1) {
         return values[0];
     }
@@ -41,6 +46,6 @@ export function listItems(values, concatWord) {
         .join(joinComma)
 }
 
-export function wrapSpeakMessage(message) {
+export function wrapSpeakMessage(message: string): string {
     return `<speak>${message}</speak>`
 }

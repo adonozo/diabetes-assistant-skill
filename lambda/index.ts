@@ -8,7 +8,6 @@ import {
     Response,
     SessionEndedRequest,
 } from 'ask-sdk-model';
-import { getLocalizedStrings } from "./strings/strings";
 import { CreateRemindersHandler, CreateRemindersInProgressHandler } from "./intents/createReminderHandler";
 import { MedicationToTakeHandler } from "./intents/getMedicationToTakeHandler";
 import {
@@ -21,6 +20,7 @@ import {
     GetGlucoseLevelIntentDateAndTimingHandler, GetGlucoseLevelIntentDateHandler, GetGlucoseLevelIntentTimeHandler
 } from "./intents/getGlucoseLeveIHandler";
 import { ConnectionsResponseHandler } from "./intents/ConnectionsResponseHandler";
+import { getLocalizedStrings } from "./utils/intent";
 
 const LaunchRequestHandler : RequestHandler = {
     canHandle(handlerInput : HandlerInput) : boolean {

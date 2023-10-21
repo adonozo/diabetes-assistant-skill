@@ -1,6 +1,6 @@
 import { IntentRequest, Response } from "ask-sdk-model";
 import { sessionValues } from "../utils/helper";
-import { buildErrorResponse, getLocalizedStrings } from "../utils/intent";
+import { buildErrorResponse, getLocalizedStrings, throwWithMessage } from "../utils/intent";
 import { timingNeedsStartTime } from "../fhir/timing";
 import { setDosageStartDate, setServiceRequestStartDate } from "../api/patients";
 import { HandlerInput } from "ask-sdk-core";
@@ -9,7 +9,7 @@ import { BaseIntentHandler } from "./baseIntentHandler";
 import { getAuthorizedUser } from "../auth";
 
 export class SetStartDateInitialIntentHandler extends BaseIntentHandler {
-    intentName: 'SetStartDateIntent';
+    intentName = 'SetStartDateIntent';
 
     canHandle(handlerInput : HandlerInput) : boolean {
         const request = handlerInput.requestEnvelope.request;
@@ -31,7 +31,7 @@ export class SetStartDateInitialIntentHandler extends BaseIntentHandler {
 }
 
 export class SetStartDateInProgressIntentHandler extends BaseIntentHandler {
-    intentName: 'SetStartDateIntent';
+    intentName = 'SetStartDateIntent';
 
     canHandle(handlerInput : HandlerInput) : boolean {
         const request = handlerInput.requestEnvelope.request;
@@ -84,7 +84,7 @@ export class SetStartDateInProgressIntentHandler extends BaseIntentHandler {
 }
 
 export class SetStartDateCompletedIntentHandler extends BaseIntentHandler {
-    intentName: 'SetStartDateIntent';
+    intentName = 'SetStartDateIntent';
 
     canHandle(handlerInput : HandlerInput) : boolean {
         const request = handlerInput.requestEnvelope.request;
@@ -136,14 +136,14 @@ export class SetStartDateCompletedIntentHandler extends BaseIntentHandler {
 function getIntentData(handlerInput: HandlerInput): DateTimeIntentData {
     const request = handlerInput.requestEnvelope.request as IntentRequest;
     const currentIntent = request.intent;
-    const date = currentIntent.slots?.date.value ?? throw Error('Date was not set in intent');
-    const time = currentIntent.slots?.healthRequestTime.value ?? throw Error('Time was not set in intent');
+    const date = currentIntent.slots?.date.value ?? throwWithMessage('Date was not set in intent');
+    const time = currentIntent.slots?.healthRequestTime.value ?? throwWithMessage('Time was not set in intent');
 
     return {date, time};
 }
 
 function getStartDateConfirmedResponse(
-    session: {},
+    session: {[p: string]: any},
     requestName: string,
     localizedMessages: MessagesInterface
 ): ConfirmedResponse {

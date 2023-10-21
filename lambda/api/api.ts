@@ -12,7 +12,7 @@ export function createJsonResponse<T>(
 ): void {
     response.setEncoding('utf8');
     let responseData = '';
-    const failed = response.statusCode < 200 || response.statusCode > 299;
+    const failed = !response.statusCode || response.statusCode < 200 || response.statusCode > 299;
 
     response.on('data', chunk => {
         responseData += chunk;

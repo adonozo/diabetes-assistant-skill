@@ -1,28 +1,39 @@
 import { DateTime } from "luxon";
-import { MessagesInterface } from "./messages-interface";
+import { MessagesInterface, ObservationValue } from "./messages-interface";
 import { MessagesEs } from "./messages.es";
 import { MessagesEn } from "./messages.en";
+import { Observation } from "fhir/r5";
 
-export function getLocalizedStrings(locale): MessagesInterface {
+export function getLocalizedStrings(locale: string | undefined): MessagesInterface {
     switch (locale) {
         case MessagesEs.locale:
             return new MessagesEs();
         case MessagesEn.locale:
             return new MessagesEn();
         default:
-            throw 'Locale not supported.';
+            throw new Error(`Locale ${locale} not supported.`);
     }
 }
 
-export function makeTextFromObservations(observations, timezone, localizedMessages) {
-    const dateMap = new Map();
+export function makeTextFromObservations(
+    observations: Observation[],
+    timezone: string,
+    localizedMessages: MessagesInterface
+): string {
+    const dateMap = new Map<string, ObservationValue[]>();
     observations.forEach(observation => {
-        const date = DateTime.fromISO(observation.issued).setZone(timezone);
-        const dayKey = localizedMessages.getTextForDay(observation.issued, timezone, localizedMessages.responses.DATE_PREPOSITION);
+        const date = DateTime.fromISO(observation.issued!).setZone(timezone);
+        const dayKey = localizedMessages
+            .getTextForDay(observation.issued!, timezone, localizedMessages.responses.DATE_PREPOSITION);
         const time = localizedMessages.getHoursAndMinutes(date);
-        const observationValue = {time: time, value: observation.valueQuantity.value, timing: observation.extension[0]?.valueCode};
+        const observationValue = {
+            time: time,
+            value: observation.valueQuantity?.value?.toString() ?? '',
+            timing: (observation.extension && observation.extension[0]?.valueCode) ?? ''
+        };
+
         if (dateMap.has(dayKey)) {
-            dateMap.get(dayKey).push(observationValue);
+            dateMap.get(dayKey)!.push(observationValue);
         } else {
             dateMap.set(dayKey, [observationValue]);
         }
@@ -37,11 +48,6 @@ export function makeTextFromObservations(observations, timezone, localizedMessag
     return wrapSpeakMessage(text);
 }
 
-function wrapSpeakMessage(message) {
+function wrapSpeakMessage(message: string): string {
     return `<speak>${message}</speak>`
-}
-
-module.exports = {
-    makeTextFromObservations,
-    getLocalizedStrings,
 }

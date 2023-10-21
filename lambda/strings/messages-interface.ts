@@ -2,6 +2,8 @@ import { DateTime } from "luxon";
 import { CustomRequest, MedicationData, ServiceData } from "../types";
 
 export interface MessagesInterface {
+    locale: string;
+
     responses: {
         WELCOME: string,
         REMINDER_PERMISSIONS: string,

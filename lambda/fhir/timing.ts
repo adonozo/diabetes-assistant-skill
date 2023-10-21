@@ -70,7 +70,7 @@ export const timingEvent = {
     ALL_DAY: 'ALL_DAY'
 }
 
-export const timingOrder = {
+export const timingOrder: {[p: string]: number} = {
     MORN: 1,
     ACM: 2,
     CM: 3,
@@ -160,7 +160,7 @@ export function getDatesFromTiming(timing: Timing, timezone: string = DEFAULT_TI
  * @param timezone {string}
  * @return {[]}
  */
-export function getTimesFromTimingWithFrequency(frequency: number, startTime: string, timezone: string): [string] {
+export function getTimesFromTimingWithFrequency(frequency: number, startTime: string, timezone: string): string[] {
     const referenceDate = DateTime.utc().setZone(timezone).startOf('day');
     const localDate = DateTime.fromISO(referenceDate.toISODate() + `T${startTime}`, {zone: timezone});
     const hoursDifference = 24 / frequency;

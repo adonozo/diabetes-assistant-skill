@@ -2,7 +2,7 @@ import * as https from "https";
 import { createJsonResponse, getOptionsFor } from "./api";
 import { Bundle, Observation, Patient } from "fhir/r5";
 
-export function getSelf(email): Promise<Patient> {
+export function getSelf(email: string): Promise<Patient> {
     return new Promise((resolve, reject) => {
         const path = `/patients/${email}`
         const options = getOptionsFor(path, 'GET');

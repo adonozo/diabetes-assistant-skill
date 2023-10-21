@@ -1,5 +1,5 @@
 import { getTimezoneOrDefault, requestsNeedStartDate } from "../utils/time";
-import { getLocalizedStrings, switchContextToStartDate } from "../utils/intent";
+import { getLocalizedStrings, switchContextToStartDate, throwWithMessage } from "../utils/intent";
 import { getRemindersForRequests } from "../utils/reminder";
 import { getActiveCarePlan } from "../api/carePlan";
 import { requestListFromBundle } from "../fhir/carePlan";
@@ -84,7 +84,7 @@ export class CreateRemindersHandler extends BaseIntentHandler {
 
         // Create reminders
         const request = handlerInput.requestEnvelope.request as IntentRequest;
-        const time = request.intent.slots?.time.value ?? throw Error('Time was not recorded in the intent');
+        const time = request.intent.slots?.time.value ?? throwWithMessage('Time was not recorded in the intent');
         const requestReminders = getRemindersForRequests({
             requests,
             time,
