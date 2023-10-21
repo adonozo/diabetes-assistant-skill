@@ -5,15 +5,17 @@ import {
     timingNeedsStartDate,
     timingNeedsStartTime
 } from "../fhir/timing";
-import { Dosage, Extension, FhirResource, MedicationRequest, ServiceRequest, Timing } from "fhir/r5";
+import { Dosage, FhirResource, MedicationRequest, ServiceRequest, Timing } from "fhir/r5";
 import { HandlerInput } from "ask-sdk-core";
 import { CustomRequest, HoursAndMinutes } from "../types";
+import { getMedicationName } from "../fhir/medicationRequest";
 
 export function requestsNeedStartDate(requests: FhirResource[]): CustomRequest | undefined {
     for (const request of requests) {
         if (request.resourceType === 'MedicationRequest') {
             const dosage = getDosageNeedingSetup(request);
-            return dosage && buildCustomMedicationRequest(dosage, request.medication.reference?.display ?? '');
+            const medicationName = getMedicationName(request);
+            return dosage && buildCustomMedicationRequest(dosage, medicationName);
         } else if (request.resourceType === 'ServiceRequest' && serviceNeedsDateTimeSetup(request)) {
             return buildCustomServiceRequest(request);
         }
@@ -98,7 +100,7 @@ export function getHoursAndMinutes(stringTime: string): HoursAndMinutes {
     return {hour: +timeParts[0], minute: +timeParts[1]};
 }
 
-export function serviceNeedsDateTimeSetup(serviceRequest: ServiceRequest): Extension | undefined {
+export function serviceNeedsDateTimeSetup(serviceRequest: ServiceRequest): boolean {
     return timingNeedsStartDate(serviceRequest.occurrenceTiming) || timingNeedsStartTime(serviceRequest.occurrenceTiming);
 }
 

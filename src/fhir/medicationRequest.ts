@@ -1,13 +1,11 @@
-import { Dosage, Extension, MedicationRequest } from "fhir/r5";
+import { Dosage, MedicationRequest } from "fhir/r5";
 import { MessagesInterface } from "../strings/messages-interface";
-import { DoseValue, MedicationData, MedicationRequestInputData, ResourceReminderData } from "../types";
+import { DoseValue, MedicationData, MedicationRequestTextDataArgs, ResourceReminderData } from "../types";
 import {
     compareWhen,
     getDatesFromTiming,
     getTimesFromTimingWithFrequency,
-    getTimingStartTime,
-    timingNeedsStartDate,
-    timingNeedsStartTime
+    getTimingStartTime
 } from "./timing";
 import { timesStringArraysFromTiming } from "../utils/time";
 
@@ -32,7 +30,7 @@ export function getMedicationText(request: MedicationRequest, timezone: string):
         medication: '',
         dose: [],
     };
-    medicationData.medication = request.medication.reference?.display!;
+    medicationData.medication = getMedicationName(request);
     request.dosageInstruction?.forEach(dosage => {
         const {value, unit} = getMedicationValues(dosage);
         let time;
@@ -59,10 +57,10 @@ export function getMedicationTextData(
         timezone,
         textProcessor,
         localizedMessages
-    }: MedicationRequestInputData
+    }: MedicationRequestTextDataArgs
 ): ResourceReminderData[] {
     const medicationData: ResourceReminderData[] = [];
-    const medication = request.medication.reference?.display ?? '';
+    const medication = getMedicationName(request);
     request.dosageInstruction?.forEach(dosage => {
         const {start, end} = getDatesFromTiming(dosage.timing!, timezone);
         const {value, unit} = getMedicationValues(dosage);
@@ -95,16 +93,17 @@ export function getMedicationValues(dosage: Dosage): DoseValue {
     }
 }
 
-export function requestNeedsStartDate(request: MedicationRequest): Extension | undefined {
-    const extension = request.dosageInstruction && request.dosageInstruction
-        .map(dosage => timingNeedsStartDate(dosage.timing))
-        .reduce((accumulator, current) => accumulator || current);
-    return extension ?? undefined;
+export function getMedicationName(request: MedicationRequest): string {
+    const errorMessage = `Medication request ${request.id} does not have a valid contained medication`;
+    if (!request.contained || request.contained.length !== 1) {
+        throw new Error(errorMessage)
+    }
+
+    const medication = request.contained[0];
+    if (medication.resourceType !== 'Medication') {
+        throw new Error(errorMessage)
+    }
+
+    return (medication.code?.coding && medication.code?.coding[0].display) ?? '';
 }
 
-export function requestNeedsStartTime(request: MedicationRequest): Extension | undefined {
-    const extension = request.dosageInstruction && request.dosageInstruction
-        .map(dosage => timingNeedsStartTime(dosage.timing))
-        .reduce((accumulator, current) => accumulator || current);
-    return extension ?? undefined;
-}

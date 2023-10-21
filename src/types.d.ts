@@ -44,7 +44,7 @@ export type ServiceRequestInputData = {
     localizedMessages: MessagesInterface
 }
 
-export type MedicationRequestInputData = {
+export type MedicationRequestTextDataArgs = {
     request: MedicationRequest,
     time: string,
     timezone: string,

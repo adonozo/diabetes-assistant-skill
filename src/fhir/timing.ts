@@ -1,7 +1,7 @@
 import { DateTime } from "luxon";
 import { RRule, Weekday } from "rrule";
 import { getExtension } from "./fhir";
-import { Duration, Extension, Timing } from "fhir/r5";
+import { Duration, Timing } from "fhir/r5";
 import { StartEndDateTime } from "../types";
 import { TimingEvent } from "../enums";
 
@@ -31,12 +31,12 @@ export function getTimingStartDate(timing: Timing, timezone: string = DEFAULT_TI
     return undefined;
 }
 
-export function timingNeedsStartDate(timing: Timing | undefined): Extension | undefined {
-    return getExtension(timing, TIMING_NEEDS_START_DATE);
+export function timingNeedsStartDate(timing: Timing | undefined): boolean {
+    return !!getExtension(timing, TIMING_NEEDS_START_DATE);
 }
 
-export function timingNeedsStartTime(timing: Timing | undefined): Extension | undefined {
-    return getExtension(timing, TIMING_NEEDS_START_TIME);
+export function timingNeedsStartTime(timing: Timing | undefined): boolean {
+    return !!getExtension(timing, TIMING_NEEDS_START_TIME);
 }
 
 export function getTimingStartTime(timing: Timing): string | undefined {
