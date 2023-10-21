@@ -1,14 +1,14 @@
 {
   "compilerOptions": {
-    "module": "ES2022",
+    "module": "CommonJS",
     "target": "ES2022",
     "lib": [
       "ES2022"
     ],
     "moduleResolution": "node",
-    "rootDir": "../lambda",
-    "outDir": "dist",
-    "sourceMap": false,
+    "rootDir": "./",
+    "outDir": "./",
+    "sourceMap": true,
     "allowJs": false,
     "noImplicitAny": true,
     "noUnusedLocals": true,
@@ -16,13 +16,14 @@
     "strictNullChecks": true,
     "noImplicitReturns": true,
     "preserveConstEnums": true,
-    "suppressImplicitAnyIndexErrors": true,
     "forceConsistentCasingInFileNames": true,
-    "strict": true
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "isolatedModules": true
   },
   "exclude": [
-    "/**/node_modules",
-    "**/*.spec.ts",
+    "/**/node_modules"
   ],
   "include": ["./"]
 }

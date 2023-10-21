@@ -14,7 +14,14 @@
         "userConfig": {
           "runtime": "nodejs18.x",
           "handler": "index.handler",
-          "awsRegion": "eu-west-2"
+          "awsRegion": "eu-west-2",
+          "lambda": {
+            "functionName": "diabetes-skill-function",
+            "description": "The function for the Diabetes Assistant skill",
+            "environmentVariables": {
+              "NODE_OPTIONS": "--enable-source-maps"
+            }
+          }
         },
         "type": "@ask-cli/lambda-deployer"
       }
