@@ -4,7 +4,7 @@
   "description": "Alexa Skill for the Diabetes Reminder System.",
   "main": "index.js",
   "scripts": {
-    "build": "esbuild index.ts --bundle --sourcemap --platform=node --target=es2022 --outfile=../lambda/index.js"
+    "build": "tsc --noEmit && esbuild index.ts --bundle --sourcemap --platform=node --target=es2022 --outfile=../lambda/index.js"
   },
   "author": "Alvaro Donozo",
   "license": "ISC",

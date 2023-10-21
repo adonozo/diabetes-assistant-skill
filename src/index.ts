@@ -1,4 +1,5 @@
 import {
+    DefaultApiClient,
     ErrorHandler,
     HandlerInput,
     RequestHandler,
@@ -116,4 +117,5 @@ exports.handler = SkillBuilders.custom()
         SessionEndedRequestHandler,
     )
     .addErrorHandlers(ErrorHandler)
+    .withApiClient(new DefaultApiClient())
     .lambda();
