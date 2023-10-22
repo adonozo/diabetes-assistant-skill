@@ -1,10 +1,9 @@
 import { HandlerInput, RequestHandler } from "ask-sdk-core";
 import { Intent, IntentRequest, Response } from "ask-sdk-model";
 import { reminderDirective } from "../utils/reminder";
-import { getLocalizedStrings } from "../utils/intent";
+import { getLocalizedStrings, sessionValues } from "../utils/intent";
 import { CustomRequest } from "../types";
 import { AbstractMessage } from "../strings/abstractMessage";
-import { sessionValues } from "../utils/helper";
 import { getTimingStartDate, timingNeedsStartDate } from "../fhir/timing";
 import { DateTime } from "luxon";
 

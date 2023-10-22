@@ -1,6 +1,5 @@
 import { IntentRequest, Response } from "ask-sdk-model";
-import { sessionValues } from "../utils/helper";
-import { getLocalizedStrings, throwWithMessage } from "../utils/intent";
+import { getLocalizedStrings, sessionValues, throwWithMessage } from "../utils/intent";
 import { timingNeedsStartTime } from "../fhir/timing";
 import { setDosageStartDate, setServiceRequestStartDate } from "../api/patients";
 import { HandlerInput } from "ask-sdk-core";

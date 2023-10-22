@@ -15,6 +15,13 @@ export function getLocalizedStrings(handlerInput: HandlerInput): AbstractMessage
     }
 }
 
+export const sessionValues = {
+    requestMissingDate: 'RequestMissingDate',
+    createRemindersIntent: 'CreateRemindersIntent',
+    getMedicationToTakeIntent: 'GetMedicationToTakeIntent',
+    carePlanIntent: 'CarePlanIntent',
+}
+
 export function throwWithMessage(message: string): never {
     throw new Error(message);
 }

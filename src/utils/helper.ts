@@ -9,13 +9,6 @@ export function logMessage(name: string, object: any): void {
     console.log(`~~~~~~ ${name}`, JSON.stringify(object));
 }
 
-export const sessionValues = {
-    requestMissingDate: 'RequestMissingDate',
-    createRemindersIntent: 'CreateRemindersIntent',
-    getMedicationToTakeIntent: 'GetMedicationToTakeIntent',
-    carePlanIntent: 'CarePlanIntent',
-}
-
 export function getBloodGlucoseAlert(
     value: number,
     stringTiming: string,

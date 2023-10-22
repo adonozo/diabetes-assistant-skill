@@ -37,20 +37,13 @@ export abstract class AbstractMessage {
         const dateMap = new Map<string, ObservationValue[]>();
         observations.forEach(observation => {
             const date = DateTime.fromISO(observation.issued!).setZone(timezone);
-            const dayKey =
-                this.getTextForDay(observation.issued!, timezone, this.responses.DATE_PREPOSITION);
-            const time = this.getHoursAndMinutes(date);
+            const dayKey = this.getTextForDay(observation.issued!, timezone, this.responses.DATE_PREPOSITION);
             const observationValue = {
-                time: time,
+                time: this.getHoursAndMinutes(date),
                 value: observation.valueQuantity?.value?.toString() ?? '',
                 timing: (observation.extension && observation.extension[0]?.valueCode) ?? ''
             };
-
-            if (dateMap.has(dayKey)) {
-                dateMap.get(dayKey)!.push(observationValue);
-            } else {
-                dateMap.set(dayKey, [observationValue]);
-            }
+            this.upsertValueToMap(dateMap, dayKey, observationValue);
         });
 
         let text = '';
@@ -121,6 +114,14 @@ export abstract class AbstractMessage {
         return values
             .map((value, index) => index === values.length - 1 ? ` ${concatWord} ${value}.` : ` ${value}`)
             .join(joinComma)
+    }
+
+    upsertValueToMap(map: Map<string, ObservationValue[]>, key: string, value: ObservationValue): void {
+        if (map.has(key)) {
+            map.get(key)!.push(value);
+        } else {
+            map.set(key, [value]);
+        }
     }
 }
 
