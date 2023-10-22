@@ -92,28 +92,6 @@ export const timingOrder: {[p: string]: number} = {
     ALL_DAY: 20
 }
 
-/**
- * @param value {string}
- */
-export function relatedTimingCodeToString(value: TimingEvent): TimingEvent {
-    switch (value) {
-        case TimingEvent.ACD:
-        case TimingEvent.CD:
-        case TimingEvent.PCD:
-            return TimingEvent.CD;
-        case TimingEvent.ACM:
-        case TimingEvent.CM:
-        case TimingEvent.PCM:
-            return TimingEvent.CM;
-        case TimingEvent.ACV:
-        case TimingEvent.CV:
-        case TimingEvent.PCV:
-            return TimingEvent.CV;
-        default:
-            return TimingEvent.C;
-    }
-}
-
 export function alexaTimingToFhirTiming(alexaTiming: string): TimingEvent {
     switch (alexaTiming) {
         case 'EV':
@@ -168,7 +146,7 @@ export function getTimesFromTimingWithFrequency(frequency: number, startTime: st
     return [...Array(frequency).keys()]
         .map(index => localDate.plus({hours: index * hoursDifference}))
         .map(dateTime => dateTime.toISOTime({ suppressSeconds: true, includeOffset: false }))
-        .filter((times): times is string => times == null);
+        .filter((times): times is string => times != null);
 }
 
 export function dayToRruleDay(day: string): Weekday | undefined {

@@ -20,7 +20,7 @@ export async function getAuthorizedUser (handlerInput: HandlerInput): Promise<an
 }
 
 function validateToken(token: string): Promise<any> {
-    const auth = "Basic " + new Buffer(clientId + ":" + clientSecret).toString("base64");
+    const auth = "Basic " + Buffer.from(clientId + ":" + clientSecret).toString("base64");
     const tokenParam = `?token=${token}`;
     const tokenHintParam = '&token_type_hint=access_token';
     const tokenQuery = tokenParam + tokenHintParam;
@@ -43,7 +43,7 @@ function validateToken(token: string): Promise<any> {
 }
 
 function getOptions(token: string): RequestOptions {
-    const auth = "Basic " + new Buffer(clientId + ":" + clientSecret).toString("base64");
+    const auth = "Basic " + Buffer.from(clientId + ":" + clientSecret).toString("base64");
     const tokenParam = `?token=${token}`;
     const tokenHintParam = '&token_type_hint=access_token';
     const tokenQuery = tokenParam + tokenHintParam;

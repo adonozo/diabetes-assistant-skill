@@ -179,14 +179,16 @@ export class MessagesEs implements MessagesInterface {
 
     makeMedicationText(medicationData: MedicationData): string {
         const regex = new RegExp('^[0-2][0-9]');
-        const doseTextArray = medicationData.dose.map(dose => {
-            const doseHasTime = dose.time.length > 0 && regex.test(dose.time[0]);
-            const timingTextFunction = doseHasTime ? this.getHoursAndMinutesFromString: this.timingToText;
-            const timings = dose.time.map(time => timingTextFunction(time));
-            return timings.map(time =>
-                `${dose.value} ${this.unitsToStrings(dose.unit, +dose.value > 1)} ${time}`);
-        })
+        const doseTextArray = medicationData.dose
+            .map(dose => {
+                const doseHasTime = dose.time.length > 0 && regex.test(dose.time[0]);
+                const timeToTextFunction = doseHasTime ? this.getHoursAndMinutesFromString : this.timingToText;
+                const timings = dose.time.map(timeToTextFunction);
+                return timings.map(time =>
+                    `${dose.value} ${this.unitsToStrings(dose.unit, dose.value > 1)} ${time}`);
+            })
             .flat(1);
+
         const doseText = listItems(doseTextArray, this.responses.CONCAT_WORD);
         return `Toma ${medicationData.medication}, ${doseText}`;
     }
