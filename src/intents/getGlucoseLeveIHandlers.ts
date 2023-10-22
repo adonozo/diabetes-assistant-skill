@@ -17,7 +17,7 @@ import { alexaTimingToFhirTiming } from "../fhir/timing";
 import { TimingEvent } from "../enums";
 import { DateTime } from "luxon";
 
-export class GetGlucoseLevelIntentDateAndTimingHandler extends BaseIntentHandler {
+export class GetGlucoseLevelDateAndTimingHandler extends BaseIntentHandler {
     intentName = 'GetGlucoseLevelIntent';
 
     canHandle(handlerInput : HandlerInput) : boolean {
@@ -50,7 +50,7 @@ export class GetGlucoseLevelIntentDateAndTimingHandler extends BaseIntentHandler
     }
 }
 
-export class GetGlucoseLevelIntentDateHandler extends BaseIntentHandler {
+export class GetGlucoseLevelDateHandler extends BaseIntentHandler {
     intentName = 'GetGlucoseLevelIntent';
 
     canHandle(handlerInput : HandlerInput) : boolean {
@@ -83,7 +83,7 @@ export class GetGlucoseLevelIntentDateHandler extends BaseIntentHandler {
     }
 }
 
-export class GetGlucoseLevelIntentTimeHandler extends BaseIntentHandler {
+export class GetGlucoseLevelTimeHandler extends BaseIntentHandler {
     intentName = 'GetGlucoseLevelIntent';
 
     canHandle(handlerInput : HandlerInput) : boolean {
@@ -111,7 +111,7 @@ export class GetGlucoseLevelIntentTimeHandler extends BaseIntentHandler {
     }
 }
 
-export class GetGlucoseLevelIntentDateAndTimeHandler extends BaseIntentHandler {
+export class GetGlucoseLevelDateAndTimeHandler extends BaseIntentHandler {
     intentName = 'GetGlucoseLevelIntent';
 
     canHandle(handlerInput : HandlerInput) : boolean {

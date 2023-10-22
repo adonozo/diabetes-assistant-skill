@@ -1,5 +1,5 @@
 import { FhirResource, Patient, ServiceRequest } from "fhir/r5";
-import { AbstractMessage } from "../strings/abstract-message";
+import { AbstractMessage } from "../strings/abstractMessage";
 import { ResourceReminderData, ServiceData, ServiceRequestInputData } from "../types";
 import {
     compareWhen,

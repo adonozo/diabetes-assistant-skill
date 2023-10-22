@@ -1,4 +1,4 @@
-import { AbstractMessage, ObservationValue } from "./abstract-message";
+import { AbstractMessage, ObservationValue } from "./abstractMessage";
 import { DateTime } from "luxon";
 import { TimingEvent } from "../enums";
 import { CustomRequest, MedicationData, ServiceData } from "../types";

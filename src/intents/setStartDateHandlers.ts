@@ -4,11 +4,11 @@ import { buildErrorResponse, getLocalizedStrings, throwWithMessage } from "../ut
 import { timingNeedsStartTime } from "../fhir/timing";
 import { setDosageStartDate, setServiceRequestStartDate } from "../api/patients";
 import { HandlerInput } from "ask-sdk-core";
-import { AbstractMessage } from "../strings/abstract-message";
+import { AbstractMessage } from "../strings/abstractMessage";
 import { BaseIntentHandler } from "./baseIntentHandler";
 import { getAuthorizedUser } from "../auth";
 
-export class SetStartDateInitialIntentHandler extends BaseIntentHandler {
+export class SetStartDateIntentHandler extends BaseIntentHandler {
     intentName = 'SetStartDateIntent';
 
     canHandle(handlerInput : HandlerInput) : boolean {
@@ -30,7 +30,7 @@ export class SetStartDateInitialIntentHandler extends BaseIntentHandler {
     }
 }
 
-export class SetStartDateInProgressIntentHandler extends BaseIntentHandler {
+export class SetStartDateInProgressHandler extends BaseIntentHandler {
     intentName = 'SetStartDateIntent';
 
     canHandle(handlerInput : HandlerInput) : boolean {
@@ -83,7 +83,7 @@ export class SetStartDateInProgressIntentHandler extends BaseIntentHandler {
     }
 }
 
-export class SetStartDateCompletedIntentHandler extends BaseIntentHandler {
+export class SetStartDateCompletedHandler extends BaseIntentHandler {
     intentName = 'SetStartDateIntent';
 
     canHandle(handlerInput : HandlerInput) : boolean {

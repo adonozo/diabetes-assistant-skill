@@ -11,7 +11,7 @@ import {
 } from "../types";
 import { getServiceTextData } from "../fhir/serviceRequest";
 import { DomainResource, MedicationRequest, ServiceRequest } from "fhir/r5";
-import { AbstractMessage } from "../strings/abstract-message";
+import { AbstractMessage } from "../strings/abstractMessage";
 import { getMedicationTextData } from "../fhir/medicationRequest";
 
 export const reminderDirective: Directive = {

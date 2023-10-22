@@ -1,7 +1,7 @@
 import { DateTime } from "luxon";
 import { getPatientSubject } from "./patient";
 import { Bundle, Observation, Patient } from "fhir/r5";
-import { AbstractMessage } from "../strings/abstract-message";
+import { AbstractMessage } from "../strings/abstractMessage";
 
 export const observationBase: Observation = {
     resourceType: "Observation",

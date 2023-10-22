@@ -4,7 +4,7 @@ import * as strings from "../strings/strings"
 import { sessionValues } from "./helper";
 import { getTimingStartDate, timingNeedsStartDate } from "../fhir/timing";
 import { CustomRequest } from "../types";
-import { AbstractMessage } from "../strings/abstract-message";
+import { AbstractMessage } from "../strings/abstractMessage";
 import { DateTime } from "luxon";
 
 export function getDelegatedSetStartDateIntent(startDate?: DateTime): Intent {

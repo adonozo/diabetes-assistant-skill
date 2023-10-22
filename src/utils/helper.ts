@@ -1,13 +1,12 @@
 import { TimingEvent } from "../enums";
-import { AbstractMessage } from "../strings/abstract-message";
+import { AbstractMessage } from "../strings/abstractMessage";
 
 export const minBloodGlucoseValue = 4;
 export const maxFastingGlucoseValue = 7;
 export const maxAfterMealGlucoseValue = 8.5;
 
 export function logMessage(name: string, object: any): void {
-    console.log(`===== ${name} =====`);
-    console.log(JSON.stringify(object));
+    console.log(`~~~~~~ ${name}`, JSON.stringify(object));
 }
 
 export const sessionValues = {

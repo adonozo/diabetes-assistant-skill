@@ -1,5 +1,5 @@
 import { DateTime } from "luxon";
-import { AbstractMessage, ObservationValue } from "./abstract-message";
+import { AbstractMessage, ObservationValue } from "./abstractMessage";
 import { MessagesEs } from "./messages.es";
 import { MessagesEn } from "./messages.en";
 import { Observation } from "fhir/r5";

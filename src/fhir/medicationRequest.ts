@@ -1,5 +1,5 @@
 import { Dosage, MedicationRequest } from "fhir/r5";
-import { AbstractMessage } from "../strings/abstract-message";
+import { AbstractMessage } from "../strings/abstractMessage";
 import { DoseValue, MedicationData, MedicationRequestTextDataArgs, ResourceReminderData } from "../types";
 import {
     compareWhen,

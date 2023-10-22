@@ -1,6 +1,6 @@
 import { DateTime } from "luxon";
 import { MedicationRequest, ServiceRequest, Timing } from "fhir/r5";
-import { AbstractMessage } from "./strings/abstract-message";
+import { AbstractMessage } from "./strings/abstractMessage";
 
 export type HttpResolvePromise<T> = (value: PromiseLike<T>) => void;
 
