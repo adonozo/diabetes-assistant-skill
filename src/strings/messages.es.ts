@@ -1,10 +1,9 @@
-import { MessagesInterface, ObservationValue } from "./messages-interface";
+import { AbstractMessage, ObservationValue } from "./abstract-message";
 import { DateTime } from "luxon";
-import { listItems, wrapSpeakMessage } from "../utils/helper";
 import { TimingEvent } from "../enums";
 import { CustomRequest, MedicationData, ServiceData } from "../types";
 
-export class MessagesEs implements MessagesInterface {
+export class MessagesEs extends AbstractMessage {
     static locale = 'es-MX'
     locale = MessagesEs.locale
 
@@ -43,7 +42,7 @@ export class MessagesEs implements MessagesInterface {
         const timeList = timings.map(time => timingTextFunction(time));
 
         const preposition = hasTime ? 'a las ' : '';
-        return preposition + listItems(timeList, this.responses.CONCAT_WORD);
+        return preposition + this.listItems(timeList, this.responses.CONCAT_WORD);
     }
 
     codeToString(timingCode: string): string {
@@ -110,9 +109,9 @@ export class MessagesEs implements MessagesInterface {
 
     getMedicationSsmlReminderText(value: number, unit: string, medication: string, times: []): string {
         const stringTimes = times.map((time) => this.timingString(time, 'a las '));
-        const timeList = listItems(stringTimes, this.responses.CONCAT_WORD);
+        const timeList = this.listItems(stringTimes, this.responses.CONCAT_WORD);
         const message = `Toma ${value} ${unit} de ${medication} ${timeList}`;
-        return wrapSpeakMessage(message);
+        return this.wrapSpeakMessage(message);
     }
 
     getNoRecordsTextForDay(date: string, userTimezone: string): string {
@@ -126,9 +125,9 @@ export class MessagesEs implements MessagesInterface {
 
     getServiceSsmlReminderText(action: string, times: []): string {
         const stringTimes = times.map((time) => this.timingString(time, 'a las '));
-        const timeList = listItems(stringTimes, this.responses.CONCAT_WORD);
+        const timeList = this.listItems(stringTimes, this.responses.CONCAT_WORD);
         const message = `${action} ${timeList}`;
-        return wrapSpeakMessage(message);
+        return this.wrapSpeakMessage(message);
     }
 
     getStartDatePrompt(missingDate: CustomRequest): string {
@@ -189,7 +188,7 @@ export class MessagesEs implements MessagesInterface {
             })
             .flat(1);
 
-        const doseText = listItems(doseTextArray, this.responses.CONCAT_WORD);
+        const doseText = this.listItems(doseTextArray, this.responses.CONCAT_WORD);
         return `Toma ${medicationData.medication}, ${doseText}`;
     }
 

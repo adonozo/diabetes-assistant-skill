@@ -11,7 +11,7 @@ import {
 } from "../types";
 import { getServiceTextData } from "../fhir/serviceRequest";
 import { DomainResource, MedicationRequest, ServiceRequest } from "fhir/r5";
-import { MessagesInterface } from "../strings/messages-interface";
+import { AbstractMessage } from "../strings/abstract-message";
 import { getMedicationTextData } from "../fhir/medicationRequest";
 
 export const reminderDirective: Directive = {
@@ -273,21 +273,21 @@ type ReminderForResourceArgs = {
     requests: DomainResource[],
     time: string,
     timezone: string,
-    localizedMessages: MessagesInterface
+    localizedMessages: AbstractMessage
 };
 
 type ReminderForServiceRequestArgs = {
     requests: ServiceRequest[],
     time: string,
     timezone: string,
-    localizedMessages: MessagesInterface
+    localizedMessages: AbstractMessage
 };
 
 type ReminderForMedicationRequestArgs = {
     requests: MedicationRequest[],
     time: string,
     timezone: string,
-    localizedMessages: MessagesInterface
+    localizedMessages: AbstractMessage
 };
 
 type AbsoluteReminderArgs = {

@@ -1,5 +1,5 @@
 import { Dosage, MedicationRequest } from "fhir/r5";
-import { MessagesInterface } from "../strings/messages-interface";
+import { AbstractMessage } from "../strings/abstract-message";
 import { DoseValue, MedicationData, MedicationRequestTextDataArgs, ResourceReminderData } from "../types";
 import {
     compareWhen,
@@ -12,7 +12,7 @@ import { timesStringArraysFromTiming } from "../utils/time";
 export function getTextForMedicationRequests(
     requests: MedicationRequest[],
     timezone: string,
-    localizedMessages: MessagesInterface
+    localizedMessages: AbstractMessage
 ): string {
     return requests.map(request => getMedicationText(request, timezone))
         .map(data => localizedMessages.makeMedicationText(data))

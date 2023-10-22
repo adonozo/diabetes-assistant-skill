@@ -4,7 +4,7 @@ import { buildErrorResponse, getLocalizedStrings, throwWithMessage } from "../ut
 import { timingNeedsStartTime } from "../fhir/timing";
 import { setDosageStartDate, setServiceRequestStartDate } from "../api/patients";
 import { HandlerInput } from "ask-sdk-core";
-import { MessagesInterface } from "../strings/messages-interface";
+import { AbstractMessage } from "../strings/abstract-message";
 import { BaseIntentHandler } from "./baseIntentHandler";
 import { getAuthorizedUser } from "../auth";
 
@@ -145,7 +145,7 @@ function getIntentData(handlerInput: HandlerInput): DateTimeIntentData {
 function getStartDateConfirmedResponse(
     session: {[p: string]: any},
     requestName: string,
-    localizedMessages: MessagesInterface
+    localizedMessages: AbstractMessage
 ): ConfirmedResponse {
     let speakOutput = localizedMessages.getConfirmationDateText(requestName);
     let reprompt = localizedMessages.responses.HELP;

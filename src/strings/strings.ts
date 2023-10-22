@@ -1,10 +1,10 @@
 import { DateTime } from "luxon";
-import { MessagesInterface, ObservationValue } from "./messages-interface";
+import { AbstractMessage, ObservationValue } from "./abstract-message";
 import { MessagesEs } from "./messages.es";
 import { MessagesEn } from "./messages.en";
 import { Observation } from "fhir/r5";
 
-export function getLocalizedStrings(locale: string | undefined): MessagesInterface {
+export function getLocalizedStrings(locale: string | undefined): AbstractMessage {
     switch (locale) {
         case MessagesEs.locale:
             return new MessagesEs();
@@ -18,7 +18,7 @@ export function getLocalizedStrings(locale: string | undefined): MessagesInterfa
 export function makeTextFromObservations(
     observations: Observation[],
     timezone: string,
-    localizedMessages: MessagesInterface
+    localizedMessages: AbstractMessage
 ): string {
     const dateMap = new Map<string, ObservationValue[]>();
     observations.forEach(observation => {

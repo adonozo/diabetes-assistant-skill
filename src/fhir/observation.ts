@@ -1,7 +1,7 @@
 import { DateTime } from "luxon";
 import { getPatientSubject } from "./patient";
 import { Bundle, Observation, Patient } from "fhir/r5";
-import { MessagesInterface } from "../strings/messages-interface";
+import { AbstractMessage } from "../strings/abstract-message";
 
 export const observationBase: Observation = {
     resourceType: "Observation",
@@ -53,7 +53,7 @@ export function createObservationObject(
     patient: Patient,
     level: number,
     timing: string,
-    localizedMessages: MessagesInterface
+    localizedMessages: AbstractMessage
 ) {
     const subject = getPatientSubject(patient);
     const date = DateTime.utc().toISO();

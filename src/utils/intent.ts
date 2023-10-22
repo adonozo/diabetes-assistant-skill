@@ -4,7 +4,7 @@ import * as strings from "../strings/strings"
 import { sessionValues } from "./helper";
 import { getTimingStartDate, timingNeedsStartDate } from "../fhir/timing";
 import { CustomRequest } from "../types";
-import { MessagesInterface } from "../strings/messages-interface";
+import { AbstractMessage } from "../strings/abstract-message";
 import { DateTime } from "luxon";
 
 export function getDelegatedSetStartDateIntent(startDate?: DateTime): Intent {
@@ -44,7 +44,7 @@ export function getDelegatedSetStartDateWithTimeIntent(healthRequestName: string
     }
 }
 
-export function getLocalizedStrings(handlerInput: HandlerInput): MessagesInterface {
+export function getLocalizedStrings(handlerInput: HandlerInput): AbstractMessage {
     return strings.getLocalizedStrings(handlerInput.requestEnvelope.request.locale);
 }
 
@@ -52,7 +52,7 @@ export function switchContextToStartDate(
     handlerInput: HandlerInput,
     requestWithMissingDate: CustomRequest,
     userTimeZone: string,
-    localizedMessages: MessagesInterface
+    localizedMessages: AbstractMessage
 ): Response {
     const attributesManager = handlerInput.attributesManager;
     const session = attributesManager.getSessionAttributes();
@@ -74,7 +74,7 @@ export function switchContextToStartDate(
         .getResponse();
 }
 
-export function buildErrorResponse(handlerInput: HandlerInput, localizedMessages: MessagesInterface): Response {
+export function buildErrorResponse(handlerInput: HandlerInput, localizedMessages: AbstractMessage): Response {
     return handlerInput.responseBuilder
         .speak(localizedMessages.responses.ERROR)
         .getResponse();

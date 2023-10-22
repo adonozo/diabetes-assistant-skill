@@ -1,5 +1,5 @@
 import { FhirResource, Patient, ServiceRequest } from "fhir/r5";
-import { MessagesInterface } from "../strings/messages-interface";
+import { AbstractMessage } from "../strings/abstract-message";
 import { ResourceReminderData, ServiceData, ServiceRequestInputData } from "../types";
 import {
     compareWhen,
@@ -18,7 +18,7 @@ export function getTextForServiceRequests(
     requests: ServiceRequest[],
     patient: Patient,
     timezone: string,
-    localizedMessages: MessagesInterface
+    localizedMessages: AbstractMessage
 ): string {
     return requests.map(request => getServiceText(request, patient, timezone))
         .map(data => localizedMessages.makeServiceText(data))

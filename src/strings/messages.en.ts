@@ -1,10 +1,9 @@
-import { MessagesInterface, ObservationValue } from "./messages-interface";
+import { AbstractMessage, ObservationValue } from "./abstract-message";
 import { timingEvent } from "../fhir/timing";
-import { listItems, wrapSpeakMessage } from "../utils/helper";
 import { DateTime } from "luxon";
 import { CustomRequest, MedicationData, ServiceData } from "../types";
 
-export class MessagesEn implements MessagesInterface {
+export class MessagesEn extends AbstractMessage {
     static locale = 'en-GB'
     locale = MessagesEn.locale;
 
@@ -52,9 +51,9 @@ export class MessagesEn implements MessagesInterface {
 
     getMedicationSsmlReminderText(value: number, unit: string, medication: string, times: string[]): string {
         const stringTimes = times.map((time, index) => this.timingString(time, index === 0 ? 'at ' : ''));
-        const timeList = listItems(stringTimes, this.responses.CONCAT_WORD);
+        const timeList = this.listItems(stringTimes, this.responses.CONCAT_WORD);
         const message = `Take ${value} ${unit} of ${medication} ${timeList}`;
-        return wrapSpeakMessage(message);
+        return this.wrapSpeakMessage(message);
     }
 
     getServiceReminderText(action: string, times: string[]): string {
@@ -64,9 +63,9 @@ export class MessagesEn implements MessagesInterface {
 
     getServiceSsmlReminderText(action: string, times: string[]): string {
         const stringTimes = times.map((time, index) => this.timingString(time, index === 0 ? 'at ' : ''));
-        const timeList = listItems(stringTimes, this.responses.CONCAT_WORD);
+        const timeList = this.listItems(stringTimes, this.responses.CONCAT_WORD);
         const message = `${action} ${timeList}`;
-        return wrapSpeakMessage(message);
+        return this.wrapSpeakMessage(message);
     }
 
     /**
@@ -185,7 +184,7 @@ export class MessagesEn implements MessagesInterface {
                 `${dose.value} ${this.unitsToStrings(dose.unit, +dose.value > 1)} ${preposition} ${time}`);
         })
             .flat(1);
-        const doseText = listItems(doseTextArray, this.responses.CONCAT_WORD);
+        const doseText = this.listItems(doseTextArray, this.responses.CONCAT_WORD);
         return `Take ${medicationData.medication}, ${doseText}`;
     }
 
@@ -208,7 +207,7 @@ export class MessagesEn implements MessagesInterface {
         const timeList = timings.map(time => timingTextFunction(time));
 
         const preposition = hasTime ? 'at ' : '';
-        return preposition + listItems(timeList, this.responses.CONCAT_WORD);
+        return preposition + this.listItems(timeList, this.responses.CONCAT_WORD);
     }
 
     timingToText(timing: string): string {

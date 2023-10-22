@@ -1,5 +1,5 @@
 import { TimingEvent } from "../enums";
-import { MessagesInterface } from "../strings/messages-interface";
+import { AbstractMessage } from "../strings/abstract-message";
 
 export const minBloodGlucoseValue = 4;
 export const maxFastingGlucoseValue = 7;
@@ -20,7 +20,7 @@ export const sessionValues = {
 export function getBloodGlucoseAlert(
     value: number,
     stringTiming: string,
-    localizedMessages: MessagesInterface
+    localizedMessages: AbstractMessage
 ): string {
     if (value < minBloodGlucoseValue) {
         return localizedMessages.responses.LOW_GLUCOSE;
@@ -33,19 +33,4 @@ export function getBloodGlucoseAlert(
     }
 
     return '';
-}
-
-export function listItems(values: string[], concatWord: string): string {
-    if (values.length === 1) {
-        return values[0];
-    }
-
-    const joinComma = values.length > 2 ? ',' : ''
-    return values
-        .map((value, index) => index === values.length - 1 ? ` ${concatWord} ${value}.` : ` ${value}`)
-        .join(joinComma)
-}
-
-export function wrapSpeakMessage(message: string): string {
-    return `<speak>${message}</speak>`
 }

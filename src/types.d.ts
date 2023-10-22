@@ -1,6 +1,6 @@
 import { DateTime } from "luxon";
 import { MedicationRequest, ServiceRequest, Timing } from "fhir/r5";
-import { MessagesInterface } from "./strings/messages-interface";
+import { AbstractMessage } from "./strings/abstract-message";
 
 export type HttpResolvePromise<T> = (value: PromiseLike<T>) => void;
 
@@ -41,7 +41,7 @@ export type ServiceRequestInputData = {
     time: string,
     timezone: string,
     textProcessor: (processor: ServiceRequestTextProcessor) => ResourceReminderData,
-    localizedMessages: MessagesInterface
+    localizedMessages: AbstractMessage
 }
 
 export type MedicationRequestTextDataArgs = {
@@ -49,7 +49,7 @@ export type MedicationRequestTextDataArgs = {
     time: string,
     timezone: string,
     textProcessor: (processor: MedicationRequestTextProcessor) => ResourceReminderData,
-    localizedMessages: MessagesInterface
+    localizedMessages: AbstractMessage
 }
 
 export type ServiceRequestTextProcessor = {
@@ -59,7 +59,7 @@ export type ServiceRequestTextProcessor = {
     start: DateTime,
     end: DateTime,
     dayOfWeek: string[],
-    localizedMessages: MessagesInterface
+    localizedMessages: AbstractMessage
 };
 
 export type MedicationRequestTextProcessor = {
@@ -71,7 +71,7 @@ export type MedicationRequestTextProcessor = {
     start: DateTime,
     end: DateTime,
     dayOfWeek: string[],
-    localizedMessages: MessagesInterface
+    localizedMessages: AbstractMessage
 };
 
 export type ResourceReminderData = {
