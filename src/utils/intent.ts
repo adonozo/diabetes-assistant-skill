@@ -1,9 +1,18 @@
 import { HandlerInput } from "ask-sdk-core";
-import * as strings from "../strings/strings"
 import { AbstractMessage } from "../strings/abstractMessage";
+import { MessagesEs } from "../strings/messages.es";
+import { MessagesEn } from "../strings/messages.en";
 
 export function getLocalizedStrings(handlerInput: HandlerInput): AbstractMessage {
-    return strings.getLocalizedStrings(handlerInput.requestEnvelope.request.locale);
+    const locale = handlerInput.requestEnvelope.request.locale;
+    switch (locale) {
+        case MessagesEs.locale:
+            return new MessagesEs();
+        case MessagesEn.locale:
+            return new MessagesEn();
+        default:
+            throw new Error(`Locale ${locale} not supported.`);
+    }
 }
 
 export function throwWithMessage(message: string): never {

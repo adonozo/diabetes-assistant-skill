@@ -1,5 +1,6 @@
 import { DateTime } from "luxon";
 import { CustomRequest, MedicationData, ServiceData } from "../types";
+import { Observation } from "fhir/r5";
 
 export abstract class AbstractMessage {
     abstract locale: string;
@@ -30,6 +31,35 @@ export abstract class AbstractMessage {
         DATE_PREPOSITION: string,
         CONCAT_WORD: string,
         REMINDER_NOT_CREATED: string,
+    }
+
+    makeTextFromObservations(observations: Observation[], timezone: string): string {
+        const dateMap = new Map<string, ObservationValue[]>();
+        observations.forEach(observation => {
+            const date = DateTime.fromISO(observation.issued!).setZone(timezone);
+            const dayKey =
+                this.getTextForDay(observation.issued!, timezone, this.responses.DATE_PREPOSITION);
+            const time = this.getHoursAndMinutes(date);
+            const observationValue = {
+                time: time,
+                value: observation.valueQuantity?.value?.toString() ?? '',
+                timing: (observation.extension && observation.extension[0]?.valueCode) ?? ''
+            };
+
+            if (dateMap.has(dayKey)) {
+                dateMap.get(dayKey)!.push(observationValue);
+            } else {
+                dateMap.set(dayKey, [observationValue]);
+            }
+        });
+
+        let text = '';
+        dateMap.forEach((value, day) => {
+            const textForDay = this.makeTextForObservationDay(day, value)
+            text = text + textForDay + '. ';
+        })
+
+        return this.wrapSpeakMessage(text);
     }
 
     abstract getMedicationReminderText(value: number, unit: string, medication: string, times: string[]): string;
