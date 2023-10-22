@@ -1,5 +1,5 @@
 import { getTimezoneOrDefault, requestsNeedStartDate } from "../utils/time";
-import { getLocalizedStrings, switchContextToStartDate, throwWithMessage } from "../utils/intent";
+import { getLocalizedStrings, throwWithMessage } from "../utils/intent";
 import { getRemindersForRequests } from "../utils/reminder";
 import { getActiveCarePlan } from "../api/carePlan";
 import { requestListFromBundle } from "../fhir/carePlan";
@@ -39,7 +39,7 @@ export class CreateRemindersInProgressHandler extends AbstractIntentHandler {
         if (customResource) {
             const userTimeZone = await getTimezoneOrDefault(handlerInput);
             const localizedMessages = getLocalizedStrings(handlerInput);
-            return switchContextToStartDate(handlerInput, customResource, userTimeZone, localizedMessages);
+            return this.switchContextToStartDate(handlerInput, customResource, userTimeZone, localizedMessages);
         }
 
         return handlerInput.responseBuilder
@@ -79,7 +79,7 @@ export class CreateRemindersHandler extends AbstractIntentHandler {
         const requests = await getActiveRequests(username);
         const customResource = requestsNeedStartDate(requests);
         if (customResource) {
-            return switchContextToStartDate(handlerInput, customResource, userTimeZone, localizedMessages);
+            return this.switchContextToStartDate(handlerInput, customResource, userTimeZone, localizedMessages);
         }
 
         // Create reminders

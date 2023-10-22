@@ -1,6 +1,6 @@
 import { IntentRequest, Response } from "ask-sdk-model";
 import { sessionValues } from "../utils/helper";
-import { buildErrorResponse, getLocalizedStrings, throwWithMessage } from "../utils/intent";
+import { getLocalizedStrings, throwWithMessage } from "../utils/intent";
 import { timingNeedsStartTime } from "../fhir/timing";
 import { setDosageStartDate, setServiceRequestStartDate } from "../api/patients";
 import { HandlerInput } from "ask-sdk-core";
@@ -56,7 +56,7 @@ export class SetStartDateInProgressHandler extends AbstractIntentHandler {
         const localizedMessages = getLocalizedStrings(handlerInput);
         const missingDate = session[sessionValues.requestMissingDate];
         if (!missingDate) {
-            return buildErrorResponse(handlerInput, localizedMessages);
+            return this.buildErrorResponse(handlerInput, localizedMessages);
         }
 
         if (timingNeedsStartTime(missingDate.timing)) {
@@ -107,7 +107,7 @@ export class SetStartDateCompletedHandler extends AbstractIntentHandler {
         const missingDate = session[sessionValues.requestMissingDate];
         const localizedMessages = getLocalizedStrings(handlerInput);
         if (!missingDate) {
-            return buildErrorResponse(handlerInput, localizedMessages);
+            return this.buildErrorResponse(handlerInput, localizedMessages);
         }
 
         const {date, time} = getIntentData(handlerInput);

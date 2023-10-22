@@ -1,5 +1,5 @@
 import { IntentRequest, Response } from "ask-sdk-model";
-import { getLocalizedStrings, switchContextToStartDate, throwWithMessage } from "../utils/intent";
+import { getLocalizedStrings, throwWithMessage } from "../utils/intent";
 import { getTimezoneOrDefault, requestsNeedStartDate } from "../utils/time";
 import { getMedicationRequests, getSelf } from "../api/patients";
 import { timingEvent } from "../fhir/timing";
@@ -47,7 +47,7 @@ export class MedicationToTakeHandler extends AbstractIntentHandler {
             const missingDataResource = errorResponse.resource;
             const customResource = requestsNeedStartDate([missingDataResource]);
             if (customResource) {
-                return switchContextToStartDate(handlerInput, customResource, userTimezone, localizedMessages);
+                return this.switchContextToStartDate(handlerInput, customResource, userTimezone, localizedMessages);
             }
 
             throw new Error("Couldn't get the resource");
