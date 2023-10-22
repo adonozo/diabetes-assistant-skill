@@ -7,10 +7,10 @@ import { medicationsFromBundle } from "../fhir/carePlan";
 import { getTextForMedicationRequests } from "../fhir/medicationRequest";
 import { HandlerInput } from "ask-sdk-core";
 import { Patient } from "fhir/r5";
-import { BaseIntentHandler } from "./baseIntentHandler";
+import { AbstractIntentHandler } from "./abstractIntentHandler";
 import { getAuthorizedUser } from "../auth";
 
-export class MedicationToTakeHandler extends BaseIntentHandler {
+export class MedicationToTakeHandler extends AbstractIntentHandler {
     intentName = 'GetMedicationToTakeIntent';
 
     canHandle(handlerInput : HandlerInput) : boolean {

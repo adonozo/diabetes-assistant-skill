@@ -5,10 +5,10 @@ import { timingNeedsStartTime } from "../fhir/timing";
 import { setDosageStartDate, setServiceRequestStartDate } from "../api/patients";
 import { HandlerInput } from "ask-sdk-core";
 import { AbstractMessage } from "../strings/abstractMessage";
-import { BaseIntentHandler } from "./baseIntentHandler";
+import { AbstractIntentHandler } from "./abstractIntentHandler";
 import { getAuthorizedUser } from "../auth";
 
-export class SetStartDateIntentHandler extends BaseIntentHandler {
+export class SetStartDateIntentHandler extends AbstractIntentHandler {
     intentName = 'SetStartDateIntent';
 
     canHandle(handlerInput : HandlerInput) : boolean {
@@ -30,7 +30,7 @@ export class SetStartDateIntentHandler extends BaseIntentHandler {
     }
 }
 
-export class SetStartDateInProgressHandler extends BaseIntentHandler {
+export class SetStartDateInProgressHandler extends AbstractIntentHandler {
     intentName = 'SetStartDateIntent';
 
     canHandle(handlerInput : HandlerInput) : boolean {
@@ -83,7 +83,7 @@ export class SetStartDateInProgressHandler extends BaseIntentHandler {
     }
 }
 
-export class SetStartDateCompletedHandler extends BaseIntentHandler {
+export class SetStartDateCompletedHandler extends AbstractIntentHandler {
     intentName = 'SetStartDateIntent';
 
     canHandle(handlerInput : HandlerInput) : boolean {

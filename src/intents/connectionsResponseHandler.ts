@@ -1,10 +1,10 @@
-import { BaseIntentHandler } from "./baseIntentHandler";
+import { AbstractIntentHandler } from "./abstractIntentHandler";
 import { getRequestType, HandlerInput } from "ask-sdk-core";
 import { interfaces, Response } from "ask-sdk-model";
 import ConnectionsResponse = interfaces.connections.ConnectionsResponse;
 import { getLocalizedStrings } from "../utils/intent";
 
-export class ConnectionsResponseHandler extends BaseIntentHandler {
+export class ConnectionsResponseHandler extends AbstractIntentHandler {
     intentName: string = "Connections.Response";
 
     canHandle(handlerInput: HandlerInput): Promise<boolean> | boolean {

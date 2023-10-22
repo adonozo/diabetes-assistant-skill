@@ -3,7 +3,7 @@ import { Response } from "ask-sdk-model";
 import { reminderDirective } from "../utils/reminder";
 import { getLocalizedStrings } from "../utils/intent";
 
-export abstract class BaseIntentHandler implements RequestHandler {
+export abstract class AbstractIntentHandler implements RequestHandler {
     abstract intentName: string;
 
     abstract canHandle(input: HandlerInput): Promise<boolean> | boolean;

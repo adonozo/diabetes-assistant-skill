@@ -6,10 +6,10 @@ import { requestListFromBundle } from "../fhir/carePlan";
 import { FhirResource } from "fhir/r5";
 import { HandlerInput } from "ask-sdk-core";
 import { IntentRequest, Response } from "ask-sdk-model";
-import { BaseIntentHandler } from "./baseIntentHandler";
+import { AbstractIntentHandler } from "./abstractIntentHandler";
 import { getAuthorizedUser } from "../auth";
 
-export class CreateRemindersInProgressHandler extends BaseIntentHandler {
+export class CreateRemindersInProgressHandler extends AbstractIntentHandler {
     intentName = 'CreateRemindersIntent';
 
     canHandle(handlerInput : HandlerInput) : boolean {
@@ -48,7 +48,7 @@ export class CreateRemindersInProgressHandler extends BaseIntentHandler {
     }
 }
 
-export class CreateRemindersHandler extends BaseIntentHandler {
+export class CreateRemindersHandler extends AbstractIntentHandler {
     intentName = 'CreateRemindersIntent';
 
     canHandle(handlerInput : HandlerInput) : boolean {

@@ -1,9 +1,9 @@
 import { HandlerInput } from "ask-sdk-core";
 import { Response } from "ask-sdk-model";
-import { BaseIntentHandler } from "./baseIntentHandler";
+import { AbstractIntentHandler } from "./abstractIntentHandler";
 import { getLocalizedStrings } from "../utils/intent";
 
-export class HelpHandler extends BaseIntentHandler {
+export class HelpHandler extends AbstractIntentHandler {
     intentName = 'AMAZON.HelpIntent';
 
     canHandle(handlerInput: HandlerInput): boolean {

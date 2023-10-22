@@ -4,7 +4,7 @@ import { makeTextFromObservations } from "../strings/strings";
 import { HandlerInput } from "ask-sdk-core";
 import { Bundle } from "fhir/r5";
 import { IntentRequest, Response } from "ask-sdk-model";
-import { BaseIntentHandler } from "./baseIntentHandler";
+import { AbstractIntentHandler } from "./abstractIntentHandler";
 import { getAuthorizedUser } from "../auth";
 import {
     getTimezoneOrDefault,
@@ -17,7 +17,7 @@ import { alexaTimingToFhirTiming } from "../fhir/timing";
 import { TimingEvent } from "../enums";
 import { DateTime } from "luxon";
 
-export class GetGlucoseLevelDateAndTimingHandler extends BaseIntentHandler {
+export class GetGlucoseLevelDateAndTimingHandler extends AbstractIntentHandler {
     intentName = 'GetGlucoseLevelIntent';
 
     canHandle(handlerInput : HandlerInput) : boolean {
@@ -50,7 +50,7 @@ export class GetGlucoseLevelDateAndTimingHandler extends BaseIntentHandler {
     }
 }
 
-export class GetGlucoseLevelDateHandler extends BaseIntentHandler {
+export class GetGlucoseLevelDateHandler extends AbstractIntentHandler {
     intentName = 'GetGlucoseLevelIntent';
 
     canHandle(handlerInput : HandlerInput) : boolean {
@@ -83,7 +83,7 @@ export class GetGlucoseLevelDateHandler extends BaseIntentHandler {
     }
 }
 
-export class GetGlucoseLevelTimeHandler extends BaseIntentHandler {
+export class GetGlucoseLevelTimeHandler extends AbstractIntentHandler {
     intentName = 'GetGlucoseLevelIntent';
 
     canHandle(handlerInput : HandlerInput) : boolean {
@@ -111,7 +111,7 @@ export class GetGlucoseLevelTimeHandler extends BaseIntentHandler {
     }
 }
 
-export class GetGlucoseLevelDateAndTimeHandler extends BaseIntentHandler {
+export class GetGlucoseLevelDateAndTimeHandler extends AbstractIntentHandler {
     intentName = 'GetGlucoseLevelIntent';
 
     canHandle(handlerInput : HandlerInput) : boolean {
