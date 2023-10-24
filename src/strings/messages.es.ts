@@ -1,11 +1,15 @@
 import { AbstractMessage, ObservationValue } from "./abstractMessage";
 import { DateTime } from "luxon";
-import { TimingEvent } from "../enums";
+import { AppLocale, TimingEvent } from "../enums";
 import { CustomRequest, MedicationData, ServiceData } from "../types";
 
 export class MessagesEs extends AbstractMessage {
-    static locale = 'es-MX'
-    locale = MessagesEs.locale
+    supportedLocales = [AppLocale.esES, AppLocale.esMX, AppLocale.esUS];
+
+    constructor(locale: AppLocale) {
+        super(locale);
+        this.ensureLocaleIsValid();
+    }
 
     responses = {
         WELCOME: "Hola, puedes preguntarme tus medicamentos para mañana",

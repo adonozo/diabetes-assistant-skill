@@ -2,10 +2,15 @@ import { AbstractMessage, ObservationValue } from "./abstractMessage";
 import { timingEvent } from "../fhir/timing";
 import { DateTime } from "luxon";
 import { CustomRequest, MedicationData, ServiceData } from "../types";
+import { AppLocale } from "../enums";
 
 export class MessagesEn extends AbstractMessage {
-    static locale = 'en-GB'
-    locale = MessagesEn.locale;
+    supportedLocales = [AppLocale.enUS, AppLocale.enGB];
+
+    constructor(locale: AppLocale) {
+        super(locale);
+        this.ensureLocaleIsValid();
+    }
 
     responses = {
         WELCOME: "Hi, I can tell you your medications for tomorrow",

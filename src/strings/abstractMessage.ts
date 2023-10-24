@@ -1,9 +1,16 @@
 import { DateTime } from "luxon";
 import { CustomRequest, MedicationData, ServiceData } from "../types";
 import { Observation } from "fhir/r5";
+import { AppLocale } from "../enums";
 
 export abstract class AbstractMessage {
-    abstract locale: string;
+    locale: AppLocale;
+
+    abstract supportedLocales: AppLocale[];
+
+    protected constructor(locale: AppLocale) {
+        this.locale = locale;
+    }
 
     abstract responses: {
         WELCOME: string,
@@ -116,7 +123,13 @@ export abstract class AbstractMessage {
             .join(joinComma)
     }
 
-    upsertValueToMap(map: Map<string, ObservationValue[]>, key: string, value: ObservationValue): void {
+    protected ensureLocaleIsValid(): void {
+        if (!this.supportedLocales.includes(this.locale)) {
+            throw new Error(`Unsupported locale ${this.locale}. Expected values: ${this.supportedLocales.join(', ')}`);
+        }
+    }
+
+    private upsertValueToMap(map: Map<string, ObservationValue[]>, key: string, value: ObservationValue): void {
         if (map.has(key)) {
             map.get(key)!.push(value);
         } else {
