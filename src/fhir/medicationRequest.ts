@@ -1,13 +1,11 @@
 import { Dosage, MedicationRequest } from "fhir/r5";
 import { AbstractMessage } from "../strings/abstractMessage";
-import { DoseValue, MedicationData, MedicationRequestTextDataArgs, ResourceReminderData } from "../types";
+import { DoseValue, MedicationData } from "../types";
 import {
     compareWhen,
-    getDatesFromTiming,
     getTimesFromTimingWithFrequency,
     getTimingStartTime
 } from "./timing";
-import { timesStringArraysFromTiming } from "../utils/time";
 
 export function getTextForMedicationRequests(
     requests: MedicationRequest[],
@@ -45,40 +43,6 @@ export function getMedicationText(request: MedicationRequest, timezone: string):
         }
 
         medicationData.dose.push({value: value, unit: unit, time: time});
-    });
-
-    return medicationData;
-}
-
-export function getMedicationTextData(
-    {
-        request,
-        time,
-        timezone,
-        textProcessor,
-        localizedMessages
-    }: MedicationRequestTextDataArgs
-): ResourceReminderData[] {
-    const medicationData: ResourceReminderData[] = [];
-    const medication = getMedicationName(request);
-    request.dosageInstruction?.forEach(dosage => {
-        const {start, end} = getDatesFromTiming(dosage.timing!, timezone);
-        const {value, unit} = getMedicationValues(dosage);
-
-        const times = timesStringArraysFromTiming(dosage.timing!, timezone);
-
-        const processedText = textProcessor({
-            time,
-            value: value,
-            unit: unit,
-            medication: medication,
-            times: times,
-            start: start,
-            end: end,
-            dayOfWeek: dosage.timing?.repeat?.dayOfWeek ?? [],
-            localizedMessages: localizedMessages
-        });
-        medicationData.push(processedText)
     });
 
     return medicationData;

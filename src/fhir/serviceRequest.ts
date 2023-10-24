@@ -1,14 +1,12 @@
-import { FhirResource, Patient, ServiceRequest } from "fhir/r5";
+import { Patient, ServiceRequest } from "fhir/r5";
 import { AbstractMessage } from "../strings/abstractMessage";
-import { ResourceReminderData, ServiceData, ServiceRequestInputData } from "../types";
+import { ServiceData } from "../types";
 import {
     compareWhen,
-    getDatesFromTiming,
     getTimesFromTimingWithFrequency,
     getTimingStartTime,
     tryParseDate
 } from "./timing";
-import { timesStringArraysFromTiming } from "../utils/time";
 import { getExtension } from "./fhir";
 import { DateTime } from "luxon";
 
@@ -49,44 +47,6 @@ export function getServiceText(
         serviceData.timings = getTimesFromTimingWithFrequency(repeat?.frequency ?? 0, startTime, timezone)
             .sort();
     }
-
-    return serviceData;
-}
-
-export function getServiceTextData(
-    {
-        request,
-        time,
-        timezone,
-        textProcessor,
-        localizedMessages
-    }: ServiceRequestInputData
-): ResourceReminderData[] {
-    const serviceData: ResourceReminderData[] = [];
-    const action = (request.code?.concept?.coding && request.code.concept.coding[0].display) ?? '';
-
-    if (!request.occurrenceTiming) {
-        return serviceData;
-    }
-
-    const {start, end} = getDatesFromTiming(request.occurrenceTiming, timezone);
-
-    request.contained?.forEach((contained: FhirResource) => {
-        const innerRequest = contained as ServiceRequest;
-        const timing = innerRequest.occurrenceTiming!;
-        const times = timesStringArraysFromTiming(timing, timezone);
-
-        const processedText = textProcessor({
-            time,
-            action: action,
-            times: times,
-            start: start,
-            end: end,
-            dayOfWeek: timing?.repeat?.dayOfWeek ?? [],
-            localizedMessages: localizedMessages
-        })
-        serviceData.push(processedText)
-    })
 
     return serviceData;
 }

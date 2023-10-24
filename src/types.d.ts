@@ -1,6 +1,5 @@
 import { DateTime } from "luxon";
-import { Dosage, MedicationRequest, ServiceRequest, Timing } from "fhir/r5";
-import { AbstractMessage } from "./strings/abstractMessage";
+import { Dosage, Timing } from "fhir/r5";
 
 export type HttpResolvePromise<T> = (value: PromiseLike<T>) => void;
 
@@ -25,44 +24,6 @@ export type CustomRequest = {
     durationUnit: string,
     frequency: number,
     timing: Timing
-};
-
-export type ServiceRequestInputData = {
-    request: ServiceRequest,
-    time: string,
-    timezone: string,
-    textProcessor: (processor: ServiceRequestTextProcessor) => ResourceReminderData,
-    localizedMessages: AbstractMessage
-}
-
-export type MedicationRequestTextDataArgs = {
-    request: MedicationRequest,
-    time: string,
-    timezone: string,
-    textProcessor: (processor: MedicationRequestTextProcessor) => ResourceReminderData,
-    localizedMessages: AbstractMessage
-}
-
-export type ServiceRequestTextProcessor = {
-    time: string,
-    action: string,
-    times: string[],
-    start: DateTime,
-    end: DateTime,
-    dayOfWeek: string[],
-    localizedMessages: AbstractMessage
-};
-
-export type MedicationRequestTextProcessor = {
-    time: string,
-    value: number,
-    unit: string,
-    medication: string,
-    times: string[],
-    start: DateTime,
-    end: DateTime,
-    dayOfWeek: string[],
-    localizedMessages: AbstractMessage
 };
 
 export type ResourceReminderData = {
