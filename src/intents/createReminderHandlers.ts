@@ -1,6 +1,5 @@
 import { getTimezoneOrDefault, requestsNeedStartDate } from "../utils/time";
 import { getLocalizedStrings, throwWithMessage } from "../utils/intent";
-import { getRemindersForRequests } from "../utils/reminder";
 import { getActiveCarePlan } from "../api/carePlan";
 import { requestListFromBundle } from "../fhir/carePlan";
 import { FhirResource } from "fhir/r5";
@@ -8,6 +7,7 @@ import { HandlerInput } from "ask-sdk-core";
 import { IntentRequest, Response } from "ask-sdk-model";
 import { AbstractIntentHandler } from "./abstractIntentHandler";
 import { getAuthorizedUser } from "../auth";
+import { RemindersBuilder } from "../reminders/remindersBuilder";
 
 export class CreateRemindersInProgressHandler extends AbstractIntentHandler {
     intentName = 'CreateRemindersIntent';
@@ -73,32 +73,28 @@ export class CreateRemindersHandler extends AbstractIntentHandler {
     }
 
     private async handleIntent(handlerInput: HandlerInput, username: string): Promise<Response> {
-        const localizedMessages = getLocalizedStrings(handlerInput);
+        const messages = getLocalizedStrings(handlerInput);
         const userTimeZone = await getTimezoneOrDefault(handlerInput);
 
         const requests = await getActiveRequests(username);
         const customResource = requestsNeedStartDate(requests);
         if (customResource) {
-            return this.switchContextToStartDate(handlerInput, customResource, userTimeZone, localizedMessages);
+            return this.switchContextToStartDate(handlerInput, customResource, userTimeZone, messages);
         }
 
         // Create reminders
         const request = handlerInput.requestEnvelope.request as IntentRequest;
         const time = request.intent.slots?.time.value ?? throwWithMessage('Time was not recorded in the intent');
-        const requestReminders = getRemindersForRequests({
-            requests,
-            time,
-            timezone: userTimeZone,
-            localizedMessages});
+        const requestReminders = new RemindersBuilder(requests, time, userTimeZone, messages).build();
         const remindersApiClient = handlerInput.serviceClientFactory!.getReminderManagementServiceClient();
-        let speakOutput = localizedMessages.responses.SUCCESSFUL_REMINDERS;
+        let speakOutput = messages.responses.SUCCESSFUL_REMINDERS;
 
         for (const reminder of requestReminders) {
             try {
                 await remindersApiClient.createReminder(reminder);
             } catch (e) {
                 console.log("Couldn't create reminder", e);
-                speakOutput = localizedMessages.responses.REMINDER_NOT_CREATED;
+                speakOutput = messages.responses.REMINDER_NOT_CREATED;
             }
         }
 

@@ -1,5 +1,5 @@
 import { DateTime } from "luxon";
-import { MedicationRequest, ServiceRequest, Timing } from "fhir/r5";
+import { Dosage, MedicationRequest, ServiceRequest, Timing } from "fhir/r5";
 import { AbstractMessage } from "./strings/abstractMessage";
 
 export type HttpResolvePromise<T> = (value: PromiseLike<T>) => void;
@@ -16,15 +16,6 @@ export type MedicationData = {
 };
 
 export type DoseValue = { value: number, unit: string };
-
-export type RequestNeedingTiming = {
-    type: string,
-    id: string,
-    name: string,
-    duration: number,
-    frequency: number,
-    timing: Timing
-};
 
 export type CustomRequest = {
     type: string,
@@ -82,3 +73,7 @@ export type ResourceReminderData = {
     end: DateTime,
     locale: string
 };
+
+export type DosagesMedicationName = { dosages: Dosage[] | undefined, medicationName: string };
+
+export type ParentServiceRequestReminderData = { action: string, startDate: DateTime, endDate: DateTime }
