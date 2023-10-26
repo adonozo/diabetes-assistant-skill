@@ -35,18 +35,23 @@ export class MessagesEn extends AbstractMessage {
         LOW_GLUCOSE: 'Your blood glucose level is lower than the recommended value. Please consider consulting to your GP or to a health provider.',
         HIGH_GLUCOSE: 'Your blood glucose level is higher than the recommended value. Please consider consulting to your GP or to a health provider.',
         PERMISSIONS_REQUIRED: "Without permissions, I can't set a reminder.",
+        REMINDER_NOT_CREATED: "Sorry, I couldn't create the reminders. Please try again.",
+        SET_START_DATE_SUCCESSFUL: 'You have set the start date for',
+    }
+
+    words = {
         DATE_PREPOSITION: "On",
         CONCAT_WORD: "and",
-        REMINDER_NOT_CREATED: "Sorry, I couldn't create the reminders. Please try again.",
+        TODAY: 'hoy',
+        TOMORROW: 'mañana',
+        YESTERDAY: 'ayer',
+        TIME_PREPOSITION: 'at',
+        FOR: 'for'
     }
 
     getMedicationReminderText(value: number, unit: string, medication: string, times: string[]): string {
         const timeList = this.buildListTimesOrTimings(times);
         return `Take ${value} ${unit} of ${medication} ${timeList}`;
-    }
-
-    getConfirmationDateText(requestName: string): string {
-        return `You have set the start date for ${requestName}.`;
     }
 
     getSuggestedTimeText(mealCode: string): string {
@@ -56,34 +61,16 @@ export class MessagesEn extends AbstractMessage {
 
     getMedicationSsmlReminderText(value: number, unit: string, medication: string, times: string[]): string {
         const stringTimes = times.map((time, index) => this.timingString(time, index === 0 ? 'at ' : ''));
-        const timeList = this.listItems(stringTimes, this.responses.CONCAT_WORD);
+        const timeList = this.listItems(stringTimes, this.words.CONCAT_WORD);
         const message = `Take ${value} ${unit} of ${medication} ${timeList}`;
         return this.wrapSpeakMessage(message);
     }
 
-    getServiceReminderText(action: string, times: string[]): string {
-        const timeList = this.buildListTimesOrTimings(times);
-        return `${action} ${timeList}`;
-    }
-
     getServiceSsmlReminderText(action: string, times: string[]): string {
         const stringTimes = times.map((time, index) => this.timingString(time, index === 0 ? 'at ' : ''));
-        const timeList = this.listItems(stringTimes, this.responses.CONCAT_WORD);
+        const timeList = this.listItems(stringTimes, this.words.CONCAT_WORD);
         const message = `${action} ${timeList}`;
         return this.wrapSpeakMessage(message);
-    }
-
-    /**
-     * Convert a timing to a spoken string
-     * @param timing: Can be a time (00:00 - 23:59) or an event date
-     * @param preposition
-     * @returns {string}: The text Alexa will tell
-     */
-    timingString(timing: string, preposition: string): string {
-        const regex = new RegExp('^[0-2][0-9]');
-        return regex.test(timing)
-            ? `${preposition}<say-as interpret-as="time">${timing}</say-as>`
-            : this.timingToText(timing);
     }
 
     getStartDatePrompt(missingDate: CustomRequest): string {
@@ -127,8 +114,7 @@ export class MessagesEn extends AbstractMessage {
     }
 
     getTimingOrTime(observationValue: ObservationValue): string {
-        if (!observationValue.timing || observationValue.timing === timingEvent.EXACT)
-        {
+        if (!observationValue.timing || observationValue.timing === timingEvent.EXACT) {
             return `at ${observationValue.time}`;
         }
 
@@ -152,30 +138,6 @@ export class MessagesEn extends AbstractMessage {
     }
 
     /**
-     * Returns "today", "yesterday", "tomorrow", or a date
-     * @param date {string}
-     * @param timezone {string}
-     * @param datePreposition {string}
-     */
-    getTextForDay(date: string, timezone: string, datePreposition: string): string {
-        const today = DateTime.utc().setZone(timezone);
-        const yesterday = today.minus({days: 1});
-        const tomorrow = today.plus({days: 1});
-        const referenceDate = DateTime.fromISO(date).setZone(timezone);
-        if (today.toISODate() === referenceDate.toISODate()) {
-            return 'today';
-        } else if (yesterday.toISODate() === referenceDate.toISODate()) {
-            return 'yesterday';
-        } else if (tomorrow.toISODate() === referenceDate.toISODate()) {
-            return 'tomorrow';
-        }
-
-        const month = referenceDate.month < 10 ? `0${referenceDate.month}` : referenceDate.month;
-        const day = referenceDate.day < 10 ? `0${referenceDate.day}` : referenceDate.day;
-        return `${datePreposition} <say-as interpret-as="date">????${month}${day}</say-as>`;
-    }
-
-    /**
      * @param medicationData {{medication: string, dose: [{value: string, unit: string, time: [string]}]}}
      */
     makeMedicationText(medicationData: MedicationData): string {
@@ -189,12 +151,8 @@ export class MessagesEn extends AbstractMessage {
                 `${dose.value} ${this.unitsToStrings(dose.unit, +dose.value > 1)} ${preposition} ${time}`);
         })
             .flat(1);
-        const doseText = this.listItems(doseTextArray, this.responses.CONCAT_WORD);
+        const doseText = this.listItems(doseTextArray, this.words.CONCAT_WORD);
         return `Take ${medicationData.medication}, ${doseText}`;
-    }
-
-    getNoRecordsTextForDay(date:string, userTimezone: string): string {
-        return `${this.responses.NO_RECORDS_FOUND} for ${this.getTextForDay(date, userTimezone, '')}`;
     }
 
     /**
@@ -203,16 +161,6 @@ export class MessagesEn extends AbstractMessage {
     makeServiceText(serviceData: ServiceData): string {
         const timeList = this.buildListTimesOrTimings(serviceData.timings);
         return `Do a ${serviceData.action} ${timeList}`;
-    }
-
-    buildListTimesOrTimings(timings: string[]): string {
-        const regex = new RegExp('^[0-2][0-9]');
-        const hasTime = timings.length > 0 && regex.test(timings[0]);
-        const timingTextFunction = hasTime ? this.getHoursAndMinutesFromString : this.timingToText;
-        const timeList = timings.map(time => timingTextFunction(time));
-
-        const preposition = hasTime ? 'at ' : '';
-        return preposition + this.listItems(timeList, this.responses.CONCAT_WORD);
     }
 
     timingToText(timing: string): string {

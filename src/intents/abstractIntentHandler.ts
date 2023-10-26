@@ -4,7 +4,7 @@ import { reminderDirective } from "../utils/reminder";
 import { getLocalizedStrings, sessionValues } from "../utils/intent";
 import { CustomRequest } from "../types";
 import { AbstractMessage } from "../strings/abstractMessage";
-import { getTimingStartDate, timingNeedsStartDate } from "../fhir/timing";
+import { getTimingStartDate } from "../fhir/timing";
 import { DateTime } from "luxon";
 
 export abstract class AbstractIntentHandler implements RequestHandler {
@@ -33,7 +33,6 @@ export abstract class AbstractIntentHandler implements RequestHandler {
     protected switchContextToStartDate(
         handlerInput: HandlerInput,
         requestWithMissingDate: CustomRequest,
-        userTimeZone: string,
         localizedMessages: AbstractMessage
     ): Response {
         const attributesManager = handlerInput.attributesManager;
@@ -44,10 +43,8 @@ export abstract class AbstractIntentHandler implements RequestHandler {
         session[sessionValues.requestMissingDate] = requestWithMissingDate;
         attributesManager.setSessionAttributes(session);
 
-        const hasStartDate = !timingNeedsStartDate(requestWithMissingDate.timing);
-        const delegatedIntent = hasStartDate ?
-            this.getDelegatedSetStartDateIntent(getTimingStartDate(requestWithMissingDate.timing))
-            : this.getDelegatedSetStartDateIntent();
+        const startDate = getTimingStartDate(requestWithMissingDate.timing);
+        const delegatedIntent = this.getDelegatedSetStartDateIntent(startDate);
 
         const requiredSetup = localizedMessages.getStartDatePrompt(requestWithMissingDate);
         return handlerInput.responseBuilder
@@ -62,7 +59,7 @@ export abstract class AbstractIntentHandler implements RequestHandler {
             .getResponse();
     }
 
-    getDelegatedSetStartDateIntent(startDate?: DateTime): Intent {
+    private getDelegatedSetStartDateIntent(startDate?: DateTime): Intent {
         const slots: any = startDate ?
             {
                 date: {

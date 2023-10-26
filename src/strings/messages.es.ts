@@ -34,19 +34,18 @@ export class MessagesEs extends AbstractMessage {
         LOW_GLUCOSE: "Tu nivel de azúcar en sangre es más bajo de lo recomendado. Considera consultar con tu médico.",
         HIGH_GLUCOSE: "Tu nivel de azúcar en sangre es más alto de lo recomendado. Considera consultar con tu médico.",
         PERMISSIONS_REQUIRED: "Sin permisos, no puedo crear recordatorios para tus medicamentos.",
-        DATE_PREPOSITION: "El",
-        CONCAT_WORD: "y",
         REMINDER_NOT_CREATED: "Lo siento, no pude crear los recordatorios. Intenta nuevamente.",
+        SET_START_DATE_SUCCESSFUL: 'Has configurado la fecha de inicio para',
     }
 
-    buildListTimesOrTimings(timings: string[]): string {
-        const regex = new RegExp('^[0-2][0-9]');
-        const hasTime = timings.length > 0 && regex.test(timings[0]);
-        const timingTextFunction = hasTime ? this.getHoursAndMinutesFromString : this.timingToText;
-        const timeList = timings.map(time => timingTextFunction(time));
-
-        const preposition = hasTime ? 'a las ' : '';
-        return preposition + this.listItems(timeList, this.responses.CONCAT_WORD);
+    words = {
+        DATE_PREPOSITION: "El",
+        CONCAT_WORD: "y",
+        TODAY: 'hoy',
+        TOMORROW: 'mañana',
+        YESTERDAY: 'ayer',
+        TIME_PREPOSITION: 'a las',
+        FOR: 'para'
     }
 
     codeToString(timingCode: string): string {
@@ -73,10 +72,6 @@ export class MessagesEs extends AbstractMessage {
             default:
                 throw new Error(`Invalid unit code ${unit}`);
         }
-    }
-
-    getConfirmationDateText(requestName: string): string {
-        return `Has configurado la fecha de inicio para ${requestName}.`;
     }
 
     getHoursAndMinutes(date: DateTime): string {
@@ -113,23 +108,14 @@ export class MessagesEs extends AbstractMessage {
 
     getMedicationSsmlReminderText(value: number, unit: string, medication: string, times: []): string {
         const stringTimes = times.map((time) => this.timingString(time, 'a las '));
-        const timeList = this.listItems(stringTimes, this.responses.CONCAT_WORD);
+        const timeList = this.listItems(stringTimes, this.words.CONCAT_WORD);
         const message = `Toma ${value} ${unit} de ${medication} ${timeList}`;
         return this.wrapSpeakMessage(message);
     }
 
-    getNoRecordsTextForDay(date: string, userTimezone: string): string {
-        return `${this.responses.NO_RECORDS_FOUND} para ${this.getTextForDay(date, userTimezone, '')}`;
-    }
-
-    getServiceReminderText(action: string, times: []): string {
-        const timeList = this.buildListTimesOrTimings(times);
-        return `${action} ${timeList}`;
-    }
-
     getServiceSsmlReminderText(action: string, times: []): string {
         const stringTimes = times.map((time) => this.timingString(time, 'a las '));
-        const timeList = this.listItems(stringTimes, this.responses.CONCAT_WORD);
+        const timeList = this.listItems(stringTimes, this.words.CONCAT_WORD);
         const message = `${action} ${timeList}`;
         return this.wrapSpeakMessage(message);
     }
@@ -153,24 +139,6 @@ export class MessagesEs extends AbstractMessage {
         return `¿Esta medida es antes ${meal}, después ${meal}, o ninguno?`
     }
 
-    getTextForDay(date: string, timezone: string, datePreposition: string): string {
-        const today = DateTime.utc().setZone(timezone);
-        const yesterday = today.minus({days: 1});
-        const tomorrow = today.plus({days: 1});
-        const referenceDate = DateTime.fromISO(date).setZone(timezone);
-        if (today.toISODate() === referenceDate.toISODate()) {
-            return 'hoy';
-        } else if (yesterday.toISODate() === referenceDate.toISODate()) {
-            return 'ayer';
-        } else if (tomorrow.toISODate() === referenceDate.toISODate()) {
-            return 'mañana';
-        }
-
-        const month = referenceDate.month < 10 ? `0${referenceDate.month}` : referenceDate.month;
-        const day = referenceDate.day < 10 ? `0${referenceDate.day}` : referenceDate.day;
-        return `${datePreposition} <say-as interpret-as="date">${month}${day}</say-as>`;
-    }
-
     getTimingOrTime(observationValue: ObservationValue): string {
         if (!observationValue.timing || observationValue.timing === TimingEvent.EXACT)
         {
@@ -192,7 +160,7 @@ export class MessagesEs extends AbstractMessage {
             })
             .flat(1);
 
-        const doseText = this.listItems(doseTextArray, this.responses.CONCAT_WORD);
+        const doseText = this.listItems(doseTextArray, this.words.CONCAT_WORD);
         return `Toma ${medicationData.medication}, ${doseText}`;
     }
 
@@ -262,11 +230,6 @@ export class MessagesEs extends AbstractMessage {
             default:
                 return 'EXACT'
         }
-    }
-
-    timingString(timing: string, preposition: string): string {
-        const regex = new RegExp('^[0-2][0-9]');
-        return regex.test(timing) ? `${preposition}<say-as interpret-as="time">${timing}</say-as>` : this.timingToText(timing);
     }
 
     timingToText(timing: string): string {
