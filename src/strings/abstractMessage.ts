@@ -35,16 +35,25 @@ export abstract class AbstractMessage {
         LOW_GLUCOSE: string,
         HIGH_GLUCOSE: string,
         PERMISSIONS_REQUIRED: string,
+        REMINDER_NOT_CREATED: string,
+        SET_START_DATE_SUCCESSFUL: string,
+    }
+
+    abstract words: {
         DATE_PREPOSITION: string,
         CONCAT_WORD: string,
-        REMINDER_NOT_CREATED: string,
+        TODAY: string,
+        TOMORROW: string,
+        YESTERDAY: string,
+        TIME_PREPOSITION: string,
+        FOR: string,
     }
 
     makeTextFromObservations(observations: Observation[], timezone: string): string {
         const dateMap = new Map<string, ObservationValue[]>();
         observations.forEach(observation => {
             const date = DateTime.fromISO(observation.issued!).setZone(timezone);
-            const dayKey = this.getTextForDay(observation.issued!, timezone, this.responses.DATE_PREPOSITION);
+            const dayKey = this.getTextForDay(observation.issued!, timezone);
             const observationValue = {
                 time: this.getHoursAndMinutes(date),
                 value: observation.valueQuantity?.value?.toString() ?? '',
@@ -62,19 +71,23 @@ export abstract class AbstractMessage {
         return this.wrapSpeakMessage(text);
     }
 
-    abstract getMedicationReminderText(value: number, unit: string, medication: string, times: string[]): string;
+    buildListTimesOrTimings(timings: string[]): string {
+        const regex = new RegExp('^[0-2][0-9]');
+        const hasTime = timings.length > 0 && regex.test(timings[0]);
+        const timingTextFunction = hasTime ? this.getHoursAndMinutesFromString : this.timingToText;
+        const timeList = timings.map(time => timingTextFunction(time));
 
-    abstract getConfirmationDateText(requestName: string): string;
+        const preposition = hasTime ? this.words.TIME_PREPOSITION + ' ' : '';
+        return preposition + this.listItems(timeList, this.words.CONCAT_WORD);
+    }
+
+    abstract getMedicationReminderText(value: number, unit: string, medication: string, times: string[]): string;
 
     abstract getSuggestedTimeText(mealCode: string): string
 
     abstract getMedicationSsmlReminderText(value: number, unit: string, medication: string, times: string[]): string;
 
-    abstract getServiceReminderText(action: string, times: string[]): string;
-
     abstract getServiceSsmlReminderText(action: string, times: string[]): string;
-
-    abstract timingString(timing: string, preposition: string): string;
 
     abstract getStartDatePrompt(missingDate: CustomRequest): string;
 
@@ -86,15 +99,9 @@ export abstract class AbstractMessage {
 
     abstract getHoursAndMinutesFromString(time: string): string;
 
-    abstract getTextForDay(date: string, timezone: string, datePreposition: string): string;
-
     abstract makeMedicationText(medicationData: MedicationData): string;
 
-    abstract getNoRecordsTextForDay(date:string, userTimezone: string): string;
-
     abstract makeServiceText(serviceData: ServiceData): string;
-
-    abstract buildListTimesOrTimings(timings: string[]): string;
 
     abstract timingToText(timing: string): string;
 
@@ -127,6 +134,58 @@ export abstract class AbstractMessage {
         if (!this.supportedLocales.includes(this.locale)) {
             throw new Error(`Unsupported locale ${this.locale}. Expected values: ${this.supportedLocales.join(', ')}`);
         }
+    }
+
+    /**
+     * Returns "today", "yesterday", "tomorrow", or a date
+     * @param date {string}
+     * @param timezone {string}
+     */
+    getTextForDay(date: string, timezone: string): string {
+        const today = DateTime.utc().setZone(timezone);
+        const yesterday = today.minus({days: 1});
+        const tomorrow = today.plus({days: 1});
+
+        const referenceDateTime = DateTime.fromISO(date).setZone(timezone);
+        const referenceDate = referenceDateTime.toISODate();
+        switch (referenceDate) {
+            case today.toISODate():
+                return this.words.TODAY;
+            case yesterday.toISODate():
+                return this.words.YESTERDAY;
+            case tomorrow.toISODate():
+                return this.words.TOMORROW;
+        }
+
+        const month = referenceDateTime.month < 10 ? `0${referenceDateTime.month}` : referenceDateTime.month;
+        const day = referenceDateTime.day < 10 ? `0${referenceDateTime.day}` : referenceDateTime.day;
+        return `${this.words.DATE_PREPOSITION} <say-as interpret-as="date">????${month}${day}</say-as>`;
+    }
+
+    getConfirmationDateText(requestName: string): string {
+        return `${this.responses.SET_START_DATE_SUCCESSFUL} ${requestName}.`;
+    }
+
+    getServiceReminderText(action: string, times: string[]): string {
+        const timeList = this.buildListTimesOrTimings(times);
+        return `${action} ${timeList}`;
+    }
+
+    /**
+     * Convert a timing to a spoken string
+     * @param timing: Can be a time (00:00 - 23:59) or an event date
+     * @param preposition
+     * @returns {string}: The text Alexa will tell
+     */
+    timingString(timing: string, preposition: string): string {
+        const regex = new RegExp('^[0-2][0-9]');
+        return regex.test(timing)
+            ? `${preposition}<say-as interpret-as="time">${timing}</say-as>`
+            : this.timingToText(timing);
+    }
+
+    getNoRecordsTextForDay(date: string, userTimezone: string): string {
+        return `${this.responses.NO_RECORDS_FOUND} ${this.words.FOR} ${this.getTextForDay(date, userTimezone)}`;
     }
 
     private upsertValueToMap(map: Map<string, ObservationValue[]>, key: string, value: ObservationValue): void {

@@ -4,10 +4,12 @@ import { getActiveCarePlan } from "../api/carePlan";
 import { requestListFromBundle } from "../fhir/carePlan";
 import { FhirResource } from "fhir/r5";
 import { HandlerInput } from "ask-sdk-core";
-import { IntentRequest, Response } from "ask-sdk-model";
+import { IntentRequest, Response, services } from "ask-sdk-model";
 import { AbstractIntentHandler } from "./abstractIntentHandler";
 import { getAuthorizedUser } from "../auth";
 import { RemindersBuilder } from "../reminders/remindersBuilder";
+import ReminderRequest = services.reminderManagement.ReminderRequest;
+import { AbstractMessage } from "../strings/abstractMessage";
 
 export class CreateRemindersInProgressHandler extends AbstractIntentHandler {
     intentName = 'CreateRemindersIntent';
@@ -37,9 +39,8 @@ export class CreateRemindersInProgressHandler extends AbstractIntentHandler {
         const requests = await getActiveRequests(username);
         const customResource = requestsNeedStartDate(requests);
         if (customResource) {
-            const userTimeZone = await getTimezoneOrDefault(handlerInput);
             const localizedMessages = getLocalizedStrings(handlerInput);
-            return this.switchContextToStartDate(handlerInput, customResource, userTimeZone, localizedMessages);
+            return this.switchContextToStartDate(handlerInput, customResource, localizedMessages);
         }
 
         return handlerInput.responseBuilder
@@ -79,13 +80,25 @@ export class CreateRemindersHandler extends AbstractIntentHandler {
         const requests = await getActiveRequests(username);
         const customResource = requestsNeedStartDate(requests);
         if (customResource) {
-            return this.switchContextToStartDate(handlerInput, customResource, userTimeZone, messages);
+            return this.switchContextToStartDate(handlerInput, customResource, messages);
         }
 
         // Create reminders
         const request = handlerInput.requestEnvelope.request as IntentRequest;
         const time = request.intent.slots?.time.value ?? throwWithMessage('Time was not recorded in the intent');
         const requestReminders = new RemindersBuilder(requests, time, userTimeZone, messages).build();
+        const speakOutputResponse = await this.CreateReminders(handlerInput, requestReminders, messages);
+
+        return handlerInput.responseBuilder
+            .speak(speakOutputResponse)
+            .getResponse();
+    }
+
+    private async CreateReminders(
+        handlerInput: HandlerInput,
+        requestReminders: ReminderRequest[],
+        messages: AbstractMessage
+    ): Promise<string> {
         const remindersApiClient = handlerInput.serviceClientFactory!.getReminderManagementServiceClient();
         let speakOutput = messages.responses.SUCCESSFUL_REMINDERS;
 
@@ -98,9 +111,7 @@ export class CreateRemindersHandler extends AbstractIntentHandler {
             }
         }
 
-        return handlerInput.responseBuilder
-            .speak(speakOutput)
-            .getResponse();
+        return speakOutput;
     }
 }
 

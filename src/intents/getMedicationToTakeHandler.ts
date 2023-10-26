@@ -47,7 +47,7 @@ export class MedicationToTakeHandler extends AbstractIntentHandler {
             const missingDataResource = errorResponse.resource;
             const customResource = requestsNeedStartDate([missingDataResource]);
             if (customResource) {
-                return this.switchContextToStartDate(handlerInput, customResource, userTimezone, localizedMessages);
+                return this.switchContextToStartDate(handlerInput, customResource, localizedMessages);
             }
 
             throw new Error("Couldn't get the resource");
@@ -60,8 +60,7 @@ export class MedicationToTakeHandler extends AbstractIntentHandler {
             speakOutput = localizedMessages.getNoRecordsTextForDay(date, userTimezone);
         } else {
             const medicationText = getTextForMedicationRequests(medicationRequests, userTimezone, localizedMessages);
-            const datePreposition = localizedMessages.responses.DATE_PREPOSITION;
-            speakOutput = `${localizedMessages.getTextForDay(date, userTimezone, datePreposition)}, ${medicationText}`;
+            speakOutput = `${localizedMessages.getTextForDay(date, userTimezone)}, ${medicationText}`;
         }
 
         return handlerInput.responseBuilder
