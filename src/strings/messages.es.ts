@@ -134,11 +134,6 @@ export class MessagesEs extends AbstractMessage {
         return '';
     }
 
-    getSuggestedTimeText(mealCode: string): string {
-        const meal = this.getMealSuggestion(mealCode);
-        return `¿Esta medida es antes ${meal}, después ${meal}, o ninguno?`
-    }
-
     getTimingOrTime(observationValue: ObservationValue): string {
         if (!observationValue.timing || observationValue.timing === TimingEvent.EXACT)
         {

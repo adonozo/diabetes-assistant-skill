@@ -1,6 +1,6 @@
 import * as https from "https";
 import { createJsonResponse, getOptionsFor } from "./api";
-import { Bundle, Observation, Patient } from "fhir/r5";
+import { Bundle, Patient } from "fhir/r5";
 
 export function getSelf(email: string): Promise<Patient> {
     return new Promise((resolve, reject) => {
@@ -53,24 +53,6 @@ export function setResourceStartDate(
         request.write(data);
         request.end();
     });
-}
-
-export function saveBloodGlucoseLevel(
-    email: string,
-    observation: Observation
-): Promise<void> {
-    return new Promise((resolve, reject) => {
-        const data = JSON.stringify(observation);
-        const path = `/patients/${email}/observations`
-        const options = getOptionsFor(path, 'POST');
-        options.headers = {
-            'Content-Type': 'application/json',
-            'Content-Length': data.length
-        }
-        const request = https.request(options, response => createJsonResponse(resolve, reject, response));
-        request.write(data);
-        request.end();
-    })
 }
 
 export function getObservationsOnDate(

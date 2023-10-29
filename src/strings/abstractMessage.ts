@@ -83,8 +83,6 @@ export abstract class AbstractMessage {
 
     abstract getMedicationReminderText(value: number, unit: string, medication: string, times: string[]): string;
 
-    abstract getSuggestedTimeText(mealCode: string): string
-
     abstract getMedicationSsmlReminderText(value: number, unit: string, medication: string, times: string[]): string;
 
     abstract getServiceSsmlReminderText(action: string, times: string[]): string;

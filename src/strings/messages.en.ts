@@ -54,11 +54,6 @@ export class MessagesEn extends AbstractMessage {
         return `Take ${value} ${unit} of ${medication} ${timeList}`;
     }
 
-    getSuggestedTimeText(mealCode: string): string {
-        const meal = this.getMealSuggestion(mealCode);
-        return `Is this measure before ${meal}, after ${meal}, or none?`
-    }
-
     getMedicationSsmlReminderText(value: number, unit: string, medication: string, times: string[]): string {
         const stringTimes = times.map((time, index) => this.timingString(time, index === 0 ? 'at ' : ''));
         const timeList = this.listItems(stringTimes, this.words.CONCAT_WORD);
