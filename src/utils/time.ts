@@ -10,8 +10,8 @@ import { HandlerInput } from "ask-sdk-core";
 import { CustomRequest, HoursAndMinutes } from "../types";
 import { getMedicationName } from "../fhir/medicationRequest";
 
-export function requestsNeedStartDate(requests: FhirResource[]): CustomRequest | undefined {
-    for (const request of requests) {
+export function requestsNeedStartDate(requests: FhirResource[] | undefined): CustomRequest | undefined {
+    for (const request of requests ?? []) {
         if (request.resourceType === 'MedicationRequest') {
             const dosage = getDosageNeedingSetup(request);
             const medicationName = getMedicationName(request);

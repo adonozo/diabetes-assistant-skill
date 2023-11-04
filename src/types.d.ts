@@ -37,4 +37,8 @@ export type ResourceReminderData = {
 
 export type DosagesMedicationName = { dosages: Dosage[] | undefined, medicationName: string };
 
-export type ParentServiceRequestReminderData = { action: string, startDate: DateTime, endDate: DateTime }
+export type ParentServiceRequestReminderData = { action: string, startDate: DateTime, endDate: DateTime };
+
+export type AlexaRequest = { userId: string, deviceId: string };
+
+export type ProblemDetails = { status: number, [p: string]: any };
