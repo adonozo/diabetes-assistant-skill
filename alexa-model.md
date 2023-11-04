@@ -19,12 +19,9 @@ _The patient needs to link their account before performing any action._
 graph TD
     subgraph "Blood glucose"
     
-    R2[Register my glucose level]
-    A2>Stores the glucose level\nto the service]
     R3["`What was my glucose level on **{date}**?`"]
     A3>"`Queries the service for Observations on **{date}**`"]
     
-    R2 --> A2
     R3 --> A3
     end
 ```
@@ -40,6 +37,20 @@ graph TD
         R4 --> A4
         A4 --> C3
         C3 -->|Yes| A4B
+    end
+```
+
+```mermaid
+graph TD
+    subgraph "Service requests (blood glucose level measurements)"
+        R7["When do I have to measure my blood glucose?"]
+        A7>"Queries for active service requests"]
+        C7{Does any<br>service request need<br>a start date?}
+        A7B>"`Asks and registers **{start date}**`"]
+
+        R7 --> A7
+        A7 --> C7
+        C7 -->|Yes| A7B
     end
 ```
 
@@ -71,8 +82,6 @@ flowchart LR
     C1{Account\nLinked?}
     R1>Request to link account]
     VI{{Voice interaction}}
-    R2[Register my glucose level]
-    A2>Stores the glucose level\nto the service]
     R3["`What was my glucose level on **{date}**?`"]
     A3>"`Queries the service for Observations on **{date}**`"]
     R4["`What medications do I have to take on **{date}**?`"]
@@ -85,6 +94,10 @@ flowchart LR
     A4B>"`Asks and registers medication **{start date}**`"]
     C4{Does any\nresource need\na start date}
     A6>"`Asks and registers resource **{start dates}**`"]
+    R7["When do I have to measure my blood glucose?"]
+    A7>"Queries for active service requests"]
+    C7{Does any<br>service request need<br>a start date?}
+    A7B>"`Asks and registers **{start date}**`"]
 
     S --> A1
     A1 ---> C1
@@ -100,8 +113,15 @@ flowchart LR
     VI --> Glucose
 
     subgraph Glucose
-        R2 --> A2
         R3 --> A3
+    end
+    
+    VI --> ServiceRequest
+    
+    subgraph ServiceRequest
+        R7 --> A7
+        A7 --> C7
+        C7 -->|Yes| A7B
     end
 
     VI --> MedicationRequest
@@ -129,6 +149,10 @@ flowchart LR
 
 Queries active `medication requests` on a given date
 
+### When do I have to measure my blood glucose?
+
+Queries active `service requests`
+
 ### Create reminders at {time} (1)
 
 Creates daily reminders at the provided time. Reminders will honor the requests' day of week (e.g. will not create a reminder in a day when the patient does not have a scheduled medication).
@@ -137,11 +161,13 @@ Queries active `care plans` and creates reminders for `medication requests` and 
 
 ### What was my blood glucose level on {date}?
 
-Queries `observations` on a given date
+Queries `observations` on a given date 
 
-### Register my blood glucose {level} at {timing}
+---
 
-Saves a blood glucose level reading taken at some timing 
+#### {date} restrictions
+
+Giving dates cause awkward interactions as they can be expressed in multiple ways, but exact dates would rarely be used by patients. Therefore, dates are restricted to `yesterday`, `today`, and `tomorrow`. This way, patients have clear expectations about possible dates.
 
 ---
 
