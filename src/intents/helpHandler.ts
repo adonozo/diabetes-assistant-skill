@@ -14,11 +14,10 @@ export class HelpHandler extends AbstractIntentHandler {
 
     handle(handlerInput: HandlerInput): Response {
         const localizedMessages = getLocalizedStrings(handlerInput);
-        const speakOutput = localizedMessages.responses.HELP;
 
         return handlerInput.responseBuilder
-            .speak(speakOutput)
-            .reprompt(speakOutput)
+            .speak(localizedMessages.responses.HELP)
+            .reprompt(localizedMessages.responses.HELP_REPROMPT)
             .getResponse();
     }
 }

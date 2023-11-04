@@ -14,26 +14,23 @@ export abstract class AbstractMessage {
 
     abstract responses: {
         WELCOME: string,
+        WELCOME_FIRST: string,
+        WELCOME_REPROMPT: string,
         REMINDER_PERMISSIONS: string,
         SUCCESSFUL_REMINDER_PERMISSION: string,
         SUCCESSFUL_REMINDER_PERMISSION_REPROMPT: string,
         REPROMPT_REMINDER_PERMISSIONS: string,
         HELP: string,
+        HELP_REPROMPT: string,
         ERROR: string,
         STOP: string,
         ACCOUNT_LINK: string,
-        UPDATED_TIMING: string,
         SUCCESSFUL_REMINDERS: string,
         REQUESTS_REMINDERS_SETUP: string,
         SETUP_TIMINGS: string,
-        INVALID_BLOOD_GLUCOSE: string,
-        INVALID_BLOOD_GLUCOSE_REPROMPT: string,
-        BLOOD_GLUCOSE_SUCCESS: string,
         NO_GLUCOSE_RECORDS_FOUND: string,
         NO_RECORDS_FOUND: string,
         QUERY_SETUP: string,
-        LOW_GLUCOSE: string,
-        HIGH_GLUCOSE: string,
         PERMISSIONS_REQUIRED: string,
         REMINDER_NOT_CREATED: string,
         SET_START_DATE_SUCCESSFUL: string,
@@ -104,8 +101,6 @@ export abstract class AbstractMessage {
     abstract timingToText(timing: string): string;
 
     abstract stringToTimingCode(value: string): string;
-
-    abstract getMealSuggestion(timingCode: string): string;
 
     abstract codeToString(timingCode: string): string;
 

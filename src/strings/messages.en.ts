@@ -13,27 +13,27 @@ export class MessagesEn extends AbstractMessage {
     }
 
     responses = {
-        WELCOME: "Hi, I can tell you your medications for tomorrow",
-        REMINDER_PERMISSIONS: "I need permission to access your reminders.",
+        WELCOME: `Welcome, this is the Diabetes Assistant. You can ask me what medications you need to take today or when
+you need to measure your blood glucose levels`,
+        WELCOME_FIRST: `Welcome, this is the Diabetes Assistant. You can ask me what medications you need to take today or
+tomorrow; or when you need to measure your blood glucose levels. You can also ask me to create daily reminders for your 
+care plan. What would you like to do?`,
+        WELCOME_REPROMPT: 'You can say: what medications do I have to take today? If you want to create reminders, just say: create reminders',
+        REMINDER_PERMISSIONS: 'I need permission to access your reminders.',
         SUCCESSFUL_REMINDER_PERMISSION: `Now that you've provided permission, you can try again by saying "setup reminders"`,
         SUCCESSFUL_REMINDER_PERMISSION_REPROMPT: 'You can try again by saying "setup reminders"',
-        REPROMPT_REMINDER_PERMISSIONS: "Say ok if you want to grant me permission.",
-        HELP: "You can ask me your medications for today or ask me to create medication reminders.",
-        ERROR: "Sorry, I had trouble doing what you asked. Please try again.",
+        REPROMPT_REMINDER_PERMISSIONS: 'Say ok if you want to grant me permission.',
+        HELP: 'You can say: what medications do I have to take today? If you want to create reminders, just say: create reminders',
+        HELP_REPROMPT: 'You can say: when do I have to measure my blood glucose?',
+        ERROR: 'Sorry, I had trouble doing what you asked. Please try again.',
         STOP: "Goodbye!",
         ACCOUNT_LINK: "Your account is not linked. Add your account first in the Alexa app.",
-        UPDATED_TIMING: "You have updated your timing for",
         SUCCESSFUL_REMINDERS: "Your reminders have been created, check the Alexa app to verify them.",
         REQUESTS_REMINDERS_SETUP: 'Say "setup reminders" if you want to continue setting up your reminders.',
         SETUP_TIMINGS: "You need to set some timings first.",
-        INVALID_BLOOD_GLUCOSE: "Sorry, I had trouble doing what you asked. Try again by saying: save my blood glucose level.",
-        INVALID_BLOOD_GLUCOSE_REPROMPT: "Try again by saying: save my blood glucose level.",
-        BLOOD_GLUCOSE_SUCCESS: "Your blood glucose level was registered.",
         NO_GLUCOSE_RECORDS_FOUND: "I didn't find records for that date",
         NO_RECORDS_FOUND: "I didn't find records",
         QUERY_SETUP: 'Now, try asking me about your care plan for a date again.',
-        LOW_GLUCOSE: 'Your blood glucose level is lower than the recommended value. Please consider consulting to your GP or to a health provider.',
-        HIGH_GLUCOSE: 'Your blood glucose level is higher than the recommended value. Please consider consulting to your GP or to a health provider.',
         PERMISSIONS_REQUIRED: "Without permissions, I can't set a reminder.",
         REMINDER_NOT_CREATED: "Sorry, I couldn't create the reminders. Please try again.",
         SET_START_DATE_SUCCESSFUL: 'You have set the start date for',
@@ -42,9 +42,9 @@ export class MessagesEn extends AbstractMessage {
     words = {
         DATE_PREPOSITION: "On",
         CONCAT_WORD: "and",
-        TODAY: 'hoy',
-        TOMORROW: 'mañana',
-        YESTERDAY: 'ayer',
+        TODAY: 'today',
+        TOMORROW: 'tomorrow',
+        YESTERDAY: 'yesterday',
         TIME_PREPOSITION: 'at',
         FOR: 'for'
     }
@@ -227,20 +227,6 @@ export class MessagesEn extends AbstractMessage {
                 return 'NIGHT'
             default:
                 return 'EXACT'
-        }
-    }
-
-    getMealSuggestion(timingCode: string): string {
-        switch (timingCode) {
-            case 'CM':
-                return 'breakfast'
-            case 'CD':
-                return 'lunch'
-            case 'CV':
-                return 'dinner'
-            case 'C':
-            default:
-                return 'meal'
         }
     }
 

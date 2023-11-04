@@ -27,6 +27,7 @@ export abstract class AbstractIntentHandler implements RequestHandler {
         return handlerInput.responseBuilder
             .speak(localizedMessages.responses.REMINDER_PERMISSIONS)
             .addDirective(reminderDirective)
+            .withAskForPermissionsConsentCard(["alexa::alerts:reminders:skill:readwrite"])
             .getResponse();
     }
 

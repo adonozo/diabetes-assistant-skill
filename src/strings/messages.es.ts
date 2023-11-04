@@ -12,27 +12,28 @@ export class MessagesEs extends AbstractMessage {
     }
 
     responses = {
-        WELCOME: "Hola, puedes preguntarme tus medicamentos para mañana",
+        WELCOME: `¡Hola! Este es el asistente de diabetes. Puedes preguntarme cuáles son los medicamentos que debes tomar 
+el día de hoy o mañana; o cúando debes medir tu nivel de glucosa en sangre`,
+        WELCOME_FIRST: `¡Hola! Este es el asistente de diabetes. Puedes preguntarme cuáles son los medicamentos que debes tomar 
+el día de hoy o mañana; o cúando debes medir tu nivel de glucosa en sangre. También puedo crear recordatorios diarios de 
+tu plan de cuidado. ¿Que deseas hacer?`,
+        WELCOME_REPROMPT: `Puedes decir: ¿cuáles son mis medicamentos para hoy? Si deseas crear recordatorios, solo dí:
+crea recordatorios.`,
         REMINDER_PERMISSIONS: "Necesito permisos para crear recordatorios",
         SUCCESSFUL_REMINDER_PERMISSION: `Ahora que tengo permisos, puedo crear recordatorios. Intenta diciendo: "crea recordatorios"`,
-        SUCCESSFUL_REMINDER_PERMISSION_REPROMPT: 'Puedes intentar de nuevo diciendo: "setup reminders"',
-        REPROMPT_REMINDER_PERMISSIONS: `Dí "sí" para otorgarme permisos.`,
-        HELP: "Puedes preguntarme qué medicamentos debes tomar, registrar tu nivel de azúcar en sangre, o crear recordatorios.",
-        ERROR: "Lo siento, tuve problemas para hacer lo que pediste. Intenta de nuevo",
+        SUCCESSFUL_REMINDER_PERMISSION_REPROMPT: 'Puedes intentar de nuevo diciendo: "crea recordatorios"',
+        REPROMPT_REMINDER_PERMISSIONS: `Dí: "sí" para otorgarme permisos.`,
+        HELP: `Puedes decir: ¿cuáles son mis medicamentos para hoy? Si deseas crear recordatorios, solo dí: crea recordatorios.`,
+        HELP_REPROMPT: 'Tambien puedes decir: ¿cuándo debo medir mi glucosa en sangre?',
+        ERROR: 'Lo siento, tuve problemas para hacer lo que pediste. Intenta de nuevo',
         STOP: "¡Hasta pronto!",
         ACCOUNT_LINK: "Tu cuenta no está enlazada. Primero añade tu cuenta en la applicación de Alexa en tu celular.",
-        UPDATED_TIMING: "Has actualizado el tiempo para ",
-        SUCCESSFUL_REMINDERS: "Tus recordatorios han sido creados. Mira la aplicación de Alexa en tu celular para verificar.",
+        SUCCESSFUL_REMINDERS: "Tus recordatorios han sido creados. Puedes gestionarlos con la aplicación de Alexa en tu celular.",
         REQUESTS_REMINDERS_SETUP: 'Dí "crea recordatorios" si deseas continuar creando tus recordatorios.',
         SETUP_TIMINGS: "Primero necesito saber la hora para algunos eventos.",
-        INVALID_BLOOD_GLUCOSE: 'Lo siento, tuve problemas para hacer lo que pediste. Intenta de nuevo diciéndo: "Registra mi nivel de azúcar en sangre"',
-        INVALID_BLOOD_GLUCOSE_REPROMPT: 'Intenta de nuevo diciéndo: "Registra mi nivel de azúcar en sangre"',
-        BLOOD_GLUCOSE_SUCCESS: "Tu nivel de azúcar en sangre se ha registrado.",
         NO_GLUCOSE_RECORDS_FOUND: "No encontré registros para esa fecha.",
         NO_RECORDS_FOUND: "No encontré registros",
         QUERY_SETUP: "Ahora, intenta preguntarme sobre tus medicamentos para una fecha de nuevo",
-        LOW_GLUCOSE: "Tu nivel de azúcar en sangre es más bajo de lo recomendado. Considera consultar con tu médico.",
-        HIGH_GLUCOSE: "Tu nivel de azúcar en sangre es más alto de lo recomendado. Considera consultar con tu médico.",
         PERMISSIONS_REQUIRED: "Sin permisos, no puedo crear recordatorios para tus medicamentos.",
         REMINDER_NOT_CREATED: "Lo siento, no pude crear los recordatorios. Intenta nuevamente.",
         SET_START_DATE_SUCCESSFUL: 'Has configurado la fecha de inicio para',
@@ -85,20 +86,6 @@ export class MessagesEs extends AbstractMessage {
         let preposition = timeParts[1] === "01" ? 'a la' : 'a las';
 
         return `${preposition} ${+timeParts[0]} ${minutes}`;
-    }
-
-    getMealSuggestion(timingCode: string): string {
-        switch (timingCode) {
-            case 'CM':
-                return 'del desayuno'
-            case 'CD':
-                return 'del almuerzo'
-            case 'CV':
-                return 'del la cena'
-            case 'C':
-            default:
-                return 'de comer'
-        }
     }
 
     getMedicationReminderText(value: number, unit: string, medication: string, times: []): string {
