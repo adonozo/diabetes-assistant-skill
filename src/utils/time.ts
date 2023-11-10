@@ -1,5 +1,6 @@
 import { DateTime, Settings } from "luxon";
 import {
+    compareWhen,
     getTimesFromTimingWithFrequency,
     getTimingStartTime,
     timingNeedsStartDate,
@@ -81,9 +82,9 @@ function buildCustomServiceRequest(serviceRequest: ServiceRequest): CustomReques
 export function timesStringArraysFromTiming(timing: Timing, timezone: string): string[] {
     let times;
     if (timing.repeat?.when && Array.isArray(timing.repeat.when) && timing.repeat.when.length > 0) {
-        times = timing.repeat.when;
+        times = timing.repeat.when.sort(compareWhen);
     } else if (timing.repeat?.timeOfDay && Array.isArray(timing.repeat.timeOfDay) && timing.repeat.timeOfDay.length > 0) {
-        times = timing.repeat.timeOfDay;
+        times = timing.repeat.timeOfDay.sort();
     } else {
         const startTime = getTimingStartTime(timing);
         if (!startTime) {

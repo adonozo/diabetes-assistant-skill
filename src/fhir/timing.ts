@@ -2,7 +2,7 @@ import { DateTime } from "luxon";
 import { RRule, Weekday } from "rrule";
 import { getExtension } from "./fhir";
 import { Duration, Timing } from "fhir/r5";
-import { StartEndDateTime } from "../types";
+import { DateTimeInterval } from "../types";
 import { TimingEvent } from "../enums";
 
 const DEFAULT_TIMEZONE = 'UTC'
@@ -107,7 +107,7 @@ export function alexaTimingToFhirTiming(alexaTiming: string): TimingEvent {
     }
 }
 
-export function getDatesFromTiming(timing: Timing, timezone: string = DEFAULT_TIMEZONE): StartEndDateTime {
+export function getDatesFromTiming(timing: Timing, timezone: string = DEFAULT_TIMEZONE): DateTimeInterval {
     if (timing.repeat?.boundsPeriod?.start && timing.repeat?.boundsPeriod?.end) {
         const startDate = DateTime.fromISO(timing.repeat.boundsPeriod.start, {zone: timezone});
         const endDate = DateTime.fromISO(timing.repeat.boundsPeriod.end, {zone: timezone})

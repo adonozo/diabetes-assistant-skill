@@ -3,7 +3,7 @@ import { Dosage, Timing } from "fhir/r5";
 
 export type HttpResolvePromise<T> = (value: PromiseLike<T>) => void;
 
-export type StartEndDateTime = { start: DateTime, end: DateTime };
+export type DateTimeInterval = { start: DateTime, end: DateTime };
 
 export type HoursAndMinutes = { hour: number, minute: number };
 

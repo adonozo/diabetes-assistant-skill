@@ -1,11 +1,7 @@
 import { Dosage, MedicationRequest } from "fhir/r5";
 import { AbstractMessage } from "../strings/abstractMessage";
 import { DoseValue, MedicationData } from "../types";
-import {
-    compareWhen,
-    getTimesFromTimingWithFrequency,
-    getTimingStartTime
-} from "./timing";
+import { timesStringArraysFromTiming } from "../utils/time";
 
 export function getTextForMedicationRequests(
     requests: MedicationRequest[],
@@ -17,12 +13,6 @@ export function getTextForMedicationRequests(
         .join('. ');
 }
 
-/**
- *
- * @param request
- * @param timezone
- * @returns {{dose: *[], medication: string}}
- */
 export function getMedicationText(request: MedicationRequest, timezone: string): MedicationData {
     const medicationData: MedicationData = {
         medication: '',
@@ -30,18 +20,12 @@ export function getMedicationText(request: MedicationRequest, timezone: string):
     };
     medicationData.medication = getMedicationName(request);
     request.dosageInstruction?.forEach(dosage => {
-        const {value, unit} = getMedicationValues(dosage);
-        let time;
-        if (dosage.timing?.repeat?.when && Array.isArray(dosage.timing.repeat.when)) {
-            time = dosage.timing.repeat.when.sort(compareWhen);
-        } else if (dosage.timing?.repeat?.timeOfDay && Array.isArray(dosage.timing.repeat.timeOfDay)) {
-            time = dosage.timing.repeat.timeOfDay.sort();
-        } else {
-            const startTime = getTimingStartTime(dosage.timing!)!;
-            time = getTimesFromTimingWithFrequency(dosage.timing?.repeat?.frequency ?? 0, startTime, timezone)
-                .sort();
+        if (!dosage.timing) {
+            return;
         }
 
+        const {value, unit} = getMedicationValues(dosage);
+        const time = timesStringArraysFromTiming(dosage.timing, timezone);
         medicationData.dose.push({value: value, unit: unit, time: time});
     });
 
@@ -70,4 +54,3 @@ export function getMedicationName(request: MedicationRequest): string {
 
     return (medication.code?.coding && medication.code?.coding[0].display) ?? '';
 }
-
