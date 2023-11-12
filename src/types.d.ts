@@ -46,3 +46,5 @@ export type ParentServiceRequestReminderData = { action: string, startDate: Date
 export type AlexaRequest = { userId: string, deviceId: string };
 
 export type ProblemDetails = { status: number, [p: string]: any };
+
+export type Result<TSuccess, TError> = { success: boolean, value?: TSuccess, error?: TError }

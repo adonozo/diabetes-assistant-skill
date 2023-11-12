@@ -116,7 +116,7 @@ crea recordatorios.`,
         }
 
         if (missingDate.type === 'ServiceRequest') {
-            return `${init} Debes ${missingDate.name} por ${missingDate.duration} ${unit}.`;
+            return `${init} Debes medir tu nivel de glucosa en sangre por ${missingDate.duration} ${unit}.`;
         }
 
         return '';

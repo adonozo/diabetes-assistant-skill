@@ -77,7 +77,7 @@ care plan. What would you like to do?`,
         }
 
         if (missingDate.type === 'ServiceRequest') {
-            return `${init} Your plan includes: ${missingDate.name} for ${missingDate.duration} ${unit}.`;
+            return `${init} Your need to measure your blood glucose level for ${missingDate.duration} ${unit}.`;
         }
 
         return '';

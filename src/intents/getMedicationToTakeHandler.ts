@@ -37,18 +37,16 @@ export class MedicationToTakeHandler extends AbstractIntentHandler {
         try {
             medicationRequest = await getMedicationRequests(patientEmail, date, timingEvent.ALL_DAY, userTimezone);
         } catch (errorResponse: any) {
-            if (errorResponse.status !== 422) {
+            if (errorResponse?.status !== 422) {
                 console.log("Unexpected error", JSON.stringify(errorResponse))
                 throw new Error("Unexpected error");
             }
 
             const missingDataResource = errorResponse.resource;
-            const customResource = requestsNeedStartDate([missingDataResource]);
-            if (customResource) {
-                return this.switchContextToStartDate(handlerInput, customResource, localizedMessages);
-            }
+            const customResource = requestsNeedStartDate([missingDataResource])
+                ?? throwWithMessage("Couldn't get the resource");
 
-            throw new Error("Couldn't get the resource");
+            return this.switchContextToStartDate(handlerInput, customResource, localizedMessages);
         }
 
         const medicationRequests = medicationsFromBundle(medicationRequest);

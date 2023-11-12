@@ -71,7 +71,7 @@ function buildCustomServiceRequest(serviceRequest: ServiceRequest): CustomReques
     return {
         type: 'ServiceRequest',
         id: serviceRequest.id!,
-        name: (serviceRequest.code?.concept?.coding && serviceRequest.code?.concept?.coding[0].display) ?? '',
+        name: '',
         duration: timing?.repeat!.boundsDuration?.value ?? 0,
         durationUnit: timing?.repeat!.boundsDuration?.unit ?? '',
         frequency: timing?.repeat!.frequency ?? 0,

@@ -3,12 +3,13 @@ import { HandlerInput } from "ask-sdk-core";
 import { Response } from "ask-sdk-model";
 import { getAuthorizedUser } from "../auth";
 import { getServiceRequests } from "../api/patients";
-import { getLocalizedStrings } from "../utils/intent";
+import { getLocalizedStrings, throwWithMessage } from "../utils/intent";
 import { serviceRequestsFromBundle } from "../fhir/carePlan";
 import { getTextForServiceRequests } from "../fhir/serviceRequest";
-import { getTimezoneOrDefault } from "../utils/time";
-import { DateTimeInterval } from "../types";
+import { getTimezoneOrDefault, requestsNeedStartDate } from "../utils/time";
+import { DateTimeInterval, Result } from "../types";
 import { DateTime } from "luxon";
+import { Bundle, FhirResource, ServiceRequest } from "fhir/r5";
 
 export class SearchNextServiceRequestsHandler extends AbstractIntentHandler {
     intentName = 'SearchNextServiceRequests';
@@ -28,12 +29,14 @@ export class SearchNextServiceRequestsHandler extends AbstractIntentHandler {
         }
 
         const localizedMessages = getLocalizedStrings(handlerInput);
-        const interval = this.getRequestInterval(userTimezone);
-        const serviceRequestsBundle = await getServiceRequests(userInfo.username,
-            interval.start.toISODate()!,
-            interval.end.toISODate()!);
+        const searchResult = await this.getNextServiceRequests(userTimezone, userInfo.username);
+        if (!searchResult.success) {
+            const customResource = requestsNeedStartDate([searchResult.error!])
+                ?? throwWithMessage("Couldn't get the resource");
+            return this.switchContextToStartDate(handlerInput, customResource, localizedMessages);
+        }
 
-        const serviceRequests = serviceRequestsFromBundle(serviceRequestsBundle);
+        const serviceRequests = serviceRequestsFromBundle(searchResult.value!);
         let speakOutput
         if (serviceRequests.length === 0) {
             speakOutput = localizedMessages.responses.NO_RECORDS_FOUND;
@@ -45,6 +48,28 @@ export class SearchNextServiceRequestsHandler extends AbstractIntentHandler {
         return handlerInput.responseBuilder
             .speak(speakOutput)
             .getResponse();
+    }
+
+    private async getNextServiceRequests(timezone: string, patientUsername: string): Promise<Result<Bundle, ServiceRequest>> {
+        const interval = this.getRequestInterval(timezone);
+        try {
+            const serviceRequestsBundle = await getServiceRequests(patientUsername,
+                interval.start.toISODate()!,
+                interval.end.toISODate()!);
+            return { success: true, value: serviceRequestsBundle };
+        } catch (errorResponse: any) {
+            if (errorResponse?.status !== 422) {
+                console.log("Unexpected error", JSON.stringify(errorResponse))
+                throw new Error("Unexpected error");
+            }
+
+            const missingDataResource = <FhirResource>errorResponse.resource;
+            if (missingDataResource?.resourceType === 'ServiceRequest') {
+                return { success: false, error: missingDataResource };
+            }
+
+            throw new Error("Couldn't get the resource");
+        }
     }
 
     private getRequestInterval(timezone: string): DateTimeInterval {
