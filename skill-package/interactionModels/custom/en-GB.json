@@ -48,6 +48,15 @@
           ]
         },
         {
+          "name": "SearchNextServiceRequests",
+          "samples": [
+            "When do I have to measure my blood glucose",
+            "When do I need to measure my blood glucose",
+            "When do I measure my blood glucose levels",
+            "When do I measure my blood glucose"
+          ]
+        },
+        {
           "name": "SetStartDateIntent",
           "slots": [
             {

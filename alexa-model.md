@@ -44,13 +44,19 @@ graph TD
 graph TD
     subgraph "Service requests (blood glucose level measurements)"
         R7["When do I have to measure my blood glucose?"]
-        A7>"Queries for active service requests"]
-        C7{Does any<br>service request need<br>a start date?}
+        A7>"Queries for service requests for the next 7 days"]
+        C7{Does any<br>request need<br>a start date?}
         A7B>"`Asks and registers **{start date}**`"]
+        C8{"Are there<br>requests in the<br>next 2 days?"}
+        A8A>"Presents service requests"]
+        A8B>"Presents next day with requests"]
 
         R7 --> A7
         A7 --> C7
         C7 -->|Yes| A7B
+        C7 -->|No| C8
+        C8 -->|Yes| A8A
+        C8 -->|No| A8B
     end
 ```
 
@@ -98,6 +104,9 @@ flowchart LR
     A7>"Queries for active service requests"]
     C7{Does any<br>service request need<br>a start date?}
     A7B>"`Asks and registers **{start date}**`"]
+    C8{"Are there<br>requests in the<br>next 2 days?"}
+    A8A>"Presents service requests"]
+    A8B>"Presents next day with requests"]
 
     S --> A1
     A1 ---> C1
@@ -122,6 +131,9 @@ flowchart LR
         R7 --> A7
         A7 --> C7
         C7 -->|Yes| A7B
+        C7 -->|No| C8
+        C8 -->|Yes| A8A
+        C8 -->|No| A8B
     end
 
     VI --> MedicationRequest
@@ -151,7 +163,7 @@ Queries active `medication requests` on a given date
 
 ### When do I have to measure my blood glucose?
 
-Queries active `service requests`
+Queries active `service requests` for the next 7 days. Tells the patient the plan for next 3 days (inclusive of the present day). If there's no activity in those days, it will take the next day of an scheduled activity.
 
 ### Create reminders at {time} (1)
 

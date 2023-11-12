@@ -61,6 +61,23 @@
           ]
         },
         {
+          "name": "SearchNextServiceRequests",
+          "samples": [
+            "Cuando debo medir mi nivel de glucosa en sangre",
+            "Cuando debo medir mi nivel de glucosa",
+            "Cuando debo medir de glucosa en sangre",
+            "Cuando debo medir mi glucosa",
+            "Cuando tengo que medir mi nivel de glucosa en sangre",
+            "Cuando tengo que medir mi nivel",
+            "Cuando tengo que medir mi glucosa en sangre",
+            "Cuando tengo que medir mi glucosa",
+            "Cuando mido mi nivel de glucosa en sangre",
+            "Cuando mido mi nivel de glucosa",
+            "Cuando mido mi glocusa en sangre",
+            "Cuando mido mi glocusa"
+          ]
+        },
+        {
           "name": "SetStartDateIntent",
           "slots": [
             {
@@ -83,9 +100,7 @@
                 "El {date} a las {healthRequestTime}",
                 "El {date} a la {healthRequestTime}",
                 "{date} a las {healthRequestTime}",
-                "{date} a la {healthRequestTime}",
-                "quizás {date} a las {healthRequestTime}",
-                "quizás {date} a la {healthRequestTime}"
+                "{date} a la {healthRequestTime}"
               ]
             },
             {
