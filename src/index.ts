@@ -16,6 +16,7 @@ import { HelpHandler } from "./intents/helpHandler";
 import { CancelAndStopHandler } from "./intents/cancelAndStopHandler";
 import { ErrorHandler } from "./intents/errorHandler";
 import { SessionEndedRequestHandler } from "./intents/sessionEndedRequestHandler";
+import { SearchNextServiceRequestsHandler } from "./intents/searchNextServiceRequestsHandler";
 
 exports.handler = SkillBuilders.custom()
     .addRequestHandlers(
@@ -24,6 +25,7 @@ exports.handler = SkillBuilders.custom()
         new CreateRemindersInProgressHandler(),
         new CreateRemindersHandler(),
         new MedicationToTakeHandler(),
+        new SearchNextServiceRequestsHandler(),
         new SetStartDateIntentHandler(),
         new SetStartDateInProgressHandler(),
         new SetStartDateCompletedHandler(),

@@ -81,10 +81,22 @@ export function getMedicationRequests(
 ): Promise<Bundle> {
     return new Promise((resolve, reject) => {
         const params = new URLSearchParams();
-        params.append("date", date)
-        params.append("timing", timing)
-        params.append("timezone", timezone)
-        const path = `/alexa/${email}/medication-requests?${params.toString()}`
+        params.append('date', date)
+        params.append('timing', timing)
+        params.append('timezone', timezone)
+        const path = `/alexa/${email}/medication-requests?${params.toString()}`;
+        const options = getOptionsFor(path, 'GET');
+        const request = https.request(options, response => createJsonResponse(resolve, reject, response));
+        request.end();
+    })
+}
+
+export function getServiceRequests(email: string, startDate: string, endDate: string): Promise<Bundle> {
+    return new Promise((resolve, reject) => {
+        const params = new URLSearchParams();
+        params.append('startDate', startDate)
+        params.append('endDate', endDate)
+        const path = `/alexa/${email}/service-requests?${params.toString()}`;
         const options = getOptionsFor(path, 'GET');
         const request = https.request(options, response => createJsonResponse(resolve, reject, response));
         request.end();
