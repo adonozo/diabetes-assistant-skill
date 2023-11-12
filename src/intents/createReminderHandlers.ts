@@ -40,7 +40,7 @@ export class CreateRemindersInProgressHandler extends AbstractIntentHandler {
         const customResource = requestsNeedStartDate(requests);
         if (customResource) {
             const localizedMessages = getLocalizedStrings(handlerInput);
-            return this.switchContextToStartDate(handlerInput, customResource, localizedMessages);
+            return this.switchContextToStartDateTime(handlerInput, customResource, localizedMessages);
         }
 
         return handlerInput.responseBuilder
@@ -80,7 +80,7 @@ export class CreateRemindersHandler extends AbstractIntentHandler {
         const requests = await getActiveRequests(username);
         const customResource = requestsNeedStartDate(requests);
         if (customResource) {
-            return this.switchContextToStartDate(handlerInput, customResource, messages);
+            return this.switchContextToStartDateTime(handlerInput, customResource, messages);
         }
 
         // Create reminders

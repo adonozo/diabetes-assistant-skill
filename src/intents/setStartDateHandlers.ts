@@ -7,8 +7,8 @@ import { AbstractMessage } from "../strings/abstractMessage";
 import { AbstractIntentHandler } from "./abstractIntentHandler";
 import { getAuthorizedUser } from "../auth";
 
-export class SetStartDateIntentHandler extends AbstractIntentHandler {
-    intentName = 'SetStartDateIntent';
+export class SetStartDateTimeIntentHandler extends AbstractIntentHandler {
+    intentName = 'SetStartDateTimeIntent';
 
     canHandle(handlerInput : HandlerInput) : boolean {
         const request = handlerInput.requestEnvelope.request;
@@ -29,8 +29,8 @@ export class SetStartDateIntentHandler extends AbstractIntentHandler {
     }
 }
 
-export class SetStartDateInProgressHandler extends AbstractIntentHandler {
-    intentName = 'SetStartDateIntent';
+export class SetStartDateTimeInProgressHandler extends AbstractIntentHandler {
+    intentName = 'SetStartDateTimeIntent';
 
     canHandle(handlerInput : HandlerInput) : boolean {
         const request = handlerInput.requestEnvelope.request;
@@ -82,8 +82,8 @@ export class SetStartDateInProgressHandler extends AbstractIntentHandler {
     }
 }
 
-export class SetStartDateCompletedHandler extends AbstractIntentHandler {
-    intentName = 'SetStartDateIntent';
+export class SetStartDateTimeCompletedHandler extends AbstractIntentHandler {
+    intentName = 'SetStartDateTimeIntent';
 
     canHandle(handlerInput : HandlerInput) : boolean {
         const request = handlerInput.requestEnvelope.request;

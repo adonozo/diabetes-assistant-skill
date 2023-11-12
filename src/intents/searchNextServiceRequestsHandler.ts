@@ -33,7 +33,7 @@ export class SearchNextServiceRequestsHandler extends AbstractIntentHandler {
         if (!searchResult.success) {
             const customResource = requestsNeedStartDate([searchResult.error!])
                 ?? throwWithMessage("Couldn't get the resource");
-            return this.switchContextToStartDate(handlerInput, customResource, localizedMessages);
+            return this.switchContextToStartDateTime(handlerInput, customResource, localizedMessages);
         }
 
         const serviceRequests = serviceRequestsFromBundle(searchResult.value!);

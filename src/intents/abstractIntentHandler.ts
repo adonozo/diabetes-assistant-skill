@@ -31,7 +31,7 @@ export abstract class AbstractIntentHandler implements RequestHandler {
             .getResponse();
     }
 
-    protected switchContextToStartDate(
+    protected switchContextToStartDateTime(
         handlerInput: HandlerInput,
         requestWithMissingDate: CustomRequest,
         localizedMessages: AbstractMessage
@@ -45,7 +45,7 @@ export abstract class AbstractIntentHandler implements RequestHandler {
         attributesManager.setSessionAttributes(session);
 
         const startDate = getTimingStartDate(requestWithMissingDate.timing);
-        const delegatedIntent = this.getDelegatedSetStartDateIntent(startDate);
+        const delegatedIntent = this.getDelegatedSetStartDateTimeIntent(startDate);
 
         const requiredSetup = localizedMessages.getStartDatePrompt(requestWithMissingDate);
         return handlerInput.responseBuilder
@@ -60,7 +60,7 @@ export abstract class AbstractIntentHandler implements RequestHandler {
             .getResponse();
     }
 
-    private getDelegatedSetStartDateIntent(startDate?: DateTime): Intent {
+    private getDelegatedSetStartDateTimeIntent(startDate?: DateTime): Intent {
         const slots: any = startDate ?
             {
                 date: {
@@ -72,7 +72,7 @@ export abstract class AbstractIntentHandler implements RequestHandler {
             : {};
 
         return {
-            name: 'SetStartDateIntent',
+            name: 'SetStartDateTimeIntent',
             confirmationStatus: "NONE",
             slots: slots
         }

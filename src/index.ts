@@ -2,9 +2,9 @@ import { DefaultApiClient, SkillBuilders } from 'ask-sdk-core';
 import { CreateRemindersHandler, CreateRemindersInProgressHandler } from "./intents/createReminderHandlers";
 import { MedicationToTakeHandler } from "./intents/getMedicationToTakeHandler";
 import {
-    SetStartDateCompletedHandler,
-    SetStartDateIntentHandler,
-    SetStartDateInProgressHandler
+    SetStartDateTimeCompletedHandler,
+    SetStartDateTimeIntentHandler,
+    SetStartDateTimeInProgressHandler
 } from "./intents/setStartDateHandlers";
 import {
     GetGlucoseLevelDateAndTimeHandler,
@@ -26,9 +26,9 @@ exports.handler = SkillBuilders.custom()
         new CreateRemindersHandler(),
         new MedicationToTakeHandler(),
         new SearchNextServiceRequestsHandler(),
-        new SetStartDateIntentHandler(),
-        new SetStartDateInProgressHandler(),
-        new SetStartDateCompletedHandler(),
+        new SetStartDateTimeIntentHandler(),
+        new SetStartDateTimeInProgressHandler(),
+        new SetStartDateTimeCompletedHandler(),
         new GetGlucoseLevelDateAndTimingHandler(),
         new GetGlucoseLevelDateAndTimeHandler(),
         new GetGlucoseLevelDateHandler(),

@@ -78,7 +78,7 @@
           ]
         },
         {
-          "name": "SetStartDateIntent",
+          "name": "SetStartDateTimeIntent",
           "slots": [
             {
               "name": "date",
@@ -324,7 +324,7 @@
     "dialog": {
       "intents": [
         {
-          "name": "SetStartDateIntent",
+          "name": "SetStartDateTimeIntent",
           "confirmationRequired": false,
           "delegationStrategy": "SKILL_RESPONSE",
           "slots": [
