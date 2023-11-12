@@ -9,6 +9,10 @@ export type HoursAndMinutes = { hour: number, minute: number };
 
 export type ServiceData = { action: string, timings: string[] };
 
+export type Day = ('mon'|'tue'|'wed'|'thu'|'fri'|'sat'|'sun');
+
+export type OccurrencesPerDay = { day: Day, when: string[] };
+
 export type MedicationData = {
     medication: string,
     dose: { value: number, unit: string, time: string[] }[]

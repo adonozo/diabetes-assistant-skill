@@ -1,7 +1,7 @@
 import { AbstractMessage, ObservationValue } from "./abstractMessage";
 import { timingEvent } from "../fhir/timing";
 import { DateTime } from "luxon";
-import { CustomRequest, MedicationData, ServiceData } from "../types";
+import { CustomRequest, Day, MedicationData, OccurrencesPerDay, ServiceData } from "../types";
 import { AppLocale } from "../enums";
 
 export class MessagesEn extends AbstractMessage {
@@ -33,6 +33,7 @@ care plan. What would you like to do?`,
         SETUP_TIMINGS: "You need to set some timings first.",
         NO_GLUCOSE_RECORDS_FOUND: "I didn't find records for that date",
         NO_RECORDS_FOUND: "I didn't find records",
+        NO_SERVICE_REQUESTS_FOUND: "You don't need to measure your blood glucose levels for the next seven days",
         QUERY_SETUP: 'Now, try asking me about your care plan for a date again.',
         PERMISSIONS_REQUIRED: "Without permissions, I can't set a reminder.",
         REMINDER_NOT_CREATED: "Sorry, I couldn't create the reminders. Please try again.",
@@ -158,6 +159,14 @@ care plan. What would you like to do?`,
         return `Do a ${serviceData.action} ${timeList}`;
     }
 
+    buildServiceRequestText(occurrences: OccurrencesPerDay[], today: Day, tomorrow: Day): string {
+        const text = occurrences
+            .map(occurence => this.occurrenceText(occurence, today, tomorrow))
+            .join('. ');
+
+        return `Measure your blood glucose level ${text}`;
+    }
+
     timingToText(timing: string): string {
         switch (timing) {
             case 'ACD':
@@ -268,6 +277,27 @@ care plan. What would you like to do?`,
                 return 'months';
             default:
                 throw new Error(`Invalid unit code ${unit}`);
+        }
+    }
+
+    dayToString(day: Day): string {
+        switch (day) {
+            case "mon":
+                return 'Monday';
+            case "tue":
+                return 'Tuesday';
+            case "wed":
+                return 'Wednesday';
+            case "thu":
+                return 'Thursday';
+            case "fri":
+                return 'Friday';
+            case "sat":
+                return 'Saturday';
+            case "sun":
+                return 'Sunday';
+            default:
+                return day;
         }
     }
 }

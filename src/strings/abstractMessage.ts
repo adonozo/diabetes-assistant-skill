@@ -1,5 +1,5 @@
 import { DateTime } from "luxon";
-import { CustomRequest, MedicationData, ServiceData } from "../types";
+import { CustomRequest, Day, MedicationData, OccurrencesPerDay, ServiceData } from "../types";
 import { Observation } from "fhir/r5";
 import { AppLocale } from "../enums";
 
@@ -30,6 +30,7 @@ export abstract class AbstractMessage {
         SETUP_TIMINGS: string,
         NO_GLUCOSE_RECORDS_FOUND: string,
         NO_RECORDS_FOUND: string,
+        NO_SERVICE_REQUESTS_FOUND: string,
         QUERY_SETUP: string,
         PERMISSIONS_REQUIRED: string,
         REMINDER_NOT_CREATED: string,
@@ -98,6 +99,8 @@ export abstract class AbstractMessage {
 
     abstract makeServiceText(serviceData: ServiceData): string;
 
+    abstract buildServiceRequestText(occurrences: OccurrencesPerDay[], today: Day, tomorrow: Day): string;
+
     abstract timingToText(timing: string): string;
 
     abstract stringToTimingCode(value: string): string;
@@ -107,6 +110,8 @@ export abstract class AbstractMessage {
     abstract unitsToStrings(unit: string, isPlural: boolean): string;
 
     abstract durationUnitToString(unit: string): string;
+
+    abstract dayToString(day: Day): string;
 
     protected wrapSpeakMessage(message: string): string {
         return `<speak>${message}</speak>`
@@ -127,6 +132,25 @@ export abstract class AbstractMessage {
         if (!this.supportedLocales.includes(this.locale)) {
             throw new Error(`Unsupported locale ${this.locale}. Expected values: ${this.supportedLocales.join(', ')}`);
         }
+    }
+
+    protected occurrenceText(occurrence: OccurrencesPerDay, today: Day, tomorrow: Day): string {
+        let start: string;
+        switch (occurrence.day) {
+            case today:
+                start = this.words.TODAY;
+                break;
+            case tomorrow:
+                start = this.words.TOMORROW;
+                break;
+            default:
+                start = `${this.words.DATE_PREPOSITION} ${this.dayToString(occurrence.day)}`;
+        }
+
+        const when = occurrence.when.map(this.timingToText)
+            .join(', ')
+
+        return `${start}, ${when}`
     }
 
     /**

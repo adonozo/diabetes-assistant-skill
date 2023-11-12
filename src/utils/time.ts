@@ -1,4 +1,4 @@
-import { DateTime, Settings } from "luxon";
+import { DateTime, Settings, WeekdayNumbers } from "luxon";
 import {
     compareWhen,
     getTimesFromTimingWithFrequency,
@@ -8,7 +8,7 @@ import {
 } from "../fhir/timing";
 import { Dosage, FhirResource, MedicationRequest, ServiceRequest, Timing } from "fhir/r5";
 import { HandlerInput } from "ask-sdk-core";
-import { CustomRequest, HoursAndMinutes } from "../types";
+import { CustomRequest, Day, HoursAndMinutes } from "../types";
 import { getMedicationName } from "../fhir/medicationRequest";
 
 export function requestsNeedStartDate(requests: FhirResource[] | undefined): CustomRequest | undefined {
@@ -108,4 +108,23 @@ export function serviceNeedsDateTimeSetup(serviceRequest: ServiceRequest): boole
 export function getDosageNeedingSetup(medicationRequest: MedicationRequest): Dosage | undefined {
     return medicationRequest.dosageInstruction!
         .find(dosage => timingNeedsStartDate(dosage.timing) || timingNeedsStartTime(dosage.timing));
+}
+
+export function dayNumberToShortCode(day: WeekdayNumbers): Day {
+    switch (day) {
+        case 1:
+            return 'mon';
+        case 2:
+            return 'tue';
+        case 3:
+            return 'wed';
+        case 4:
+            return 'thu';
+        case 5:
+            return 'fri';
+        case 6:
+            return 'sat';
+        case 7:
+            return 'sun';
+    }
 }

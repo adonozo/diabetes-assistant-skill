@@ -1,7 +1,7 @@
 import { AbstractMessage, ObservationValue } from "./abstractMessage";
 import { DateTime } from "luxon";
 import { AppLocale, TimingEvent } from "../enums";
-import { CustomRequest, MedicationData, ServiceData } from "../types";
+import { CustomRequest, Day, MedicationData, OccurrencesPerDay, ServiceData } from "../types";
 
 export class MessagesEs extends AbstractMessage {
     supportedLocales = [AppLocale.esES, AppLocale.esMX, AppLocale.esUS];
@@ -19,23 +19,24 @@ el día de hoy o mañana; o cúando debes medir tu nivel de glucosa en sangre. T
 tu plan de cuidado. ¿Que deseas hacer?`,
         WELCOME_REPROMPT: `Puedes decir: ¿cuáles son mis medicamentos para hoy? Si deseas crear recordatorios, solo dí:
 crea recordatorios.`,
-        REMINDER_PERMISSIONS: "Necesito permisos para crear recordatorios",
+        REMINDER_PERMISSIONS: 'Necesito permisos para crear recordatorios',
         SUCCESSFUL_REMINDER_PERMISSION: `Ahora que tengo permisos, puedo crear recordatorios. Intenta diciendo: "crea recordatorios"`,
         SUCCESSFUL_REMINDER_PERMISSION_REPROMPT: 'Puedes intentar de nuevo diciendo: "crea recordatorios"',
         REPROMPT_REMINDER_PERMISSIONS: `Dí: "sí" para otorgarme permisos.`,
         HELP: `Puedes decir: ¿cuáles son mis medicamentos para hoy? Si deseas crear recordatorios, solo dí: crea recordatorios.`,
         HELP_REPROMPT: 'Tambien puedes decir: ¿cuándo debo medir mi glucosa en sangre?',
         ERROR: 'Lo siento, tuve problemas para hacer lo que pediste. Intenta de nuevo',
-        STOP: "¡Hasta pronto!",
-        ACCOUNT_LINK: "Tu cuenta no está enlazada. Primero añade tu cuenta en la applicación de Alexa en tu celular.",
-        SUCCESSFUL_REMINDERS: "Tus recordatorios han sido creados. Puedes gestionarlos con la aplicación de Alexa en tu celular.",
+        STOP: '¡Hasta pronto!',
+        ACCOUNT_LINK: 'Tu cuenta no está enlazada. Primero añade tu cuenta en la applicación de Alexa en tu celular.',
+        SUCCESSFUL_REMINDERS: 'Tus recordatorios han sido creados. Puedes gestionarlos con la aplicación de Alexa en tu celular.',
         REQUESTS_REMINDERS_SETUP: 'Dí "crea recordatorios" si deseas continuar creando tus recordatorios.',
-        SETUP_TIMINGS: "Primero necesito saber la hora para algunos eventos.",
-        NO_GLUCOSE_RECORDS_FOUND: "No encontré registros para esa fecha.",
-        NO_RECORDS_FOUND: "No encontré registros",
-        QUERY_SETUP: "Ahora, intenta preguntarme sobre tus medicamentos para una fecha de nuevo",
-        PERMISSIONS_REQUIRED: "Sin permisos, no puedo crear recordatorios para tus medicamentos.",
-        REMINDER_NOT_CREATED: "Lo siento, no pude crear los recordatorios. Intenta nuevamente.",
+        SETUP_TIMINGS: 'Primero necesito saber la hora para algunos eventos.',
+        NO_GLUCOSE_RECORDS_FOUND: 'No encontré registros para esa fecha.',
+        NO_RECORDS_FOUND: 'No encontré registros',
+        NO_SERVICE_REQUESTS_FOUND: 'No debes medir tu nivel de glucosa en sangre en los próximos siete días.',
+        QUERY_SETUP: 'Ahora, intenta preguntarme sobre tus medicamentos para una fecha de nuevo',
+        PERMISSIONS_REQUIRED: 'Sin permisos, no puedo crear recordatorios para tus medicamentos.',
+        REMINDER_NOT_CREATED: 'Lo siento, no pude crear los recordatorios. Intenta nuevamente.',
         SET_START_DATE_SUCCESSFUL: 'Has configurado la fecha de inicio para',
     }
 
@@ -151,6 +152,14 @@ crea recordatorios.`,
         return `${serviceData.action} ${timeList}`;
     }
 
+    buildServiceRequestText(occurrences: OccurrencesPerDay[], today: Day, tomorrow: Day): string {
+        const text = occurrences
+            .map(occurence => this.occurrenceText(occurence, today, tomorrow))
+            .join('. ');
+
+        return `Mide tu nivel de glucosa en sangre ${text}`;
+    }
+
     makeTextForObservationDay(day: string, observationsValues: ObservationValue[]): string {
         let text = `${day}, tu nivel de azúcar en sangre fue`;
         if (observationsValues.length === 1) {
@@ -253,6 +262,27 @@ crea recordatorios.`,
                 return 'tableta' + (isPlural ? 's' : '');
             default:
                 return unit;
+        }
+    }
+
+    dayToString(day: Day): string {
+        switch (day) {
+            case "mon":
+                return 'lunes';
+            case "tue":
+                return 'martes';
+            case "wed":
+                return 'miércoles';
+            case "thu":
+                return 'jueves';
+            case "fri":
+                return 'viernes';
+            case "sat":
+                return 'sabado';
+            case "sun":
+                return 'domingp';
+            default:
+                return day;
         }
     }
 }
