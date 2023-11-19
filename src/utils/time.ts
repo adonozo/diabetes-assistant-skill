@@ -17,7 +17,7 @@ export function requestsNeedStartDate(requests: FhirResource[] | undefined): Cus
             const dosage = getDosageNeedingSetup(request);
             const medicationName = getMedicationName(request);
             return dosage && buildCustomMedicationRequest(dosage, medicationName);
-        } else if (request.resourceType === 'ServiceRequest' && serviceNeedsDateTimeSetup(request)) {
+        } else if (request.resourceType === 'ServiceRequest' && serviceNeedsDateSetup(request)) {
             return buildCustomServiceRequest(request);
         }
     }
@@ -101,8 +101,8 @@ export function getHoursAndMinutes(stringTime: string): HoursAndMinutes {
     return {hour: +timeParts[0], minute: +timeParts[1]};
 }
 
-export function serviceNeedsDateTimeSetup(serviceRequest: ServiceRequest): boolean {
-    return timingNeedsStartDate(serviceRequest.occurrenceTiming) || timingNeedsStartTime(serviceRequest.occurrenceTiming);
+export function serviceNeedsDateSetup(serviceRequest: ServiceRequest): boolean {
+    return timingNeedsStartDate(serviceRequest.occurrenceTiming);
 }
 
 export function getDosageNeedingSetup(medicationRequest: MedicationRequest): Dosage | undefined {

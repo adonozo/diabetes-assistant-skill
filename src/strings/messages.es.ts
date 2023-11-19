@@ -43,7 +43,7 @@ crea recordatorios.`,
     words = {
         DATE_PREPOSITION: "El",
         CONCAT_WORD: "y",
-        TODAY: 'hoy',
+        TODAY: 'hoy día',
         TOMORROW: 'mañana',
         YESTERDAY: 'ayer',
         TIME_PREPOSITION: 'a las',
@@ -153,11 +153,10 @@ crea recordatorios.`,
     }
 
     buildServiceRequestText(occurrences: OccurrencesPerDay[], today: Day, tomorrow: Day): string {
-        const text = occurrences
-            .map(occurence => this.occurrenceText(occurence, today, tomorrow))
-            .join('. ');
+        const dailyOccurrences = occurrences
+            .map(occurrence => this.occurrenceText(occurrence, today, tomorrow));
 
-        return `Mide tu nivel de glucosa en sangre ${text}`;
+        return `Mide tu nivel de glucosa en sangre ${this.listItems(dailyOccurrences, this.words.CONCAT_WORD)}`;
     }
 
     makeTextForObservationDay(day: string, observationsValues: ObservationValue[]): string {

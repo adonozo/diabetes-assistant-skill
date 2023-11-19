@@ -160,11 +160,10 @@ care plan. What would you like to do?`,
     }
 
     buildServiceRequestText(occurrences: OccurrencesPerDay[], today: Day, tomorrow: Day): string {
-        const text = occurrences
-            .map(occurence => this.occurrenceText(occurence, today, tomorrow))
-            .join('. ');
+        const dailyOccurrences = occurrences
+            .map(occurrence => this.occurrenceText(occurrence, today, tomorrow));
 
-        return `Measure your blood glucose level ${text}`;
+        return `Measure your blood glucose level ${this.listItems(dailyOccurrences, this.words.CONCAT_WORD)}`;
     }
 
     timingToText(timing: string): string {
