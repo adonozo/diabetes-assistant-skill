@@ -110,6 +110,10 @@ export function getDosageNeedingSetup(medicationRequest: MedicationRequest): Dos
         .find(dosage => timingNeedsStartDate(dosage.timing) || timingNeedsStartTime(dosage.timing));
 }
 
+export function digitWithLeadingZero(number: number): string {
+    return number < 10 ? `0${number}` : number.toString();
+}
+
 export function dayNumberToShortCode(day: WeekdayNumbers): Day {
     switch (day) {
         case 1:

@@ -6,6 +6,8 @@ import { HandlerInput } from "ask-sdk-core";
 import { AbstractMessage } from "../strings/abstractMessage";
 import { AbstractIntentHandler } from "./abstractIntentHandler";
 import { getAuthorizedUser } from "../auth";
+import { getTimezoneOrDefault } from "../utils/time";
+import { DateTime } from "luxon";
 
 export class SetStartDateTimeIntentHandler extends AbstractIntentHandler {
     intentName = 'SetStartDateTimeIntent';
@@ -14,6 +16,7 @@ export class SetStartDateTimeIntentHandler extends AbstractIntentHandler {
         const request = handlerInput.requestEnvelope.request;
         return request.type === 'IntentRequest'
             && request.intent.name === this.intentName
+            && !request.intent.slots?.date.value
             && request.dialogState !== "COMPLETED"
     }
 
@@ -23,8 +26,13 @@ export class SetStartDateTimeIntentHandler extends AbstractIntentHandler {
             return this.requestAccountLink(handlerInput);
         }
 
+        const messages = getLocalizedStrings(handlerInput);
+        const timezone = getTimezoneOrDefault(handlerInput);
+        const now = DateTime.local({zone: timezone});
+
         return handlerInput.responseBuilder
-            .addDelegateDirective()
+            .speak(messages.promptStartDate(now))
+            .reprompt(messages.rePromptStartDate(now))
             .getResponse();
     }
 }

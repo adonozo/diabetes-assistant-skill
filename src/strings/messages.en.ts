@@ -3,6 +3,7 @@ import { timingEvent } from "../fhir/timing";
 import { DateTime } from "luxon";
 import { CustomRequest, Day, MedicationData, OccurrencesPerDay, ServiceData } from "../types";
 import { AppLocale } from "../enums";
+import { digitWithLeadingZero } from "../utils/time";
 
 export class MessagesEn extends AbstractMessage {
     supportedLocales = [AppLocale.enUS, AppLocale.enGB];
@@ -164,6 +165,20 @@ care plan. What would you like to do?`,
             .map(occurrence => this.occurrenceText(occurrence, today, tomorrow));
 
         return `Measure your blood glucose level ${this.listItems(dailyOccurrences, this.words.CONCAT_WORD)}`;
+    }
+
+    promptStartDate(currentDate: DateTime): string {
+        const day = digitWithLeadingZero(currentDate.day);
+        const month = digitWithLeadingZero(currentDate.month);
+        const text = `On which date have you started or will you start? Today is <say-as interpret-as=\"date\">????${month}${day}</say-as>`
+        return this.wrapSpeakMessage(text);
+    }
+
+    rePromptStartDate(currentDate: DateTime): string {
+        const day = digitWithLeadingZero(currentDate.day);
+        const month = digitWithLeadingZero(currentDate.month);
+        const text = `Tell me the day and month you have started or you will start. Today is <say-as interpret-as=\"date\">????${month}${day}</say-as>`
+        return this.wrapSpeakMessage(text);
     }
 
     timingToText(timing: string): string {

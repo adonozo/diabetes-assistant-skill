@@ -2,6 +2,7 @@ import { DateTime } from "luxon";
 import { CustomRequest, Day, MedicationData, OccurrencesPerDay, ServiceData } from "../types";
 import { Observation } from "fhir/r5";
 import { AppLocale } from "../enums";
+import { digitWithLeadingZero } from "../utils/time";
 
 export abstract class AbstractMessage {
     locale: AppLocale;
@@ -101,6 +102,10 @@ export abstract class AbstractMessage {
 
     abstract buildServiceRequestText(occurrences: OccurrencesPerDay[], today: Day, tomorrow: Day): string;
 
+    abstract promptStartDate(date: DateTime): string;
+
+    abstract rePromptStartDate(date: DateTime): string;
+
     abstract timingToText(timing: string): string;
 
     abstract stringToTimingCode(value: string): string;
@@ -174,8 +179,8 @@ export abstract class AbstractMessage {
                 return this.words.TOMORROW;
         }
 
-        const month = referenceDateTime.month < 10 ? `0${referenceDateTime.month}` : referenceDateTime.month;
-        const day = referenceDateTime.day < 10 ? `0${referenceDateTime.day}` : referenceDateTime.day;
+        const month = digitWithLeadingZero(referenceDateTime.month);
+        const day = digitWithLeadingZero(referenceDateTime.day);
         return `${this.words.DATE_PREPOSITION} <say-as interpret-as="date">????${month}${day}</say-as>`;
     }
 

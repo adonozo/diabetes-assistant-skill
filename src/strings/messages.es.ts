@@ -2,6 +2,7 @@ import { AbstractMessage, ObservationValue } from "./abstractMessage";
 import { DateTime } from "luxon";
 import { AppLocale, TimingEvent } from "../enums";
 import { CustomRequest, Day, MedicationData, OccurrencesPerDay, ServiceData } from "../types";
+import { digitWithLeadingZero } from "../utils/time";
 
 export class MessagesEs extends AbstractMessage {
     supportedLocales = [AppLocale.esES, AppLocale.esMX, AppLocale.esUS];
@@ -178,6 +179,20 @@ crea recordatorios.`,
         }).join(',');
 
         return `${text} ${values}`;
+    }
+
+    promptStartDate(currentDate: DateTime): string {
+        const day = digitWithLeadingZero(currentDate.day);
+        const month = digitWithLeadingZero(currentDate.month);
+        const text = `¿En que fecha empezaste o empezarás? Hoy es <say-as interpret-as=\"date\">????${month}${day}</say-as>`
+        return this.wrapSpeakMessage(text);
+    }
+
+    rePromptStartDate(currentDate: DateTime): string {
+        const day = digitWithLeadingZero(currentDate.day);
+        const month = digitWithLeadingZero(currentDate.month);
+        const text = `Dime el día y mes en el que empezaste o piensas empezar. Hoy es <say-as interpret-as=\"date\">????${month}${day}</say-as>`
+        return this.wrapSpeakMessage(text);
     }
 
     stringToTimingCode(value: string): string {

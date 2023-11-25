@@ -297,10 +297,7 @@
               "name": "date",
               "type": "AMAZON.DATE",
               "confirmationRequired": false,
-              "elicitationRequired": true,
-              "prompts": {
-                "elicitation": "Elicit.Slot.startHealthRequestDate.date"
-              }
+              "elicitationRequired": false
             },
             {
               "name": "healthRequestTime",
@@ -390,15 +387,6 @@
           {
             "type": "PlainText",
             "value": "What date are you asking for?"
-          }
-        ]
-      },
-      {
-        "id": "Elicit.Slot.startHealthRequestDate.date",
-        "variations": [
-          {
-            "type": "PlainText",
-            "value": "On which day are you starting or have you started it?"
           }
         ]
       },
