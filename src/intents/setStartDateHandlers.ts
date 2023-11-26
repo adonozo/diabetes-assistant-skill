@@ -27,7 +27,7 @@ export class SetStartDateTimeIntentHandler extends AbstractIntentHandler {
         }
 
         const messages = getLocalizedStrings(handlerInput);
-        const timezone = getTimezoneOrDefault(handlerInput);
+        const timezone = await getTimezoneOrDefault(handlerInput);
         const now = DateTime.local({zone: timezone});
 
         return handlerInput.responseBuilder
@@ -45,7 +45,7 @@ export class SetStartDateTimeInProgressHandler extends AbstractIntentHandler {
         return request.type === 'IntentRequest'
             && request.intent.name === this.intentName
             && !!request.intent.slots?.date.value
-            && !request.intent.slots?.healthRequestTime.value
+            && !request.intent.slots?.time.value
             && request.dialogState !== "COMPLETED"
     }
 
@@ -68,7 +68,7 @@ export class SetStartDateTimeInProgressHandler extends AbstractIntentHandler {
 
         if (timingNeedsStartTime(missingDate.timing)) {
             return handlerInput.responseBuilder
-                .addElicitSlotDirective("healthRequestTime")
+                .addElicitSlotDirective("time")
                 .getResponse();
         }
 
@@ -144,7 +144,7 @@ function getIntentData(handlerInput: HandlerInput): DateTimeIntentData {
     const request = handlerInput.requestEnvelope.request as IntentRequest;
     const currentIntent = request.intent;
     const date = currentIntent.slots?.date.value ?? throwWithMessage('Date was not set in intent');
-    const time = currentIntent.slots?.healthRequestTime.value ?? throwWithMessage('Time was not set in intent');
+    const time = currentIntent.slots?.time.value ?? throwWithMessage('Time was not set in intent');
 
     return {date, time};
 }

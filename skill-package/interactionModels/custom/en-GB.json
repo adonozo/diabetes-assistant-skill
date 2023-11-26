@@ -67,19 +67,19 @@
                 "on {date}",
                 "{date}",
                 "maybe {date}",
-                "I'll start it on {date} at {healthRequestTime}",
-                "on {date} at {healthRequestTime}",
-                "{date} at {healthRequestTime}",
-                "maybe {date} at {healthRequestTime}"
+                "I'll start it on {date} at {time}",
+                "on {date} at {time}",
+                "{date} at {time}",
+                "maybe {date} at {time}"
               ]
             },
             {
-              "name": "healthRequestTime",
+              "name": "time",
               "type": "AMAZON.TIME",
               "samples": [
-                "at {healthRequestTime}",
-                "{healthRequestTime}",
-                "around {healthRequestTime}"
+                "at {time}",
+                "{time}",
+                "around {time}"
               ]
             }
           ],
@@ -300,13 +300,13 @@
               "elicitationRequired": false
             },
             {
-              "name": "healthRequestTime",
+              "name": "time",
               "type": "AMAZON.TIME",
               "confirmationRequired": true,
               "elicitationRequired": true,
               "prompts": {
-                "confirmation": "Confirm.Slot.startHealthRequestDate.healthRequestTime",
-                "elicitation": "Elicit.Slot.startHealthRequestDate.healthRequestTime"
+                "confirmation": "Confirm.Slot.setStartDateTimeIntent.time",
+                "elicitation": "Elicit.Slot.setStartDateTimeIntent.time"
               }
             }
           ]
@@ -391,20 +391,20 @@
         ]
       },
       {
-        "id": "Confirm.Slot.startHealthRequestDate.healthRequestTime",
+        "id": "Confirm.Slot.setStartDateTimeIntent.time",
         "variations": [
           {
             "type": "SSML",
-            "value": "<speak>I heard <say-as interpret-as=\"time\">{healthRequestTime}</say-as>, is that correct?</speak>"
+            "value": "<speak>I heard <say-as interpret-as=\"time\">{time}</say-as>, is that correct?</speak>"
           },
           {
             "type": "SSML",
-            "value": "<speak>Is <say-as interpret-as=\"time\">{healthRequestTime}</say-as> correct?</speak>"
+            "value": "<speak>Is <say-as interpret-as=\"time\">{time}</say-as> correct?</speak>"
           }
         ]
       },
       {
-        "id": "Elicit.Slot.startHealthRequestDate.healthRequestTime",
+        "id": "Elicit.Slot.setStartDateTimeIntent.time",
         "variations": [
           {
             "type": "PlainText",

@@ -91,27 +91,27 @@
                 "{date}",
                 "tal vez {date}",
                 "probablemente {date}",
-                "Lo empezaré {date} a las {healthRequestTime}",
-                "Lo empezaré {date} a la {healthRequestTime}",
-                "Iniciaré {date} a la {healthRequestTime}",
-                "Iniciaré {date} a las {healthRequestTime}",
-                "Empezaré {date} a las {healthRequestTime}",
-                "Empezaré {date} a la {healthRequestTime}",
-                "El {date} a las {healthRequestTime}",
-                "El {date} a la {healthRequestTime}",
-                "{date} a las {healthRequestTime}",
-                "{date} a la {healthRequestTime}"
+                "Lo empezaré {date} a las {time}",
+                "Lo empezaré {date} a la {time}",
+                "Iniciaré {date} a la {time}",
+                "Iniciaré {date} a las {time}",
+                "Empezaré {date} a las {time}",
+                "Empezaré {date} a la {time}",
+                "El {date} a las {time}",
+                "El {date} a la {time}",
+                "{date} a las {time}",
+                "{date} a la {time}"
               ]
             },
             {
-              "name": "healthRequestTime",
+              "name": "time",
               "type": "AMAZON.TIME",
               "samples": [
-                "a las {healthRequestTime}",
-                "a la {healthRequestTime}",
-                "{healthRequestTime}",
-                "cerca a las {healthRequestTime}",
-                "cerca a la {healthRequestTime}"
+                "a las {time}",
+                "a la {time}",
+                "{time}",
+                "cerca a las {time}",
+                "cerca a la {time}"
               ]
             }
           ],
@@ -335,13 +335,13 @@
               "elicitationRequired": false
             },
             {
-              "name": "healthRequestTime",
+              "name": "time",
               "type": "AMAZON.TIME",
               "confirmationRequired": true,
-              "elicitationRequired": true,
+              "elicitationRequired": false,
               "prompts": {
-                "confirmation": "Confirm.Slot.startHealthRequestDate.healthRequestTime",
-                "elicitation": "Elicit.Slot.startHealthRequestDate.healthRequestTime"
+                "confirmation": "Confirm.Slot.setStartDateTimeIntent.time",
+                "elicitation": "Elicit.Slot.setStartDateTimeIntent.time"
               }
             }
           ]
@@ -426,20 +426,20 @@
         ]
       },
       {
-        "id": "Confirm.Slot.startHealthRequestDate.healthRequestTime",
+        "id": "Confirm.Slot.setStartDateTimeIntent.time",
         "variations": [
           {
             "type": "SSML",
-            "value": "<speak>Escuché <say-as interpret-as=\"time\">{healthRequestTime}</say-as>, ¿es correcto?</speak>"
+            "value": "<speak>Escuché <say-as interpret-as=\"time\">{time}</say-as>, ¿es correcto?</speak>"
           },
           {
             "type": "SSML",
-            "value": "<speak>¿Es <say-as interpret-as=\"time\">{healthRequestTime}</say-as> correcto?</speak>"
+            "value": "<speak>¿Es <say-as interpret-as=\"time\">{time}</say-as> correcto?</speak>"
           }
         ]
       },
       {
-        "id": "Elicit.Slot.startHealthRequestDate.healthRequestTime",
+        "id": "Elicit.Slot.setStartDateTimeIntent.time",
         "variations": [
           {
             "type": "PlainText",
