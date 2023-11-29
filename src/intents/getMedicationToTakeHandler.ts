@@ -46,7 +46,10 @@ export class MedicationToTakeHandler extends AbstractIntentHandler {
             const customResource = requestsNeedStartDate([missingDataResource])
                 ?? throwWithMessage("Couldn't get the resource");
 
-            return this.switchContextToStartDateTime(handlerInput, customResource, localizedMessages);
+            return this.switchContextToStartDateTime(handlerInput,
+                customResource,
+                userTimezone,
+                localizedMessages);
         }
 
         const medicationRequests = medicationsFromBundle(medicationRequest);
