@@ -8,10 +8,10 @@ import {
 } from "../fhir/timing";
 import { Dosage, FhirResource, MedicationRequest, ServiceRequest, Timing } from "fhir/r5";
 import { HandlerInput } from "ask-sdk-core";
-import { CustomRequest, Day, HoursAndMinutes } from "../types";
+import { MissingDateSetupRequest, Day, HoursAndMinutes } from "../types";
 import { getMedicationName } from "../fhir/medicationRequest";
 
-export function requestsNeedStartDate(requests: FhirResource[] | undefined): CustomRequest | undefined {
+export function requestsNeedStartDate(requests: FhirResource[] | undefined): MissingDateSetupRequest | undefined {
     for (const request of requests ?? []) {
         if (request.resourceType === 'MedicationRequest') {
             const dosage = getDosageNeedingSetup(request);
@@ -54,7 +54,7 @@ export function utcDateTimeFromLocalDateAndTime(date: string, time: string, time
     return utcDate.toISO();
 }
 
-function buildCustomMedicationRequest(dosageInstruction: Dosage, medicationName: string): CustomRequest {
+function buildCustomMedicationRequest(dosageInstruction: Dosage, medicationName: string): MissingDateSetupRequest {
     return {
         type: 'MedicationRequest',
         id: dosageInstruction.id ?? '',
@@ -66,7 +66,7 @@ function buildCustomMedicationRequest(dosageInstruction: Dosage, medicationName:
     };
 }
 
-function buildCustomServiceRequest(serviceRequest: ServiceRequest): CustomRequest {
+function buildCustomServiceRequest(serviceRequest: ServiceRequest): MissingDateSetupRequest {
     const timing = serviceRequest.occurrenceTiming!;
     return {
         type: 'ServiceRequest',

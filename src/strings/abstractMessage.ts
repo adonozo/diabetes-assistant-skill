@@ -1,8 +1,10 @@
 import { DateTime } from "luxon";
-import { CustomRequest, Day, MedicationData, OccurrencesPerDay, ServiceData } from "../types";
+import { MissingDateSetupRequest, Day, MedicationData, OccurrencesPerDay, ServiceData } from "../types";
 import { Observation } from "fhir/r5";
 import { AppLocale } from "../enums";
 import { digitWithLeadingZero } from "../utils/time";
+import { timingNeedsStartDate, timingNeedsStartTime } from "../fhir/timing";
+import { throwWithMessage } from "../utils/intent";
 
 export abstract class AbstractMessage {
     locale: AppLocale;
@@ -36,6 +38,8 @@ export abstract class AbstractMessage {
         PERMISSIONS_REQUIRED: string,
         REMINDER_NOT_CREATED: string,
         SET_START_DATE_SUCCESSFUL: string,
+        PROMPT_START_TIME: string,
+        REPROMPT_START_TIME: string,
     }
 
     abstract words: {
@@ -86,8 +90,6 @@ export abstract class AbstractMessage {
 
     abstract getServiceSsmlReminderText(action: string, times: string[]): string;
 
-    abstract getStartDatePrompt(missingDate: CustomRequest): string;
-
     abstract makeTextForObservationDay(day: string, observationsValues: ObservationValue[]): string;
 
     abstract getTimingOrTime(observationValue: ObservationValue): string;
@@ -101,6 +103,8 @@ export abstract class AbstractMessage {
     abstract makeServiceText(serviceData: ServiceData): string;
 
     abstract buildServiceRequestText(occurrences: OccurrencesPerDay[], today: Day, tomorrow: Day): string;
+
+    abstract promptMissingRequest(missingDateRequest: MissingDateSetupRequest, currentDate: DateTime): string;
 
     abstract promptStartDate(date: DateTime): string;
 
@@ -158,6 +162,14 @@ export abstract class AbstractMessage {
         return `${start}, ${when}`
     }
 
+    protected promptStartTime(): string {
+        return this.responses.PROMPT_START_TIME;
+    }
+
+    protected rePromptStartTime(): string {
+        return this.responses.REPROMPT_START_TIME;
+    }
+
     /**
      * Returns "today", "yesterday", "tomorrow", or a date
      * @param date {string}
@@ -208,6 +220,16 @@ export abstract class AbstractMessage {
 
     getNoRecordsTextForDay(date: string, userTimezone: string): string {
         return `${this.responses.NO_RECORDS_FOUND} ${this.words.FOR} ${this.getTextForDay(date, userTimezone)}`;
+    }
+
+    rePromptMissingRequest(missingDateRequest: MissingDateSetupRequest, currentDate: DateTime): string {
+        if (timingNeedsStartDate(missingDateRequest.timing)) {
+            return this.rePromptStartTime();
+        } else if (timingNeedsStartTime(missingDateRequest.timing)) {
+            return this.wrapSpeakMessage(this.rePromptStartDate(currentDate));
+        } else {
+            throwWithMessage('Could not get determine whether resource needs date or time');
+        }
     }
 
     private upsertValueToMap(map: Map<string, ObservationValue[]>, key: string, value: ObservationValue): void {

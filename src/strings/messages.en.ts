@@ -1,9 +1,10 @@
 import { AbstractMessage, ObservationValue } from "./abstractMessage";
-import { timingEvent } from "../fhir/timing";
+import { timingEvent, timingNeedsStartDate, timingNeedsStartTime } from "../fhir/timing";
 import { DateTime } from "luxon";
-import { CustomRequest, Day, MedicationData, OccurrencesPerDay, ServiceData } from "../types";
+import { MissingDateSetupRequest, Day, MedicationData, OccurrencesPerDay, ServiceData } from "../types";
 import { AppLocale } from "../enums";
 import { digitWithLeadingZero } from "../utils/time";
+import { throwWithMessage } from "../utils/intent";
 
 export class MessagesEn extends AbstractMessage {
     supportedLocales = [AppLocale.enUS, AppLocale.enGB];
@@ -27,7 +28,7 @@ care plan. What would you like to do?`,
         HELP: 'You can say: what medications do I have to take today? If you want to create reminders, just say: create reminders',
         HELP_REPROMPT: 'You can say: when do I have to measure my blood glucose?',
         ERROR: 'Sorry, I had trouble doing what you asked. Please try again.',
-        STOP: "Goodbye!",
+        STOP: 'Goodbye!',
         ACCOUNT_LINK: "Your account is not linked. Add your account first in the Alexa app.",
         SUCCESSFUL_REMINDERS: "Your reminders have been created, check the Alexa app to verify them.",
         REQUESTS_REMINDERS_SETUP: 'Say "setup reminders" if you want to continue setting up your reminders.',
@@ -39,6 +40,8 @@ care plan. What would you like to do?`,
         PERMISSIONS_REQUIRED: "Without permissions, I can't set a reminder.",
         REMINDER_NOT_CREATED: "Sorry, I couldn't create the reminders. Please try again.",
         SET_START_DATE_SUCCESSFUL: 'You have set the start date for',
+        PROMPT_START_TIME: 'At what time will you start it?',
+        REPROMPT_START_TIME: 'At what time are your starting or have you started it?',
     }
 
     words = {
@@ -68,20 +71,6 @@ care plan. What would you like to do?`,
         const timeList = this.listItems(stringTimes, this.words.CONCAT_WORD);
         const message = `${action} ${timeList}`;
         return this.wrapSpeakMessage(message);
-    }
-
-    getStartDatePrompt(missingDate: CustomRequest): string {
-        const init = 'I need some information first.';
-        const unit = this.durationUnitToString(missingDate.durationUnit);
-        if (missingDate.type === 'MedicationRequest') {
-            return `${init} You need to take ${missingDate.name} for ${missingDate.duration} ${unit}.`;
-        }
-
-        if (missingDate.type === 'ServiceRequest') {
-            return `${init} Your need to measure your blood glucose level for ${missingDate.duration} ${unit}.`;
-        }
-
-        return '';
     }
 
     /**
@@ -167,18 +156,40 @@ care plan. What would you like to do?`,
         return `Measure your blood glucose level ${this.listItems(dailyOccurrences, this.words.CONCAT_WORD)}`;
     }
 
+    promptMissingRequest(missingDateRequest: MissingDateSetupRequest, currentDate: DateTime): string {
+        let textStart = 'I need some information first.';
+        const unit = this.durationUnitToString(missingDateRequest.durationUnit);
+        let textEnd;
+
+        if (missingDateRequest.type === 'MedicationRequest') {
+            textStart = `${textStart} You need to take ${missingDateRequest.name} for ${missingDateRequest.duration} ${unit}.`;
+        } else if (missingDateRequest.type === 'ServiceRequest') {
+            textStart = `${textStart} Your need to measure your blood glucose level for ${missingDateRequest.duration} ${unit}.`;
+        } else {
+            throwWithMessage(`Could not determine request type: ${missingDateRequest.type}`);
+        }
+
+        if (timingNeedsStartTime(missingDateRequest.timing)) {
+            textEnd = this.promptStartTime();
+        } else if (timingNeedsStartDate(missingDateRequest.timing)) {
+            textEnd = this.promptStartDate(currentDate);
+        } else {
+            throwWithMessage('Could not get determine whether resource needs date or time');
+        }
+
+        return this.wrapSpeakMessage(`${textStart} ${textEnd}`);
+    }
+
     promptStartDate(currentDate: DateTime): string {
         const day = digitWithLeadingZero(currentDate.day);
         const month = digitWithLeadingZero(currentDate.month);
-        const text = `On which date have you started or will you start? Today is <say-as interpret-as=\"date\">????${month}${day}</say-as>`
-        return this.wrapSpeakMessage(text);
+        return `On which date have you started or will you start? Today is <say-as interpret-as=\"date\">????${month}${day}</say-as>`
     }
 
     rePromptStartDate(currentDate: DateTime): string {
         const day = digitWithLeadingZero(currentDate.day);
         const month = digitWithLeadingZero(currentDate.month);
-        const text = `Tell me the day and month you have started or you will start. Today is <say-as interpret-as=\"date\">????${month}${day}</say-as>`
-        return this.wrapSpeakMessage(text);
+        return `Tell me the day and month you have started, or you will start. Today is <say-as interpret-as=\"date\">????${month}${day}</say-as>`;
     }
 
     timingToText(timing: string): string {

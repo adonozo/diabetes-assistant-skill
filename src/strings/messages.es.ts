@@ -1,8 +1,10 @@
 import { AbstractMessage, ObservationValue } from "./abstractMessage";
 import { DateTime } from "luxon";
 import { AppLocale, TimingEvent } from "../enums";
-import { CustomRequest, Day, MedicationData, OccurrencesPerDay, ServiceData } from "../types";
+import { MissingDateSetupRequest, Day, MedicationData, OccurrencesPerDay, ServiceData } from "../types";
 import { digitWithLeadingZero } from "../utils/time";
+import { throwWithMessage } from "../utils/intent";
+import { timingNeedsStartDate, timingNeedsStartTime } from "../fhir/timing";
 
 export class MessagesEs extends AbstractMessage {
     supportedLocales = [AppLocale.esES, AppLocale.esMX, AppLocale.esUS];
@@ -39,6 +41,8 @@ crea recordatorios.`,
         PERMISSIONS_REQUIRED: 'Sin permisos, no puedo crear recordatorios para tus medicamentos.',
         REMINDER_NOT_CREATED: 'Lo siento, no pude crear los recordatorios. Intenta nuevamente.',
         SET_START_DATE_SUCCESSFUL: 'Has configurado la fecha de inicio para',
+        PROMPT_START_TIME: 'Necesito saber la hora a la que empezarás. Dime la hora aproximada entre 0 y 23 horas',
+        REPROMPT_START_TIME: '¿A qué hora piensas empezar? Dime la hora aproximada entre 0 y 23 horas',
     }
 
     words = {
@@ -109,20 +113,6 @@ crea recordatorios.`,
         return this.wrapSpeakMessage(message);
     }
 
-    getStartDatePrompt(missingDate: CustomRequest): string {
-        const init = 'Primero necesito algunos datos.';
-        const unit = this.durationUnitToString(missingDate.durationUnit);
-        if (missingDate.type === 'MedicationRequest') {
-            return `${init} Debes tomar ${missingDate.name} por ${missingDate.duration} ${unit}.`;
-        }
-
-        if (missingDate.type === 'ServiceRequest') {
-            return `${init} Debes medir tu nivel de glucosa en sangre por ${missingDate.duration} ${unit}.`;
-        }
-
-        return '';
-    }
-
     getTimingOrTime(observationValue: ObservationValue): string {
         if (!observationValue.timing || observationValue.timing === TimingEvent.EXACT)
         {
@@ -181,18 +171,40 @@ crea recordatorios.`,
         return `${text} ${values}`;
     }
 
+    promptMissingRequest(missingDateRequest: MissingDateSetupRequest, currentDate: DateTime): string {
+        let textStart = 'Primero necesito algunos datos.';
+        const unit = this.durationUnitToString(missingDateRequest.durationUnit);
+        let textEnd;
+
+        if (missingDateRequest.type === 'MedicationRequest') {
+            textStart = `${textStart} Debes tomar ${missingDateRequest.name} por ${missingDateRequest.duration} ${unit}.`;
+        } else if (missingDateRequest.type === 'ServiceRequest') {
+            textStart = `${textStart} Debes medir tu nivel de glucosa en sangre por ${missingDateRequest.duration} ${unit}.`;
+        } else {
+            throwWithMessage(`Could not determine request type: ${missingDateRequest.type}`);
+        }
+
+        if (timingNeedsStartDate(missingDateRequest.timing)) {
+            textEnd = this.promptStartDate(currentDate);
+        } else if (timingNeedsStartTime(missingDateRequest.timing)) {
+            textEnd = this.promptStartTime();
+        } else {
+            throwWithMessage('Could not get determine whether resource needs date or time');
+        }
+
+        return this.wrapSpeakMessage(`${textStart} ${textEnd}`);
+    }
+
     promptStartDate(currentDate: DateTime): string {
         const day = digitWithLeadingZero(currentDate.day);
         const month = digitWithLeadingZero(currentDate.month);
-        const text = `¿En que fecha empezaste o empezarás? Hoy es <say-as interpret-as=\"date\">????${month}${day}</say-as>`
-        return this.wrapSpeakMessage(text);
+        return `¿En que día y mes empezaste o empezarás? Hoy es <say-as interpret-as=\"date\">????${month}${day}</say-as>`;
     }
 
     rePromptStartDate(currentDate: DateTime): string {
         const day = digitWithLeadingZero(currentDate.day);
         const month = digitWithLeadingZero(currentDate.month);
-        const text = `Dime el día y mes en el que empezaste o piensas empezar. Hoy es <say-as interpret-as=\"date\">????${month}${day}</say-as>`
-        return this.wrapSpeakMessage(text);
+        return `Dime el día y mes en el que empezaste o piensas empezar. Hoy es <say-as interpret-as=\"date\">????${month}${day}</say-as>`;
     }
 
     stringToTimingCode(value: string): string {

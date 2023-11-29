@@ -20,7 +20,7 @@ export type MedicationData = {
 
 export type DoseValue = { value: number, unit: string };
 
-export type CustomRequest = {
+export type MissingDateSetupRequest = {
     type: string,
     id: string,
     name: string,
