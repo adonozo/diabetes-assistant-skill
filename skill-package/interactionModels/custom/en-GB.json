@@ -297,7 +297,10 @@
               "name": "date",
               "type": "AMAZON.DATE",
               "confirmationRequired": false,
-              "elicitationRequired": false
+              "elicitationRequired": true,
+              "prompts": {
+                "elicitation": "Elicit.Slot.setStartDateTimeIntent.date"
+              }
             },
             {
               "name": "time",
@@ -408,11 +411,24 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "At what time are you taking it?"
+            "value": "At what time will you start it?"
           },
           {
             "type": "PlainText",
-            "value": "At what time are your starting or have you started taking it?"
+            "value": "At what time are your starting or have you started it?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.setStartDateTimeIntent.date",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "On what month and day have you started it or you plan to start it?"
+          },
+          {
+            "type": "PlainText",
+            "value": "Tell me the month and day on which you have started it or you will start it"
           }
         ]
       },

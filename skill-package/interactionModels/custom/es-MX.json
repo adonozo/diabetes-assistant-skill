@@ -332,13 +332,16 @@
               "name": "date",
               "type": "AMAZON.DATE",
               "confirmationRequired": false,
-              "elicitationRequired": false
+              "elicitationRequired": true,
+              "prompts": {
+                "elicitation": "Elicit.Slot.setStartDateTimeIntent.date"
+              }
             },
             {
               "name": "time",
               "type": "AMAZON.TIME",
               "confirmationRequired": true,
-              "elicitationRequired": false,
+              "elicitationRequired": true,
               "prompts": {
                 "confirmation": "Confirm.Slot.setStartDateTimeIntent.time",
                 "elicitation": "Elicit.Slot.setStartDateTimeIntent.time"
@@ -443,7 +446,24 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "¿A qué hora?"
+            "value": "Necesito saber la hora a la que empezarás. Dime la hora aproximada entre 0 y 23 horas"
+          },
+          {
+            "type": "PlainText",
+            "value": "¿A qué hora piensas empezar? Dime la hora aproximada entre 0 y 23 horas"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.setStartDateTimeIntent.date",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "¿En que mes y día empezaste o piensas a empezarás?"
+          },
+          {
+            "type": "PlainText",
+            "value": "Dime el día y mes en el que empezaste o piensas empezar"
           }
         ]
       },
@@ -452,7 +472,7 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "¿A qué hora?"
+            "value": "¿A qué hora quieres que te recuerde?"
           }
         ]
       },
