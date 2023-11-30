@@ -1,9 +1,8 @@
 import { DateTime } from "luxon";
-import { MissingDateSetupRequest, Day, MedicationData, OccurrencesPerDay, ServiceData } from "../types";
+import { MissingDateSetupRequest, Day, MedicationData, OccurrencesPerDay, ServiceData, DateSlot } from "../types";
 import { Observation } from "fhir/r5";
 import { AppLocale } from "../enums";
 import { digitWithLeadingZero } from "../utils/time";
-import { timingNeedsStartDate, timingNeedsStartTime } from "../fhir/timing";
 import { throwWithMessage } from "../utils/intent";
 
 export abstract class AbstractMessage {
@@ -104,7 +103,7 @@ export abstract class AbstractMessage {
 
     abstract buildServiceRequestText(occurrences: OccurrencesPerDay[], today: Day, tomorrow: Day): string;
 
-    abstract promptMissingRequest(missingDateRequest: MissingDateSetupRequest, currentDate: DateTime): string;
+    abstract promptMissingRequest(missingDateRequest: MissingDateSetupRequest, currentDate: DateTime, slot: DateSlot): string;
 
     abstract promptStartDate(date: DateTime): string;
 
@@ -222,13 +221,14 @@ export abstract class AbstractMessage {
         return `${this.responses.NO_RECORDS_FOUND} ${this.words.FOR} ${this.getTextForDay(date, userTimezone)}`;
     }
 
-    rePromptMissingRequest(missingDateRequest: MissingDateSetupRequest, currentDate: DateTime): string {
-        if (timingNeedsStartDate(missingDateRequest.timing)) {
-            return this.rePromptStartTime();
-        } else if (timingNeedsStartTime(missingDateRequest.timing)) {
-            return this.wrapSpeakMessage(this.rePromptStartDate(currentDate));
-        } else {
-            throwWithMessage('Could not get determine whether resource needs date or time');
+    rePromptMissingRequest(currentDate: DateTime, slot: DateSlot): string {
+        switch (slot) {
+            case "time":
+                return this.wrapSpeakMessage(this.rePromptStartDate(currentDate));
+            case "date":
+                return this.rePromptStartTime();
+            default:
+                throwWithMessage('Could not get determine whether resource needs date or time');
         }
     }
 

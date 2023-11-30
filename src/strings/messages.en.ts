@@ -1,7 +1,7 @@
 import { AbstractMessage, ObservationValue } from "./abstractMessage";
-import { timingEvent, timingNeedsStartDate, timingNeedsStartTime } from "../fhir/timing";
+import { timingEvent } from "../fhir/timing";
 import { DateTime } from "luxon";
-import { MissingDateSetupRequest, Day, MedicationData, OccurrencesPerDay, ServiceData } from "../types";
+import { MissingDateSetupRequest, Day, MedicationData, OccurrencesPerDay, ServiceData, DateSlot } from "../types";
 import { AppLocale } from "../enums";
 import { digitWithLeadingZero } from "../utils/time";
 import { throwWithMessage } from "../utils/intent";
@@ -156,25 +156,31 @@ care plan. What would you like to do?`,
         return `Measure your blood glucose level ${this.listItems(dailyOccurrences, this.words.CONCAT_WORD)}`;
     }
 
-    promptMissingRequest(missingDateRequest: MissingDateSetupRequest, currentDate: DateTime): string {
+    promptMissingRequest(missingDateRequest: MissingDateSetupRequest, currentDate: DateTime, slot: DateSlot): string {
         let textStart = 'I need some information first.';
         const unit = this.durationUnitToString(missingDateRequest.durationUnit);
         let textEnd;
 
-        if (missingDateRequest.type === 'MedicationRequest') {
-            textStart = `${textStart} You need to take ${missingDateRequest.name} for ${missingDateRequest.duration} ${unit}.`;
-        } else if (missingDateRequest.type === 'ServiceRequest') {
-            textStart = `${textStart} Your need to measure your blood glucose level for ${missingDateRequest.duration} ${unit}.`;
-        } else {
-            throwWithMessage(`Could not determine request type: ${missingDateRequest.type}`);
+        switch (missingDateRequest.type) {
+            case 'MedicationRequest':
+                textStart = `${textStart} You need to take ${missingDateRequest.name} for ${missingDateRequest.duration} ${unit}.`;
+                break;
+            case 'ServiceRequest':
+                textStart = `${textStart} Your need to measure your blood glucose level for ${missingDateRequest.duration} ${unit}.`;
+                break;
+            default:
+                throwWithMessage(`Could not determine request type: ${missingDateRequest.type}`);
         }
 
-        if (timingNeedsStartTime(missingDateRequest.timing)) {
-            textEnd = this.promptStartTime();
-        } else if (timingNeedsStartDate(missingDateRequest.timing)) {
-            textEnd = this.promptStartDate(currentDate);
-        } else {
-            throwWithMessage('Could not get determine whether resource needs date or time');
+        switch (slot) {
+            case "time":
+                textEnd = this.promptStartTime();
+                break;
+            case "date":
+                textEnd = this.promptStartDate(currentDate);
+                break;
+            default:
+                throwWithMessage('Could not get determine whether resource needs date or time');
         }
 
         return this.wrapSpeakMessage(`${textStart} ${textEnd}`);

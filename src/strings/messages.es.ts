@@ -1,10 +1,9 @@
 import { AbstractMessage, ObservationValue } from "./abstractMessage";
 import { DateTime } from "luxon";
 import { AppLocale, TimingEvent } from "../enums";
-import { MissingDateSetupRequest, Day, MedicationData, OccurrencesPerDay, ServiceData } from "../types";
+import { MissingDateSetupRequest, Day, MedicationData, OccurrencesPerDay, ServiceData, DateSlot } from "../types";
 import { digitWithLeadingZero } from "../utils/time";
 import { throwWithMessage } from "../utils/intent";
-import { timingNeedsStartDate, timingNeedsStartTime } from "../fhir/timing";
 
 export class MessagesEs extends AbstractMessage {
     supportedLocales = [AppLocale.esES, AppLocale.esMX, AppLocale.esUS];
@@ -171,25 +170,31 @@ crea recordatorios.`,
         return `${text} ${values}`;
     }
 
-    promptMissingRequest(missingDateRequest: MissingDateSetupRequest, currentDate: DateTime): string {
+    promptMissingRequest(missingDateRequest: MissingDateSetupRequest, currentDate: DateTime, slot: DateSlot): string {
         let textStart = 'Primero necesito algunos datos.';
         const unit = this.durationUnitToString(missingDateRequest.durationUnit);
         let textEnd;
 
-        if (missingDateRequest.type === 'MedicationRequest') {
-            textStart = `${textStart} Debes tomar ${missingDateRequest.name} por ${missingDateRequest.duration} ${unit}.`;
-        } else if (missingDateRequest.type === 'ServiceRequest') {
-            textStart = `${textStart} Debes medir tu nivel de glucosa en sangre por ${missingDateRequest.duration} ${unit}.`;
-        } else {
-            throwWithMessage(`Could not determine request type: ${missingDateRequest.type}`);
+        switch (missingDateRequest.type) {
+            case 'MedicationRequest':
+                textStart = `${textStart} Debes tomar ${missingDateRequest.name} por ${missingDateRequest.duration} ${unit}.`;
+                break;
+            case 'ServiceRequest':
+                textStart = `${textStart} Debes medir tu nivel de glucosa en sangre por ${missingDateRequest.duration} ${unit}.`;
+                break;
+            default:
+                throwWithMessage(`Could not determine request type: ${missingDateRequest.type}`);
         }
 
-        if (timingNeedsStartDate(missingDateRequest.timing)) {
-            textEnd = this.promptStartDate(currentDate);
-        } else if (timingNeedsStartTime(missingDateRequest.timing)) {
-            textEnd = this.promptStartTime();
-        } else {
-            throwWithMessage('Could not get determine whether resource needs date or time');
+        switch (slot) {
+            case "time":
+                textEnd = this.promptStartTime();
+                break;
+            case "date":
+                textEnd = this.promptStartDate(currentDate);
+                break;
+            default:
+                throwWithMessage('Could not get determine whether resource needs date or time');
         }
 
         return this.wrapSpeakMessage(`${textStart} ${textEnd}`);
