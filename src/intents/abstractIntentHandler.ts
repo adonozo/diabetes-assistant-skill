@@ -1,11 +1,11 @@
 import { HandlerInput, RequestHandler } from "ask-sdk-core";
 import { Intent, IntentRequest, Response } from "ask-sdk-model";
 import { reminderDirective } from "../utils/reminder";
-import { getLocalizedStrings, sessionValues } from "../utils/intent";
-import { CustomRequest } from "../types";
+import { getLocalizedStrings, sessionValues, throwWithMessage } from "../utils/intent";
+import { DateSlot, MissingDateSetupRequest } from "../types";
 import { AbstractMessage } from "../strings/abstractMessage";
-import { getTimingStartDate } from "../fhir/timing";
 import { DateTime } from "luxon";
+import { timingNeedsStartDate, timingNeedsStartTime } from "../fhir/timing";
 
 export abstract class AbstractIntentHandler implements RequestHandler {
     abstract intentName: string;
@@ -33,7 +33,8 @@ export abstract class AbstractIntentHandler implements RequestHandler {
 
     protected switchContextToStartDateTime(
         handlerInput: HandlerInput,
-        requestWithMissingDate: CustomRequest,
+        requestWithMissingDate: MissingDateSetupRequest,
+        timezone: string,
         localizedMessages: AbstractMessage
     ): Response {
         const attributesManager = handlerInput.attributesManager;
@@ -44,13 +45,18 @@ export abstract class AbstractIntentHandler implements RequestHandler {
         session[sessionValues.requestMissingDate] = requestWithMissingDate;
         attributesManager.setSessionAttributes(session);
 
-        const startDate = getTimingStartDate(requestWithMissingDate.timing);
-        const delegatedIntent = this.getDelegatedSetStartDateTimeIntent(startDate);
+        const delegatedIntent = this.getDelegatedSetStartDateTimeIntent();
+        const slot = this.getElicitSlot(requestWithMissingDate);
 
-        const requiredSetup = localizedMessages.getStartDatePrompt(requestWithMissingDate);
+        const now = DateTime.local();
+        const requiredSetupPrompt = localizedMessages.promptMissingRequest(requestWithMissingDate, now, slot);
+        const setupRePrompt = localizedMessages.rePromptMissingRequest(now, slot);
+
+
         return handlerInput.responseBuilder
-            .addDelegateDirective(delegatedIntent)
-            .speak(requiredSetup)
+            .addElicitSlotDirective(slot, delegatedIntent)
+            .speak(requiredSetupPrompt)
+            .reprompt(setupRePrompt)
             .getResponse();
     }
 
@@ -60,21 +66,23 @@ export abstract class AbstractIntentHandler implements RequestHandler {
             .getResponse();
     }
 
-    private getDelegatedSetStartDateTimeIntent(startDate?: DateTime): Intent {
-        const slots: any = startDate ?
-            {
-                date: {
-                    name: 'date',
-                    value: startDate,
-                    confirmationStatus: 'NONE'
-                }
-            }
-            : {};
-
+    private getDelegatedSetStartDateTimeIntent(): Intent {
         return {
             name: 'SetStartDateTimeIntent',
             confirmationStatus: "NONE",
-            slots: slots
+            slots: {}
         }
+    }
+
+    private getElicitSlot(request: MissingDateSetupRequest): DateSlot {
+        if (timingNeedsStartDate(request.timing)) {
+            return 'date';
+        }
+
+        if (timingNeedsStartTime(request.timing)) {
+            return 'time';
+        }
+
+        throwWithMessage('Could not get determine whether resource needs date or time');
     }
 }
