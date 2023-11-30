@@ -1,91 +1,40 @@
 import { IntentRequest, Response } from "ask-sdk-model";
 import { getLocalizedStrings, sessionValues, throwWithMessage } from "../utils/intent";
-import { timingNeedsStartTime } from "../fhir/timing";
+import { getTimingStartDate, getTimingStartTime, timingNeedsStartDate, timingNeedsStartTime } from "../fhir/timing";
 import { setDosageStartDate, setServiceRequestStartDate } from "../api/patients";
 import { HandlerInput } from "ask-sdk-core";
 import { AbstractMessage } from "../strings/abstractMessage";
 import { AbstractIntentHandler } from "./abstractIntentHandler";
 import { getAuthorizedUser } from "../auth";
-import { getTimezoneOrDefault } from "../utils/time";
-import { DateTime } from "luxon";
+import { MissingDateSetupRequest } from "../types";
 
-export class SetStartDateTimeIntentHandler extends AbstractIntentHandler {
+export class SetStartDateTimeContinueHandler extends AbstractIntentHandler {
     intentName = 'SetStartDateTimeIntent';
 
-    canHandle(handlerInput : HandlerInput) : boolean {
+    canHandle(handlerInput: HandlerInput): boolean {
         const request = handlerInput.requestEnvelope.request;
         return request.type === 'IntentRequest'
             && request.intent.name === this.intentName
-            && !request.intent.slots?.date.value
             && request.dialogState !== "COMPLETED"
     }
 
     async handle(handlerInput: HandlerInput): Promise<Response> {
-        const userInfo = await getAuthorizedUser(handlerInput);
-        if (!userInfo) {
-            return this.requestAccountLink(handlerInput);
+        const request = handlerInput.requestEnvelope.request as IntentRequest;
+        const currentIntent = request.intent;
+
+        const missingDateRequest = sessionRequestMissingDate(handlerInput);
+
+        if (!timingNeedsStartTime(missingDateRequest.timing) && !currentIntent.slots!.time.value) {
+            currentIntent.slots!.time.value = getTimingStartTime(missingDateRequest.timing);
+            currentIntent.slots!.time.confirmationStatus = 'CONFIRMED';
         }
 
-        const messages = getLocalizedStrings(handlerInput);
-        const timezone = await getTimezoneOrDefault(handlerInput);
-        const now = DateTime.local({zone: timezone});
+        if (!timingNeedsStartDate(missingDateRequest.timing) && !currentIntent.slots!.date.value) {
+            currentIntent.slots!.date.value = getTimingStartDate(missingDateRequest.timing)?.toISODate() ?? undefined;
+        }
 
         return handlerInput.responseBuilder
-            .speak(messages.promptStartDate(now))
-            .reprompt(messages.rePromptStartDate(now))
-            .getResponse();
-    }
-}
-
-export class SetStartDateTimeInProgressHandler extends AbstractIntentHandler {
-    intentName = 'SetStartDateTimeIntent';
-
-    canHandle(handlerInput : HandlerInput) : boolean {
-        const request = handlerInput.requestEnvelope.request;
-        return request.type === 'IntentRequest'
-            && request.intent.name === this.intentName
-            && !!request.intent.slots?.date.value
-            && !request.intent.slots?.time.value
-            && request.dialogState !== "COMPLETED"
-    }
-
-    async handle(handlerInput: HandlerInput): Promise<Response> {
-        const userInfo = await getAuthorizedUser(handlerInput);
-        if (!userInfo) {
-            return this.requestAccountLink(handlerInput);
-        }
-
-        return this.handleInProgress(handlerInput, userInfo.username);
-    }
-
-    private async handleInProgress(handlerInput: HandlerInput, patientEmail: string): Promise<Response> {
-        const session = handlerInput.attributesManager.getSessionAttributes();
-        const localizedMessages = getLocalizedStrings(handlerInput);
-        const missingDate = session[sessionValues.requestMissingDate];
-        if (!missingDate) {
-            return this.buildErrorResponse(handlerInput, localizedMessages);
-        }
-
-        if (timingNeedsStartTime(missingDate.timing)) {
-            return handlerInput.responseBuilder
-                .addElicitSlotDirective("time")
-                .getResponse();
-        }
-
-        const {date} = getIntentData(handlerInput);
-        switch (missingDate.type) {
-            case 'ServiceRequest':
-                await setServiceRequestStartDate(patientEmail, missingDate.id, {startDate: date})
-                break;
-            case 'MedicationRequest':
-                await setDosageStartDate(patientEmail, missingDate.id, {startDate: date});
-                break;
-        }
-
-        const {speakOutput, reprompt} = getStartDateConfirmedResponse(session, '', localizedMessages);
-        return handlerInput.responseBuilder
-            .speak(speakOutput)
-            .reprompt(reprompt)
+            .addDelegateDirective(currentIntent)
             .getResponse();
     }
 }
@@ -93,7 +42,7 @@ export class SetStartDateTimeInProgressHandler extends AbstractIntentHandler {
 export class SetStartDateTimeCompletedHandler extends AbstractIntentHandler {
     intentName = 'SetStartDateTimeIntent';
 
-    canHandle(handlerInput : HandlerInput) : boolean {
+    canHandle(handlerInput: HandlerInput): boolean {
         const request = handlerInput.requestEnvelope.request;
         return request.type === 'IntentRequest'
             && request.intent.name === this.intentName
@@ -102,20 +51,14 @@ export class SetStartDateTimeCompletedHandler extends AbstractIntentHandler {
 
     async handle(handlerInput: HandlerInput): Promise<Response> {
         const userInfo = await getAuthorizedUser(handlerInput);
-        if (!userInfo) {
-            return this.requestAccountLink(handlerInput);
-        }
 
         return this.handleIntent(handlerInput, userInfo.username)
     }
 
     private async handleIntent(handlerInput: HandlerInput, patientEmail: string): Promise<Response> {
         const session = handlerInput.attributesManager.getSessionAttributes();
-        const missingDate = session[sessionValues.requestMissingDate];
         const localizedMessages = getLocalizedStrings(handlerInput);
-        if (!missingDate) {
-            return this.buildErrorResponse(handlerInput, localizedMessages);
-        }
+        const missingDate = sessionRequestMissingDate(handlerInput);
 
         const {date, time} = getIntentData(handlerInput);
         const startDateTime = {startDate: date, startTime: time + ':00'};
@@ -143,14 +86,30 @@ export class SetStartDateTimeCompletedHandler extends AbstractIntentHandler {
 function getIntentData(handlerInput: HandlerInput): DateTimeIntentData {
     const request = handlerInput.requestEnvelope.request as IntentRequest;
     const currentIntent = request.intent;
-    const date = currentIntent.slots?.date.value ?? throwWithMessage('Date was not set in intent');
-    const time = currentIntent.slots?.time.value ?? throwWithMessage('Time was not set in intent');
+    const missingDateRequest = sessionRequestMissingDate(handlerInput);
 
-    return {date, time};
+    const date = currentIntent.slots!.date.value
+        ?? getTimingStartDate(missingDateRequest.timing)?.toISODate()
+        ?? throwWithMessage('Date was not set in intent');
+    const time = currentIntent.slots!.time.value
+        ?? getTimingStartTime(missingDateRequest.timing)
+        ?? throwWithMessage('Time was not set in intent');
+
+    return timingNeedsStartTime(missingDateRequest.timing) ? {date, time} : {date};
+}
+
+function sessionRequestMissingDate(handlerInput: HandlerInput): MissingDateSetupRequest {
+    const session = handlerInput.attributesManager.getSessionAttributes();
+    const missingDate = session[sessionValues.requestMissingDate];
+    if (!missingDate) {
+        throwWithMessage('SetStartDateTimeIntent - session does not have a requestMissingDate');
+    }
+
+    return missingDate as MissingDateSetupRequest;
 }
 
 function getStartDateConfirmedResponse(
-    session: {[p: string]: any},
+    session: { [p: string]: any },
     requestName: string,
     localizedMessages: AbstractMessage
 ): ConfirmedResponse {
@@ -167,6 +126,6 @@ function getStartDateConfirmedResponse(
     return {speakOutput, reprompt}
 }
 
-type DateTimeIntentData = { date: string, time: string };
+type DateTimeIntentData = { date: string, time?: string };
 
 type ConfirmedResponse = { speakOutput: string, reprompt: string }
