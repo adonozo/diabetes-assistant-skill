@@ -7,6 +7,8 @@ import { AbstractMessage } from "../strings/abstractMessage";
 import { AbstractIntentHandler } from "./abstractIntentHandler";
 import { getAuthorizedUser } from "../auth";
 import { MissingDateSetupRequest } from "../types";
+import { DateTime } from "luxon";
+import { getTimezoneOrDefault } from "../utils/time";
 
 export class SetStartDateTimeContinueHandler extends AbstractIntentHandler {
     intentName = 'SetStartDateTimeIntent';
@@ -52,25 +54,11 @@ export class SetStartDateTimeCompletedHandler extends AbstractIntentHandler {
     async handle(handlerInput: HandlerInput): Promise<Response> {
         const userInfo = await getAuthorizedUser(handlerInput);
 
-        return this.handleIntent(handlerInput, userInfo.username)
-    }
-
-    private async handleIntent(handlerInput: HandlerInput, patientEmail: string): Promise<Response> {
         const session = handlerInput.attributesManager.getSessionAttributes();
         const localizedMessages = getLocalizedStrings(handlerInput);
         const missingDate = sessionRequestMissingDate(handlerInput);
 
-        const {date, time} = getIntentData(handlerInput);
-        const startDateTime = {startDate: date, startTime: time + ':00'};
-
-        switch (missingDate.type) {
-            case 'ServiceRequest':
-                await setServiceRequestStartDate(patientEmail, missingDate.id, startDateTime)
-                break;
-            case 'MedicationRequest':
-                await setDosageStartDate(patientEmail, missingDate.id, startDateTime);
-                break;
-        }
+        await submitStartDateTime(handlerInput, userInfo.username, missingDate);
 
         const {speakOutput, reprompt} = getStartDateConfirmedResponse(session, missingDate.name, localizedMessages);
         delete session[sessionValues.requestMissingDate];
@@ -106,6 +94,40 @@ function sessionRequestMissingDate(handlerInput: HandlerInput): MissingDateSetup
     }
 
     return missingDate as MissingDateSetupRequest;
+}
+
+async function submitStartDateTime(
+    handlerInput: HandlerInput,
+    patientEmail: string,
+    missingDateRequest: MissingDateSetupRequest
+): Promise<void> {
+    const timezone = await getTimezoneOrDefault(handlerInput);
+    const {date, time} = getIntentData(handlerInput);
+    const amendedDate = amendFutureDate(timezone, date);
+    const startDateTime = {startDate: amendedDate, startTime: time + ':00'};
+
+    switch (missingDateRequest.type) {
+        case 'ServiceRequest':
+            await setServiceRequestStartDate(patientEmail, missingDateRequest.id, startDateTime)
+            break;
+        case 'MedicationRequest':
+            await setDosageStartDate(patientEmail, missingDateRequest.id, startDateTime);
+            break;
+    }
+}
+
+/**
+ * Alexa adds one year of a given past date, for example, if today is Feb 1 and patient said Jan 30, the date will be
+ * a Jan 30 of the next year
+ * @param timezone The patient's timezone
+ * @param date The date given by a patient
+ */
+function amendFutureDate(timezone: string, date: string): string {
+    const startDate = DateTime.fromISO(date, {zone: timezone});
+    const difference = startDate.diffNow('months');
+    return difference.months > 6
+        ? startDate.minus({year: 1}).toISODate() ?? throwWithMessage(`Unable to amend date: ${date}`)
+        : date;
 }
 
 function getStartDateConfirmedResponse(
