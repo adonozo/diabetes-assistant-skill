@@ -446,11 +446,15 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "Necesito saber la hora a la que empezarás. Dime la hora aproximada entre 0 y 23 horas"
+            "value": "Necesito saber la hora de la primera dosis. Dime la hora aproximada entre 0 y 23 horas"
           },
           {
             "type": "PlainText",
-            "value": "¿A qué hora piensas empezar? Dime la hora aproximada entre 0 y 23 horas"
+            "value": "¿Cuál es la hora de la primera dosis? Dime la hora aproximada entre 0 y 23 horas"
+          },
+          {
+            "type": "PlainText",
+            "value": "Dime la hora aproximada de la primera dosis entre 0 y 23 horas"
           }
         ]
       },
