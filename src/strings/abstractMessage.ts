@@ -1,6 +1,5 @@
 import { DateTime } from "luxon";
 import { MissingDateSetupRequest, Day, MedicationData, OccurrencesPerDay, ServiceData, DateSlot } from "../types";
-import { Observation } from "fhir/r5";
 import { AppLocale } from "../enums";
 import { digitWithLeadingZero } from "../utils/time";
 import { throwWithMessage } from "../utils/intent";
@@ -51,28 +50,6 @@ export abstract class AbstractMessage {
         FOR: string,
     }
 
-    makeTextFromObservations(observations: Observation[], timezone: string): string {
-        const dateMap = new Map<string, ObservationValue[]>();
-        observations.forEach(observation => {
-            const date = DateTime.fromISO(observation.issued!).setZone(timezone);
-            const dayKey = this.getTextForDay(observation.issued!, timezone);
-            const observationValue = {
-                time: this.getHoursAndMinutes(date),
-                value: observation.valueQuantity?.value?.toString() ?? '',
-                timing: (observation.extension && observation.extension[0]?.valueCode) ?? ''
-            };
-            this.upsertValueToMap(dateMap, dayKey, observationValue);
-        });
-
-        let text = '';
-        dateMap.forEach((value, day) => {
-            const textForDay = this.makeTextForObservationDay(day, value)
-            text = text + textForDay + '. ';
-        })
-
-        return this.wrapSpeakMessage(text);
-    }
-
     buildListTimesOrTimings(timings: string[]): string {
         const regex = new RegExp('^[0-2][0-9]');
         const hasTime = timings.length > 0 && regex.test(timings[0]);
@@ -88,10 +65,6 @@ export abstract class AbstractMessage {
     abstract getMedicationSsmlReminderText(value: number, unit: string, medication: string, times: string[]): string;
 
     abstract getServiceSsmlReminderText(action: string, times: string[]): string;
-
-    abstract makeTextForObservationDay(day: string, observationsValues: ObservationValue[]): string;
-
-    abstract getTimingOrTime(observationValue: ObservationValue): string;
 
     abstract getHoursAndMinutes(date: DateTime): string;
 
@@ -110,10 +83,6 @@ export abstract class AbstractMessage {
     abstract rePromptStartDate(date: DateTime): string;
 
     abstract timingToText(timing: string): string;
-
-    abstract stringToTimingCode(value: string): string;
-
-    abstract codeToString(timingCode: string): string;
 
     abstract unitsToStrings(unit: string, isPlural: boolean): string;
 
@@ -229,14 +198,6 @@ export abstract class AbstractMessage {
                 return this.rePromptStartTime();
             default:
                 throwWithMessage('Could not get determine whether resource needs date or time');
-        }
-    }
-
-    private upsertValueToMap(map: Map<string, ObservationValue[]>, key: string, value: ObservationValue): void {
-        if (map.has(key)) {
-            map.get(key)!.push(value);
-        } else {
-            map.set(key, [value]);
         }
     }
 }

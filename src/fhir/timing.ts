@@ -3,7 +3,6 @@ import { RRule, Weekday } from "rrule";
 import { getExtension } from "./fhir";
 import { Duration, Timing } from "fhir/r5";
 import { DateTimeInterval } from "../types";
-import { TimingEvent } from "../enums";
 
 const DEFAULT_TIMEZONE = 'UTC'
 const TIMING_START_DATE = 'http://diabetes-assistant.com/fhir/StructureDefinition/TimingStartDate';
@@ -90,21 +89,6 @@ export const timingOrder: {[p: string]: number} = {
     // Custom definitions
     EXACT: 20,
     ALL_DAY: 20
-}
-
-export function alexaTimingToFhirTiming(alexaTiming: string): TimingEvent {
-    switch (alexaTiming) {
-        case 'EV':
-            return TimingEvent.EVE;
-        case 'NI':
-            return TimingEvent.NIGHT;
-        case 'MO':
-            return TimingEvent.MORN;
-        case 'AF':
-            return TimingEvent.AFT;
-        default:
-            return TimingEvent.EXACT;
-    }
 }
 
 export function getDatesFromTiming(timing: Timing, timezone: string = DEFAULT_TIMEZONE): DateTimeInterval {

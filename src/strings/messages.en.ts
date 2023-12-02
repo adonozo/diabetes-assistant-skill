@@ -1,5 +1,4 @@
-import { AbstractMessage, ObservationValue } from "./abstractMessage";
-import { timingEvent } from "../fhir/timing";
+import { AbstractMessage } from "./abstractMessage";
 import { DateTime } from "luxon";
 import { MissingDateSetupRequest, Day, MedicationData, OccurrencesPerDay, ServiceData, DateSlot } from "../types";
 import { AppLocale } from "../enums";
@@ -71,40 +70,6 @@ care plan. What would you like to do?`,
         const timeList = this.listItems(stringTimes, this.words.CONCAT_WORD);
         const message = `${action} ${timeList}`;
         return this.wrapSpeakMessage(message);
-    }
-
-    /**
-     *
-     * @param day {string}
-     * @param observationsValues {{time: string, value: string, timing: string}[]}
-     */
-    makeTextForObservationDay(day: string, observationsValues: ObservationValue[]): string {
-        let text = `${day}, you had a blood glucose level of`;
-        if (observationsValues.length === 1) {
-            const observation = observationsValues[0];
-            const time = this.getTimingOrTime(observation);
-            text = `${text} ${observation.value} ${time}`;
-            return text;
-        }
-
-        const values = observationsValues.map((value, index) => {
-            const time = this.getTimingOrTime(value);
-            if (index === observationsValues.length - 1) {
-                return ` and ${value.value} ${time}.`;
-            }
-
-            return ` ${value.value} ${time}`;
-        }).join(',');
-
-        return `${text} ${values}`;
-    }
-
-    getTimingOrTime(observationValue: ObservationValue): string {
-        if (!observationValue.timing || observationValue.timing === timingEvent.EXACT) {
-            return `at ${observationValue.time}`;
-        }
-
-        return this.timingToText(observationValue.timing);
     }
 
     /**
@@ -226,64 +191,6 @@ care plan. What would you like to do?`,
                 return 'after meals';
             default:
                 return '';
-        }
-    }
-
-    stringToTimingCode(value: string): string {
-        switch (value) {
-            case 'lunch':
-                return 'CD';
-            case "before lunch":
-                return 'ACD';
-            case "after lunch":
-                return 'PCD'
-            case 'breakfast':
-                return 'CM';
-            case 'before breakfast':
-                return 'ACM';
-            case 'after breakfast':
-                return 'PCM';
-            case 'dinner':
-                return 'CV'
-            case 'before dinner':
-                return 'ACV';
-            case 'after dinner':
-                return 'PCV';
-            case 'before meal':
-                return 'AC'
-            case 'after meal':
-                return 'PC'
-            case 'dawn':
-                return 'MORN_early'
-            case 'morning':
-                return 'MORN'
-            case 'noon':
-                return 'NOON'
-            case 'afternoon':
-                return 'AFT'
-            case 'evening':
-                return 'EVE'
-            case 'night':
-                return 'NIGHT'
-            default:
-                return 'EXACT'
-        }
-    }
-
-    /**
-     * To get exact code translations, for intent's timingEvent type
-     * @param timingCode
-     */
-    codeToString(timingCode: string): string {
-        switch (timingCode) {
-            case 'CM':
-                return 'breakfast';
-            case 'CD':
-                return 'lunch';
-            case 'CV':
-                return 'dinner';
-            default:
-                throw new Error(`Invalid timing code ${timingCode}`);
         }
     }
 

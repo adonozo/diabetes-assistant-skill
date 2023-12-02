@@ -55,24 +55,6 @@ export function setResourceStartDate(
     });
 }
 
-export function getObservationsOnDate(
-    email: string,
-    date: string,
-    timing: string,
-    timezone: string
-): Promise<Bundle> {
-    return new Promise((resolve, reject) => {
-        const params = new URLSearchParams();
-        params.append("date", date);
-        params.append("timing", timing);
-        params.append("timezone", timezone);
-        const path = `/alexa/${email}/observations/?${params.toString()}`
-        const options = getOptionsFor(path, 'GET');
-        const request = https.request(options, response => createJsonResponse(resolve, reject, response));
-        request.end();
-    });
-}
-
 export function getMedicationRequests(
     email: string,
     date: string,

@@ -1,6 +1,6 @@
-import { AbstractMessage, ObservationValue } from "./abstractMessage";
+import { AbstractMessage } from "./abstractMessage";
 import { DateTime } from "luxon";
-import { AppLocale, TimingEvent } from "../enums";
+import { AppLocale } from "../enums";
 import { MissingDateSetupRequest, Day, MedicationData, OccurrencesPerDay, ServiceData, DateSlot } from "../types";
 import { digitWithLeadingZero } from "../utils/time";
 import { throwWithMessage } from "../utils/intent";
@@ -54,19 +54,6 @@ crea recordatorios.`,
         FOR: 'para'
     }
 
-    codeToString(timingCode: string): string {
-        switch (timingCode) {
-            case 'CM':
-                return 'desayuno';
-            case 'CD':
-                return 'almuerzo';
-            case 'CV':
-                return 'cena';
-            default:
-                throw new Error(`Invalid timing code ${timingCode}`);
-        }
-    }
-
     durationUnitToString(unit: string): string {
         switch (unit.toLowerCase()) {
             case 'd':
@@ -112,15 +99,6 @@ crea recordatorios.`,
         return this.wrapSpeakMessage(message);
     }
 
-    getTimingOrTime(observationValue: ObservationValue): string {
-        if (!observationValue.timing || observationValue.timing === TimingEvent.EXACT)
-        {
-            return `a las ${observationValue.time}`;
-        }
-
-        return this.timingToText(observationValue.timing);
-    }
-
     makeMedicationText(medicationData: MedicationData): string {
         const regex = new RegExp('^[0-2][0-9]');
         const doseTextArray = medicationData.dose
@@ -147,27 +125,6 @@ crea recordatorios.`,
             .map(occurrence => this.occurrenceText(occurrence, today, tomorrow));
 
         return `Mide tu nivel de glucosa en sangre ${this.listItems(dailyOccurrences, this.words.CONCAT_WORD)}`;
-    }
-
-    makeTextForObservationDay(day: string, observationsValues: ObservationValue[]): string {
-        let text = `${day}, tu nivel de azúcar en sangre fue`;
-        if (observationsValues.length === 1) {
-            const observation = observationsValues[0];
-            const time = this.getTimingOrTime(observation);
-            text = `${text} ${observation.value} ${time}`;
-            return text;
-        }
-
-        const values = observationsValues.map((value, index) => {
-            const time = this.getTimingOrTime(value);
-            if (index === observationsValues.length - 1) {
-                return ` y ${value.value} ${time}.`;
-            }
-
-            return ` ${value.value} ${time}`;
-        }).join(',');
-
-        return `${text} ${values}`;
     }
 
     promptMissingRequest(missingDateRequest: MissingDateSetupRequest, currentDate: DateTime, slot: DateSlot): string {
@@ -210,48 +167,6 @@ crea recordatorios.`,
         const day = digitWithLeadingZero(currentDate.day);
         const month = digitWithLeadingZero(currentDate.month);
         return `Dime el día y mes en el que empezaste o piensas empezar. Hoy es <say-as interpret-as=\"date\">????${month}${day}</say-as>`;
-    }
-
-    stringToTimingCode(value: string): string {
-        switch (value) {
-            case 'almuerzo':
-                return 'CD';
-            case "antes del almuerzo":
-                return 'ACD';
-            case "después del almuerzo":
-            case "despues del almuerzo":
-                return 'PCD'
-            case 'desayuno':
-                return 'CM';
-            case 'antes del desayuno':
-                return 'ACM';
-            case 'después del desayuno':
-            case 'despues del desayuno':
-                return 'PCM';
-            case 'cena':
-                return 'CV'
-            case 'antes de la cena':
-                return 'ACV';
-            case 'después de la cena':
-            case 'despues de la cena':
-                return 'PCV';
-            case 'antes de comer':
-                return 'AC'
-            case 'después de comer':
-                return 'PC'
-            case 'madrugada':
-                return 'MORN_early'
-            case 'mañana':
-                return 'MORN'
-            case 'tarde':
-                return 'AFT'
-            case 'noche':
-                return 'NIGHT'
-            case 'mediodía':
-                return 'NOON'
-            default:
-                return 'EXACT'
-        }
     }
 
     timingToText(timing: string): string {
