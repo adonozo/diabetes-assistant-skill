@@ -268,21 +268,6 @@
               }
             }
           ]
-        },
-        {
-          "name": "healthRequestName",
-          "values": [
-            {
-              "name": {
-                "value": "Glucose measurement"
-              }
-            },
-            {
-              "name": {
-                "value": "Blood Glucose measurement"
-              }
-            }
-          ]
         }
       ]
     },
