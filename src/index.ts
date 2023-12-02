@@ -1,6 +1,6 @@
 import { DefaultApiClient, SkillBuilders } from 'ask-sdk-core';
 import { CreateRemindersHandler, CreateRemindersInProgressHandler } from "./intents/createReminderHandlers";
-import { MedicationToTakeHandler } from "./intents/getMedicationToTakeHandler";
+import { MedicationToTakeHandler } from "./intents/medicationToTakeHandler";
 import { SetStartDateTimeCompletedHandler, SetStartDateTimeContinueHandler } from "./intents/setStartDateHandlers";
 import { ConnectionsResponseHandler } from "./intents/connectionsResponseHandler";
 import { LaunchRequestHandler } from "./intents/launchRequestHandler";
