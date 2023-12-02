@@ -216,7 +216,11 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "¿Cuál es la fecha que te interesa?"
+            "value": "¿Quieres saber tus medicamentos para hoy o para mañana?"
+          },
+          {
+            "type": "PlainText",
+            "value": "Puedo decirte tus medicamentos para hoy o mañana"
           }
         ]
       },
@@ -282,80 +286,6 @@
           {
             "type": "SSML",
             "value": "<speak>¿Es <say-as interpret-as=\"time\">{time}</say-as> correcto?</speak>"
-          }
-        ]
-      },
-      {
-        "id": "Confirm.Slot.glucoseLevel.level",
-        "variations": [
-          {
-            "type": "PlainText",
-            "value": "Escuché {level}, ¿es correcto?"
-          },
-          {
-            "type": "PlainText",
-            "value": "¿Es {level} correcto?"
-          }
-        ]
-      },
-      {
-        "id": "Elicitation.Slot.glucoseLevel.level",
-        "variations": [
-          {
-            "type": "PlainText",
-            "value": "¿Cuál es tu nivel de glucosa?"
-          },
-          {
-            "type": "PlainText",
-            "value": "¿Qué valor tienes para tu nivel de azúcar?"
-          },
-          {
-            "type": "PlainText",
-            "value": "¿Qué valor tienes para tu nivel de glucosa?"
-          }
-        ]
-      },
-      {
-        "id": "Elicitation.Slot.glucoseLevel.glucoseTiming",
-        "variations": [
-          {
-            "type": "PlainText",
-            "value": "Esta medida es ¿antes de una comida, después, o ninguno?"
-          }
-        ]
-      },
-      {
-        "id": "Elicit.Slot.AskGlucoseLevel.time",
-        "variations": [
-          {
-            "type": "PlainText",
-            "value": "¿En qué hora del día?"
-          },
-          {
-            "type": "PlainText",
-            "value": "¿A qué hora?"
-          }
-        ]
-      },
-      {
-        "id": "Elicit.Slot.AskGlucoseLevel.timing",
-        "variations": [
-          {
-            "type": "PlainText",
-            "value": "¿Es para el desayuno, almuerzo, cena...?"
-          }
-        ]
-      },
-      {
-        "id": "Elicit.Slot.AskGlucoseLevel.date",
-        "variations": [
-          {
-            "type": "PlainText",
-            "value": "¿En qué día?"
-          },
-          {
-            "type": "PlainText",
-            "value": "¿Para qué día?"
           }
         ]
       }

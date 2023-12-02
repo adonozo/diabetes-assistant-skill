@@ -171,7 +171,7 @@
               "confirmationRequired": false,
               "elicitationRequired": true,
               "prompts": {
-                "elicitation": "Elicit.Slot.getMedicationToTake.date"
+                "elicitation": "Elicit.Slot.medicationToTake.date"
               }
             }
           ]
@@ -181,11 +181,11 @@
     },
     "prompts": [
       {
-        "id": "Elicit.Slot.getMedicationToTake.date",
+        "id": "Elicit.Slot.medicationToTake.date",
         "variations": [
           {
             "type": "PlainText",
-            "value": "What date are you asking for?"
+            "value": "I can tell you your medications for today or tomorrow"
           }
         ]
       },
@@ -247,80 +247,6 @@
           {
             "type": "SSML",
             "value": "<speak>Is <say-as interpret-as=\"time\">{time}</say-as> correct?</speak>"
-          }
-        ]
-      },
-      {
-        "id": "Confirm.Slot.glucoseLevel.level",
-        "variations": [
-          {
-            "type": "PlainText",
-            "value": "I heard {level}, is that correct?"
-          },
-          {
-            "type": "PlainText",
-            "value": "Is {level} correct?"
-          }
-        ]
-      },
-      {
-        "id": "Elicitation.Slot.glucoseLevel.level",
-        "variations": [
-          {
-            "type": "PlainText",
-            "value": "What is your blood glucose level?"
-          },
-          {
-            "type": "PlainText",
-            "value": "What value you have for your blood glucose level?"
-          }
-        ]
-      },
-      {
-        "id": "Elicitation.Slot.glucoseLevel.glucoseTiming",
-        "variations": [
-          {
-            "type": "PlainText",
-            "value": "Is this measure before a meal, after a meal, or none?"
-          }
-        ]
-      },
-      {
-        "id": "Elicit.Slot.AskGlucoseLevel.time",
-        "variations": [
-          {
-            "type": "PlainText",
-            "value": "At what moment in the day?"
-          },
-          {
-            "type": "PlainText",
-            "value": "At what time in the day?"
-          }
-        ]
-      },
-      {
-        "id": "Elicit.Slot.AskGlucoseLevel.timing",
-        "variations": [
-          {
-            "type": "PlainText",
-            "value": "When?"
-          },
-          {
-            "type": "PlainText",
-            "value": "Is it for breakfast, lunch, dinner...?"
-          }
-        ]
-      },
-      {
-        "id": "Elicit.Slot.AskGlucoseLevel.date",
-        "variations": [
-          {
-            "type": "PlainText",
-            "value": "On which day?"
-          },
-          {
-            "type": "PlainText",
-            "value": "For which day?"
           }
         ]
       }
