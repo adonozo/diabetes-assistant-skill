@@ -99,7 +99,7 @@ export abstract class AbstractMessage {
 
         const joinComma = values.length > 2 ? ',' : ''
         return values
-            .map((value, index) => index === values.length - 1 ? `${concatWord} ${value}.` : ` ${value}`)
+            .map((value, index) => index === values.length - 1 ? ` ${concatWord} ${value}.` : ` ${value}`)
             .join(joinComma)
     }
 

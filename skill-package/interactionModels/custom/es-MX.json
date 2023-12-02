@@ -34,30 +34,32 @@
             }
           ],
           "samples": [
-            "Qué medicamentos tenía que tomar {date}",
-            "Qué medicinas tenía que tomar {date}",
-            "Que medicamentos tomaré {date}",
-            "Que medicinas tomaré {date}",
-            "Que medicamentos tengo que tomar {date}",
-            "Que medicinas tengo que tomar {date}",
-            "Medicamentos para el {date}",
-            "Medicamentos el {date}",
-            "Medicamentos {date}",
-            "Medicinas para el {date}",
-            "Medicinas el {date}",
-            "Medicinas {date}",
-            "Mi medicación para {date}",
-            "Mi medicación {date}",
-            "Mi medicación el {date}",
-            "Cuáles eran mis medicinas {date}",
-            "Cuáles eran mis medicamentos {date}",
-            "Cuáles son mis medicamentos para {date}",
-            "Qué debia tomar {date}",
-            "Qué debo tomar {date}",
-            "Qué tengo que tomar {date}",
+            "Qué medicamentos tenía que tomar",
+            "Qué medicamentos tenía que tomar hoy",
+            "Qué medicinas tenía que tomar hoy",
+            "Qué medicinas tenía que tomar",
+            "Que medicamentos tomaré hoy",
+            "Que medicinas tomaré",
+            "Que medicamentos tengo que tomar",
+            "Que medicamentos tengo que tomar hoy",
+            "Que medicinas tengo que tomar hoy",
+            "Que medicinas tengo que tomar",
+            "Medicamentos para hoy",
+            "Medicinas para hoy",
+            "Mi medicación para hoy",
+            "Mi medicación hoy día",
+            "Cuáles eran mis medicinas",
+            "Cuáles eran mis medicamentos",
+            "Cuáles son mis medicamentos para hoy",
+            "Cuáles son mis medicamentos",
+            "Qué debia tomar",
+            "Qué debia tomar hoy",
+            "Qué debo tomar",
+            "Qué debo tomar hoy",
+            "Qué tengo que tomar hoy",
             "Qué medicamentos tengo",
             "Dime mi medicación",
-            "Dime mi medicación para {date}"
+            "Dime mi medicación para hoy"
           ]
         },
         {
@@ -188,21 +190,6 @@
               "prompts": {
                 "confirmation": "Confirm.Slot.createRemindersIntent.time",
                 "elicitation": "Elicit.Slot.createRemindersIntent.time"
-              }
-            }
-          ]
-        },
-        {
-          "name": "MedicationToTakeIntent",
-          "confirmationRequired": false,
-          "slots": [
-            {
-              "name": "date",
-              "type": "AMAZON.DATE",
-              "confirmationRequired": false,
-              "elicitationRequired": true,
-              "prompts": {
-                "elicitation": "Elicit.Slot.medicationToTakeIntent.date"
               }
             }
           ]

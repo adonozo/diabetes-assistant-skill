@@ -1,4 +1,4 @@
-import { IntentRequest, Response } from "ask-sdk-model";
+import { Response } from "ask-sdk-model";
 import { getLocalizedStrings, throwWithMessage } from "../utils/intent";
 import { getTimezoneOrDefault, requestsNeedStartDate } from "../utils/time";
 import { getMedicationRequests } from "../api/patients";
@@ -8,6 +8,9 @@ import { getTextForMedicationRequests } from "../fhir/medicationRequest";
 import { HandlerInput } from "ask-sdk-core";
 import { AbstractIntentHandler } from "./abstractIntentHandler";
 import { getAuthorizedUser } from "../auth";
+import { DateTime } from "luxon";
+import { Result } from "../types";
+import { Bundle, FhirResource, MedicationRequest } from "fhir/r5";
 
 export class MedicationToTakeHandler extends AbstractIntentHandler {
     intentName = 'MedicationToTakeIntent';
@@ -29,31 +32,20 @@ export class MedicationToTakeHandler extends AbstractIntentHandler {
 
     private async handleIntent(handlerInput: HandlerInput, patientEmail: string): Promise<Response> {
         const localizedMessages = getLocalizedStrings(handlerInput);
-        const request = handlerInput.requestEnvelope.request as IntentRequest;
-        const date = request.intent.slots?.date.value ?? throwWithMessage('Date was not set on intent');
         const userTimezone = await getTimezoneOrDefault(handlerInput);
+        const date = DateTime.now().setZone(userTimezone).toISODate()!;
 
-        let medicationRequest;
-        try {
-            medicationRequest = await getMedicationRequests(patientEmail, date, timingEvent.ALL_DAY, userTimezone);
-        } catch (errorResponse: any) {
-            if (errorResponse?.status !== 422) {
-                console.log("Unexpected error", JSON.stringify(errorResponse))
-                throw new Error("Unexpected error");
-            }
-
-            const missingDataResource = errorResponse.resource;
-            const customResource = requestsNeedStartDate([missingDataResource])
+        const result = await this.getTodayMedicationRequests(date, patientEmail, userTimezone);
+        if (!result.success) {
+            const customResource = requestsNeedStartDate([result.error!])
                 ?? throwWithMessage("Couldn't get the resource");
-
             return this.switchContextToStartDateTime(handlerInput,
                 customResource,
                 userTimezone,
                 localizedMessages);
         }
 
-        const medicationRequests = medicationsFromBundle(medicationRequest);
-
+        const medicationRequests = medicationsFromBundle(result.value!);
         let speakOutput
         if (medicationRequests.length === 0) {
             speakOutput = localizedMessages.getNoRecordsTextForDay(date, userTimezone);
@@ -65,5 +57,28 @@ export class MedicationToTakeHandler extends AbstractIntentHandler {
         return handlerInput.responseBuilder
             .speak(speakOutput)
             .getResponse();
+    }
+
+    private async getTodayMedicationRequests(
+        date: string,
+        patientEmail: string,
+        timezone: string
+    ): Promise<Result<Bundle, MedicationRequest>> {
+        try {
+            const medicationRequest = await getMedicationRequests(patientEmail, date, timingEvent.ALL_DAY, timezone);
+            return {success: true, value: medicationRequest};
+        } catch (errorResponse: any) {
+            if (errorResponse?.status !== 422) {
+                console.log("Unexpected error", JSON.stringify(errorResponse))
+                throw new Error("Unexpected error");
+            }
+
+            const missingDataResource = <FhirResource>errorResponse.resource;
+            if (missingDataResource.resourceType === 'MedicationRequest') {
+                return {success: false, error: missingDataResource};
+            }
+
+            throwWithMessage("Couldn't get the resource");
+        }
     }
 }
