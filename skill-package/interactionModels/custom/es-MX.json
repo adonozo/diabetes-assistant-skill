@@ -29,35 +29,35 @@
           "name": "GetMedicationToTakeIntent",
           "slots": [
             {
-              "name": "treatmentDate",
+              "name": "date",
               "type": "AMAZON.DATE"
             }
           ],
           "samples": [
-            "Qué medicamentos tenía que tomar {treatmentDate}",
-            "Qué medicinas tenía que tomar {treatmentDate}",
-            "Que medicamentos tomaré {treatmentDate}",
-            "Que medicinas tomaré {treatmentDate}",
-            "Que medicamentos tengo que tomar {treatmentDate}",
-            "Que medicinas tengo que tomar {treatmentDate}",
-            "Medicamentos para el {treatmentDate}",
-            "Medicamentos el {treatmentDate}",
-            "Medicamentos {treatmentDate}",
-            "Medicinas para el {treatmentDate}",
-            "Medicinas el {treatmentDate}",
-            "Medicinas {treatmentDate}",
-            "Mi medicación para {treatmentDate}",
-            "Mi medicación {treatmentDate}",
-            "Mi medicación el {treatmentDate}",
-            "Cuáles eran mis medicinas {treatmentDate}",
-            "Cuáles eran mis medicamentos {treatmentDate}",
-            "Cuáles son mis medicamentos para {treatmentDate}",
-            "Qué debia tomar {treatmentDate}",
-            "Qué debo tomar {treatmentDate}",
-            "Qué tengo que tomar {treatmentDate}",
+            "Qué medicamentos tenía que tomar {date}",
+            "Qué medicinas tenía que tomar {date}",
+            "Que medicamentos tomaré {date}",
+            "Que medicinas tomaré {date}",
+            "Que medicamentos tengo que tomar {date}",
+            "Que medicinas tengo que tomar {date}",
+            "Medicamentos para el {date}",
+            "Medicamentos el {date}",
+            "Medicamentos {date}",
+            "Medicinas para el {date}",
+            "Medicinas el {date}",
+            "Medicinas {date}",
+            "Mi medicación para {date}",
+            "Mi medicación {date}",
+            "Mi medicación el {date}",
+            "Cuáles eran mis medicinas {date}",
+            "Cuáles eran mis medicamentos {date}",
+            "Cuáles son mis medicamentos para {date}",
+            "Qué debia tomar {date}",
+            "Qué debo tomar {date}",
+            "Qué tengo que tomar {date}",
             "Qué medicamentos tengo",
             "Dime mi medicación",
-            "Dime mi medicación para {treatmentDate}"
+            "Dime mi medicación para {date}"
           ]
         },
         {
@@ -371,12 +371,12 @@
           "confirmationRequired": false,
           "slots": [
             {
-              "name": "treatmentDate",
+              "name": "date",
               "type": "AMAZON.DATE",
               "confirmationRequired": false,
               "elicitationRequired": true,
               "prompts": {
-                "elicitation": "Elicit.Slot.getMedicationToTake.treatmentDate"
+                "elicitation": "Elicit.Slot.getMedicationToTake.date"
               }
             }
           ]
@@ -420,7 +420,7 @@
     },
     "prompts": [
       {
-        "id": "Elicit.Slot.getMedicationToTake.treatmentDate",
+        "id": "Elicit.Slot.getMedicationToTake.date",
         "variations": [
           {
             "type": "PlainText",

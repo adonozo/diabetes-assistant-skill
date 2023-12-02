@@ -27,24 +27,24 @@
           "name": "GetMedicationToTakeIntent",
           "slots": [
             {
-              "name": "treatmentDate",
+              "name": "date",
               "type": "AMAZON.DATE"
             }
           ],
           "samples": [
-            "What medicines I had to take {treatmentDate}",
-            "What pills I had to take {treatmentDate}",
-            "What is my medication for {treatmentDate}",
-            "What medicines I have to take {treatmentDate}",
-            "What pills I have to take {treatmentDate}",
-            "Medicines for {treatmentDate}",
-            "Medicines on {treatmentDate}",
-            "Pills for {treatmentDate}",
-            "Pills on {treatmentDate}",
-            "My medication for {treatmentDate}",
-            "My medication {treatmentDate}",
-            "medications for {treatmentDate}",
-            "medications {treatmentDate}"
+            "What medicines I had to take {date}",
+            "What pills I had to take {date}",
+            "What is my medication for {date}",
+            "What medicines I have to take {date}",
+            "What pills I have to take {date}",
+            "Medicines for {date}",
+            "Medicines on {date}",
+            "Pills for {date}",
+            "Pills on {date}",
+            "My medication for {date}",
+            "My medication {date}",
+            "medications for {date}",
+            "medications {date}"
           ]
         },
         {
@@ -336,12 +336,12 @@
           "confirmationRequired": false,
           "slots": [
             {
-              "name": "treatmentDate",
+              "name": "date",
               "type": "AMAZON.DATE",
               "confirmationRequired": false,
               "elicitationRequired": true,
               "prompts": {
-                "elicitation": "Elicit.Slot.getMedicationToTake.treatmentDate"
+                "elicitation": "Elicit.Slot.getMedicationToTake.date"
               }
             }
           ]
@@ -385,7 +385,7 @@
     },
     "prompts": [
       {
-        "id": "Elicit.Slot.getMedicationToTake.treatmentDate",
+        "id": "Elicit.Slot.getMedicationToTake.date",
         "variations": [
           {
             "type": "PlainText",

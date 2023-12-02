@@ -30,7 +30,7 @@ export class MedicationToTakeHandler extends AbstractIntentHandler {
     private async handleIntent(handlerInput: HandlerInput, patientEmail: string): Promise<Response> {
         const localizedMessages = getLocalizedStrings(handlerInput);
         const request = handlerInput.requestEnvelope.request as IntentRequest;
-        const date = request.intent.slots?.treatmentDate.value ?? throwWithMessage('Date was not set on intent');
+        const date = request.intent.slots?.date.value ?? throwWithMessage('Date was not set on intent');
         const userTimezone = await getTimezoneOrDefault(handlerInput);
 
         let medicationRequest;
