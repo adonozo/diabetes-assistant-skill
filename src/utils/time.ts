@@ -1,4 +1,4 @@
-import { DateTime, Settings, WeekdayNumbers } from "luxon";
+import { Settings, WeekdayNumbers } from "luxon";
 import {
     compareWhen,
     getTimesFromTimingWithFrequency,
@@ -35,23 +35,6 @@ export async function getTimezoneOrDefault(handlerInput: HandlerInput): Promise<
     }
 
     return userTimeZone;
-}
-
-export function utcDateFromLocalDate(date: string, timezone: string): string | null {
-    const time = DateTime.now().setZone(timezone);
-    const utcDate = DateTime.fromISO(`${date}T${time.toISOTime()}`, {zone: timezone}).toUTC();
-    return utcDate.toISO();
-}
-
-export function utcTimeFromLocalTime(time: string, timezone: string): string | null {
-    const date = DateTime.now().setZone(timezone);
-    const utcDate = DateTime.fromISO(`${date.toISODate()}T${time}`, {zone: timezone});
-    return utcDate.toUTC().toISO();
-}
-
-export function utcDateTimeFromLocalDateAndTime(date: string, time: string, timezone: string): string | null {
-    const utcDate = DateTime.fromISO(`${date}T${time}`, {zone: timezone});
-    return utcDate.toISO();
 }
 
 function buildCustomMedicationRequest(dosageInstruction: Dosage, medicationName: string): MissingDateSetupRequest {

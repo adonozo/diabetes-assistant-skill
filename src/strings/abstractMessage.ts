@@ -1,5 +1,5 @@
 import { DateTime } from "luxon";
-import { MissingDateSetupRequest, Day, MedicationData, OccurrencesPerDay, ServiceData, DateSlot } from "../types";
+import { MissingDateSetupRequest, Day, MedicationData, OccurrencesPerDay, DateSlot } from "../types";
 import { AppLocale } from "../enums";
 import { digitWithLeadingZero } from "../utils/time";
 import { throwWithMessage } from "../utils/intent";
@@ -71,8 +71,6 @@ export abstract class AbstractMessage {
     abstract getHoursAndMinutesFromString(time: string): string;
 
     abstract makeMedicationText(medicationData: MedicationData): string;
-
-    abstract makeServiceText(serviceData: ServiceData): string;
 
     abstract buildServiceRequestText(occurrences: OccurrencesPerDay[], today: Day, tomorrow: Day): string;
 
@@ -201,5 +199,3 @@ export abstract class AbstractMessage {
         }
     }
 }
-
-export type ObservationValue = {time: string, value: string, timing: string}

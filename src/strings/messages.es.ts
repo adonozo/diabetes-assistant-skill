@@ -1,7 +1,7 @@
 import { AbstractMessage } from "./abstractMessage";
 import { DateTime } from "luxon";
 import { AppLocale } from "../enums";
-import { MissingDateSetupRequest, Day, MedicationData, OccurrencesPerDay, ServiceData, DateSlot } from "../types";
+import { MissingDateSetupRequest, Day, MedicationData, OccurrencesPerDay, DateSlot } from "../types";
 import { digitWithLeadingZero } from "../utils/time";
 import { throwWithMessage } from "../utils/intent";
 
@@ -113,11 +113,6 @@ crea recordatorios.`,
 
         const doseText = this.listItems(doseTextArray, this.words.CONCAT_WORD);
         return `Toma ${medicationData.medication}, ${doseText}`;
-    }
-
-    makeServiceText(serviceData: ServiceData): string {
-        const timeList = this.buildListTimesOrTimings(serviceData.timings);
-        return `${serviceData.action} ${timeList}`;
     }
 
     buildServiceRequestText(occurrences: OccurrencesPerDay[], today: Day, tomorrow: Day): string {

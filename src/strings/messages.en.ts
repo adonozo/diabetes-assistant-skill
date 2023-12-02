@@ -1,6 +1,6 @@
 import { AbstractMessage } from "./abstractMessage";
 import { DateTime } from "luxon";
-import { MissingDateSetupRequest, Day, MedicationData, OccurrencesPerDay, ServiceData, DateSlot } from "../types";
+import { MissingDateSetupRequest, Day, MedicationData, OccurrencesPerDay, DateSlot } from "../types";
 import { AppLocale } from "../enums";
 import { digitWithLeadingZero } from "../utils/time";
 import { throwWithMessage } from "../utils/intent";
@@ -104,14 +104,6 @@ care plan. What would you like to do?`,
             .flat(1);
         const doseText = this.listItems(doseTextArray, this.words.CONCAT_WORD);
         return `Take ${medicationData.medication}, ${doseText}`;
-    }
-
-    /**
-     * @param serviceData {{action: string, timings: [string]}}
-     */
-    makeServiceText(serviceData: ServiceData): string {
-        const timeList = this.buildListTimesOrTimings(serviceData.timings);
-        return `Do a ${serviceData.action} ${timeList}`;
     }
 
     buildServiceRequestText(occurrences: OccurrencesPerDay[], today: Day, tomorrow: Day): string {
