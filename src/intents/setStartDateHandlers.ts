@@ -140,7 +140,7 @@ function getStartDateConfirmedResponse(
 
     if (session[sessionValues.createRemindersIntent]) {
         reprompt = localizedMessages.responses.REQUESTS_REMINDERS_SETUP;
-    } else if (session[sessionValues.carePlanIntent] || session[sessionValues.getMedicationToTakeIntent]) {
+    } else if (session[sessionValues.carePlanIntent] || session[sessionValues.medicationToTakeIntent]) {
         reprompt = localizedMessages.responses.QUERY_SETUP;
     }
 

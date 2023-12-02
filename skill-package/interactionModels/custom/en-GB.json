@@ -24,7 +24,7 @@
           "samples": []
         },
         {
-          "name": "GetMedicationToTakeIntent",
+          "name": "MedicationToTakeIntent",
           "slots": [
             {
               "name": "date",
@@ -162,7 +162,7 @@
           ]
         },
         {
-          "name": "GetMedicationToTakeIntent",
+          "name": "MedicationToTakeIntent",
           "confirmationRequired": false,
           "slots": [
             {

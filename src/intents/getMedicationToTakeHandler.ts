@@ -10,7 +10,7 @@ import { AbstractIntentHandler } from "./abstractIntentHandler";
 import { getAuthorizedUser } from "../auth";
 
 export class MedicationToTakeHandler extends AbstractIntentHandler {
-    intentName = 'GetMedicationToTakeIntent';
+    intentName = 'MedicationToTakeIntent';
 
     canHandle(handlerInput : HandlerInput) : boolean {
         const request = handlerInput.requestEnvelope.request;
