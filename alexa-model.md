@@ -5,7 +5,7 @@ graph TD
     Start --> A{Account<br>linked?}
     A -->|Yes| B[Reminders]
     A -->|Yes| D[Medication requests]
-    A -->|Yes| C[Blood Glucose]
+    A -->|Yes| C[Service requets]
     E{Needs<br>setup?}
     F[Set start date/time]
     B --> E
@@ -17,29 +17,35 @@ _The patient needs to link their account before performing any action._
 
 ```mermaid
 graph TD
-    subgraph "Blood glucose"
-    
-    R2[Register my glucose level]
-    A2>Stores the glucose level\nto the service]
-    R3["`What was my glucose level on **{date}**?`"]
-    A3>"`Queries the service for Observations on **{date}**`"]
-    
-    R2 --> A2
-    R3 --> A3
-    end
-```
-
-```mermaid
-graph TD
     subgraph "Medication requests"
-        R4["`What medications do I have to take on **{date}**?`"]
-        A4>"`Queries for medication requests for the **{date range}**`"]
+        R4["`What medications do I have to take?`"]
+        A4>"`Queries for medication requests for today`"]
         C3{Does any<br>medication needs<br>a start date?}
         A4B>"`Asks and registers medication **{start date}**`"]
 
         R4 --> A4
         A4 --> C3
         C3 -->|Yes| A4B
+    end
+```
+
+```mermaid
+graph TD
+    subgraph "Service requests (blood glucose level measurements)"
+        R7["When do I have to measure my blood glucose?"]
+        A7>"Queries for service requests for the next 7 days"]
+        C7{Does any<br>request need<br>a start date?}
+        A7B>"`Asks and registers **{start date}**`"]
+        C8{"Are there<br>requests in the<br>next 2 days?"}
+        A8A>"Presents service requests"]
+        A8B>"Presents next day with requests"]
+
+        R7 --> A7
+        A7 --> C7
+        C7 -->|Yes| A7B
+        C7 -->|No| C8
+        C8 -->|Yes| A8A
+        C8 -->|No| A8B
     end
 ```
 
@@ -71,12 +77,8 @@ flowchart LR
     C1{Account\nLinked?}
     R1>Request to link account]
     VI{{Voice interaction}}
-    R2[Register my glucose level]
-    A2>Stores the glucose level\nto the service]
-    R3["`What was my glucose level on **{date}**?`"]
-    A3>"`Queries the service for Observations on **{date}**`"]
-    R4["`What medications do I have to take on **{date}**?`"]
-    A4>"`Queries for medication requests for the **{date range}**`"]
+    R4["`What medications do I have to take`"]
+    A4>"`Queries for medication requests for today`"]
     R5[Create reminders]
     A5A>"`Asks for a **{time}** and creates daily reminders`"]
     C2{Reminder\npermissions\ngranted?}
@@ -85,6 +87,13 @@ flowchart LR
     A4B>"`Asks and registers medication **{start date}**`"]
     C4{Does any\nresource need\na start date}
     A6>"`Asks and registers resource **{start dates}**`"]
+    R7["When do I have to measure my blood glucose?"]
+    A7>"Queries for active service requests"]
+    C7{Does any<br>service request need<br>a start date?}
+    A7B>"`Asks and registers **{start date}**`"]
+    C8{"Are there<br>requests in the<br>next 2 days?"}
+    A8A>"Presents service requests"]
+    A8B>"Presents next day with requests"]
 
     S --> A1
     A1 ---> C1
@@ -96,12 +105,16 @@ flowchart LR
         C1 -->|No| R1
         C1 -->|Yes| VI
     end
-
-    VI --> Glucose
-
-    subgraph Glucose
-        R2 --> A2
-        R3 --> A3
+    
+    VI --> ServiceRequest
+    
+    subgraph ServiceRequest
+        R7 --> A7
+        A7 --> C7
+        C7 -->|Yes| A7B
+        C7 -->|No| C8
+        C8 -->|Yes| A8A
+        C8 -->|No| A8B
     end
 
     VI --> MedicationRequest
@@ -125,9 +138,13 @@ flowchart LR
 
 ## User actions
 
-### What medications do I have to take on {date}? (1)
+### What medications do I have to take?
 
-Queries active `medication requests` on a given date
+Queries active `medication requests` for today
+
+### When do I have to measure my blood glucose?
+
+Queries active `service requests` for the next 7 days. Tells the patient the plan for next 3 days (inclusive of the present day). If there's no activity in those days, it will take the next day of an scheduled activity.
 
 ### Create reminders at {time} (1)
 
@@ -135,17 +152,15 @@ Creates daily reminders at the provided time. Reminders will honor the requests'
 
 Queries active `care plans` and creates reminders for `medication requests` and `service requests`.
 
-### What was my blood glucose level on {date}?
+---
 
-Queries `observations` on a given date
+#### Date restrictions
 
-### Register my blood glucose {level} at {timing}
-
-Saves a blood glucose level reading taken at some timing 
+Dates cause awkward interactions as they can be expressed in multiple ways. Moreover, patients wouldn't ask for medications for past dates, like the week before. Therefore, the skill only queries dates from the current day. By taking the complexities of dates out, patients have clear expectations about the responses.
 
 ---
 
-The following are prompted when some set up is needed
+The following is prompted when some set up is needed
 
 #### [1] Set up: resource (medication/service request) start date/time
 

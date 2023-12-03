@@ -1,11 +1,4 @@
-import { Patient, Reference } from "fhir/r5";
-
-export function getPatientSubject(patient: Patient): Reference {
-    return {
-        reference: `Patient/${patient.id}`,
-        display: getPatientFullName(patient)
-    }
-}
+import { Patient } from "fhir/r5";
 
 export function getPatientFullName(patient: Patient): string {
     if (!patient.name || !Array.isArray(patient.name) || patient.name.length === 0) {
