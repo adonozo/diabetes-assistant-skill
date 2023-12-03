@@ -16,8 +16,7 @@ export class MessagesEn extends AbstractMessage {
     responses = {
         WELCOME: `Welcome, this is the Diabetes Assistant. You can ask me what medications you need to take today or when
 you need to measure your blood glucose levels`,
-        WELCOME_FIRST: `Welcome, this is the Diabetes Assistant. You can ask me what medications you need to take today or
-tomorrow; or when you need to measure your blood glucose levels. You can also ask me to create daily reminders for your 
+        WELCOME_FIRST: `Welcome, this is the Diabetes Assistant. You can ask me what medications you need to take today; or when you need to measure your blood glucose levels. You can also ask me to create daily reminders for your 
 care plan. What would you like to do?`,
         WELCOME_REPROMPT: 'You can say: what medications do I have to take today? If you want to create reminders, just say: create reminders',
         REMINDER_PERMISSIONS: 'I need permission to access your reminders.',
@@ -35,7 +34,7 @@ care plan. What would you like to do?`,
         NO_GLUCOSE_RECORDS_FOUND: "I didn't find records for that date",
         NO_RECORDS_FOUND: "I didn't find records",
         NO_SERVICE_REQUESTS_FOUND: "You don't need to measure your blood glucose levels for the next seven days",
-        QUERY_SETUP: 'Now, try asking me about your care plan for a date again.',
+        QUERY_SETUP: 'Now, try asking me about your care plan for today again.',
         PERMISSIONS_REQUIRED: "Without permissions, I can't set a reminder.",
         REMINDER_NOT_CREATED: "Sorry, I couldn't create the reminders. Please try again.",
         SET_START_DATE_SUCCESSFUL: 'You have set the start date for',

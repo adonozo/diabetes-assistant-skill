@@ -32,7 +32,8 @@ export class SetStartDateTimeContinueHandler extends AbstractIntentHandler {
         }
 
         if (!timingNeedsStartDate(missingDateRequest.timing) && !currentIntent.slots!.date.value) {
-            currentIntent.slots!.date.value = getTimingStartDate(missingDateRequest.timing)?.toISODate() ?? undefined;
+            currentIntent.slots!.date.value = getTimingStartDate(missingDateRequest.timing)?.toISODate()
+                ?? DateTime.now().toISODate()!;
         }
 
         return handlerInput.responseBuilder

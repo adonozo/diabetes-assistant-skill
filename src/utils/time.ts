@@ -1,4 +1,4 @@
-import { Settings, WeekdayNumbers } from "luxon";
+import { DateTime, Settings, WeekdayNumbers } from "luxon";
 import {
     compareWhen,
     getTimesFromTimingWithFrequency,
@@ -10,6 +10,7 @@ import { Dosage, FhirResource, MedicationRequest, ServiceRequest, Timing } from 
 import { HandlerInput } from "ask-sdk-core";
 import { MissingDateSetupRequest, Day, HoursAndMinutes } from "../types";
 import { getMedicationName } from "../fhir/medicationRequest";
+import { throwWithMessage } from "./intent";
 
 export function requestsNeedStartDate(requests: FhirResource[] | undefined): MissingDateSetupRequest | undefined {
     for (const request of requests ?? []) {
@@ -38,12 +39,13 @@ export async function getTimezoneOrDefault(handlerInput: HandlerInput): Promise<
 }
 
 function buildCustomMedicationRequest(dosageInstruction: Dosage, medicationName: string): MissingDateSetupRequest {
+    const duration = getDuration(dosageInstruction.timing!);
     return {
         type: 'MedicationRequest',
         id: dosageInstruction.id ?? '',
         name: medicationName,
-        duration: dosageInstruction.timing!.repeat?.boundsDuration?.value ?? 0,
-        durationUnit: dosageInstruction.timing!.repeat?.boundsDuration?.unit ?? '',
+        duration: duration.duration,
+        durationUnit: duration.durationUnit,
         frequency: dosageInstruction.timing!.repeat!.frequency ?? 0,
         timing: dosageInstruction.timing!
     };
@@ -51,12 +53,13 @@ function buildCustomMedicationRequest(dosageInstruction: Dosage, medicationName:
 
 function buildCustomServiceRequest(serviceRequest: ServiceRequest): MissingDateSetupRequest {
     const timing = serviceRequest.occurrenceTiming!;
+    const duration = getDuration(timing);
     return {
         type: 'ServiceRequest',
         id: serviceRequest.id!,
         name: '',
-        duration: timing?.repeat!.boundsDuration?.value ?? 0,
-        durationUnit: timing?.repeat!.boundsDuration?.unit ?? '',
+        duration: duration.duration,
+        durationUnit: duration.durationUnit,
         frequency: timing?.repeat!.frequency ?? 0,
         timing: timing
     }
@@ -115,3 +118,25 @@ export function dayNumberToShortCode(day: WeekdayNumbers): Day {
             return 'sun';
     }
 }
+
+function getDuration(timing: Timing): ResourceDuration {
+    if (timing.repeat?.boundsDuration) {
+        return {
+            duration: timing.repeat.boundsDuration.value ?? throwWithMessage('Malformed duration'),
+            durationUnit: timing.repeat.boundsDuration.unit ?? throwWithMessage('Malformed unit'),
+        }
+    }
+
+    if (timing.repeat?.boundsPeriod?.start && timing.repeat?.boundsPeriod?.end) {
+        const start = DateTime.fromISO(timing.repeat.boundsPeriod.start);
+        const end = DateTime.fromISO(timing.repeat.boundsPeriod.end);
+        return {
+            duration: end.diff(start, 'day').days + 1, // duration is end date inclusive
+            durationUnit: 'd'
+        }
+    }
+
+    throwWithMessage('Invalid timing');
+}
+
+type ResourceDuration = { duration: number, durationUnit: string };

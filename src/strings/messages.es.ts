@@ -15,10 +15,10 @@ export class MessagesEs extends AbstractMessage {
 
     responses = {
         WELCOME: `¡Hola! Este es el asistente de diabetes. Puedes preguntarme cuáles son los medicamentos que debes tomar 
-el día de hoy o mañana; o cúando debes medir tu nivel de glucosa en sangre`,
+el día de hoy; o cúando debes medir tu nivel de glucosa en sangre`,
         WELCOME_FIRST: `¡Hola! Este es el asistente de diabetes. Puedes preguntarme cuáles son los medicamentos que debes tomar 
-el día de hoy o mañana; o cúando debes medir tu nivel de glucosa en sangre. También puedo crear recordatorios diarios de 
-tu plan de cuidado. ¿Que deseas hacer?`,
+el día de hoy; o cúando debes medir tu nivel de glucosa en sangre. También puedo crear recordatorios diarios de 
+tu plan de cuidado. ¿Qué deseas hacer?`,
         WELCOME_REPROMPT: `Puedes decir: ¿cuáles son mis medicamentos para hoy? Si deseas crear recordatorios, solo dí:
 crea recordatorios.`,
         REMINDER_PERMISSIONS: 'Necesito permisos para crear recordatorios',
@@ -36,7 +36,7 @@ crea recordatorios.`,
         NO_GLUCOSE_RECORDS_FOUND: 'No encontré registros para esa fecha.',
         NO_RECORDS_FOUND: 'No encontré registros',
         NO_SERVICE_REQUESTS_FOUND: 'No debes medir tu nivel de glucosa en sangre en los próximos siete días.',
-        QUERY_SETUP: 'Ahora, intenta preguntarme sobre tus medicamentos para una fecha de nuevo',
+        QUERY_SETUP: 'Ahora, intenta preguntarme sobre tus medicamentos para hoy de nuevo',
         PERMISSIONS_REQUIRED: 'Sin permisos, no puedo crear recordatorios para tus medicamentos.',
         REMINDER_NOT_CREATED: 'Lo siento, no pude crear los recordatorios. Intenta nuevamente.',
         SET_START_DATE_SUCCESSFUL: 'Has configurado la fecha de inicio para',
