@@ -7,8 +7,13 @@ export const reminderDirective: Directive = {
     name: "AskFor",
     payload: {
         "@type": "AskForPermissionsConsentRequest",
-        "@version": "1",
-        "permissionScope": "alexa::alerts:reminders:skill:readwrite"
+        "@version": "2",
+        "permissionScopes": [
+            {
+                "permissionScope": "alexa::alerts:reminders:skill:readwrite",
+                "consentLevel": "ACCOUNT"
+            }
+        ]
     },
     token: ""
 }

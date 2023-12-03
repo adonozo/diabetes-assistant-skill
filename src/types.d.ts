@@ -3,11 +3,15 @@ import { Dosage, Timing } from "fhir/r5";
 
 export type HttpResolvePromise<T> = (value: PromiseLike<T>) => void;
 
-export type StartEndDateTime = { start: DateTime, end: DateTime };
+export type DateTimeInterval = { start: DateTime, end: DateTime };
 
 export type HoursAndMinutes = { hour: number, minute: number };
 
 export type ServiceData = { action: string, timings: string[] };
+
+export type Day = ('mon'|'tue'|'wed'|'thu'|'fri'|'sat'|'sun');
+
+export type OccurrencesPerDay = { day: Day, when: string[] };
 
 export type MedicationData = {
     medication: string,
@@ -16,7 +20,7 @@ export type MedicationData = {
 
 export type DoseValue = { value: number, unit: string };
 
-export type CustomRequest = {
+export type MissingDateSetupRequest = {
     type: string,
     id: string,
     name: string,
@@ -37,4 +41,12 @@ export type ResourceReminderData = {
 
 export type DosagesMedicationName = { dosages: Dosage[] | undefined, medicationName: string };
 
-export type ParentServiceRequestReminderData = { action: string, startDate: DateTime, endDate: DateTime }
+export type ParentServiceRequestReminderData = { action: string, startDate: DateTime, endDate: DateTime };
+
+export type AlexaRequest = { userId: string, deviceId: string };
+
+export type ProblemDetails = { status: number, [p: string]: any };
+
+export type Result<TSuccess, TError> = { success: boolean, value?: TSuccess, error?: TError }
+
+export type DateSlot = 'time' | 'date'

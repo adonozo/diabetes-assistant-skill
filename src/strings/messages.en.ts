@@ -1,8 +1,9 @@
-import { AbstractMessage, ObservationValue } from "./abstractMessage";
-import { timingEvent } from "../fhir/timing";
+import { AbstractMessage } from "./abstractMessage";
 import { DateTime } from "luxon";
-import { CustomRequest, MedicationData, ServiceData } from "../types";
+import { MissingDateSetupRequest, Day, MedicationData, OccurrencesPerDay, DateSlot } from "../types";
 import { AppLocale } from "../enums";
+import { digitWithLeadingZero } from "../utils/time";
+import { throwWithMessage } from "../utils/intent";
 
 export class MessagesEn extends AbstractMessage {
     supportedLocales = [AppLocale.enUS, AppLocale.enGB];
@@ -13,38 +14,40 @@ export class MessagesEn extends AbstractMessage {
     }
 
     responses = {
-        WELCOME: "Hi, I can tell you your medications for tomorrow",
-        REMINDER_PERMISSIONS: "I need permission to access your reminders.",
+        WELCOME: `Welcome, this is the Diabetes Assistant. You can ask me what medications you need to take today or when
+you need to measure your blood glucose levels`,
+        WELCOME_FIRST: `Welcome, this is the Diabetes Assistant. You can ask me what medications you need to take today; or when you need to measure your blood glucose levels. You can also ask me to create daily reminders for your 
+care plan. What would you like to do?`,
+        WELCOME_REPROMPT: 'You can say: what medications do I have to take today? If you want to create reminders, just say: create reminders',
+        REMINDER_PERMISSIONS: 'I need permission to access your reminders.',
         SUCCESSFUL_REMINDER_PERMISSION: `Now that you've provided permission, you can try again by saying "setup reminders"`,
         SUCCESSFUL_REMINDER_PERMISSION_REPROMPT: 'You can try again by saying "setup reminders"',
-        REPROMPT_REMINDER_PERMISSIONS: "Say ok if you want to grant me permission.",
-        HELP: "You can ask me your medications for today or ask me to create medication reminders.",
-        ERROR: "Sorry, I had trouble doing what you asked. Please try again.",
-        STOP: "Goodbye!",
+        REPROMPT_REMINDER_PERMISSIONS: 'Say ok if you want to grant me permission.',
+        HELP: 'You can say: what medications do I have to take today? If you want to create reminders, just say: create reminders',
+        HELP_REPROMPT: 'You can say: when do I have to measure my blood glucose?',
+        ERROR: 'Sorry, I had trouble doing what you asked. Please try again.',
+        STOP: 'Goodbye!',
         ACCOUNT_LINK: "Your account is not linked. Add your account first in the Alexa app.",
-        UPDATED_TIMING: "You have updated your timing for",
         SUCCESSFUL_REMINDERS: "Your reminders have been created, check the Alexa app to verify them.",
         REQUESTS_REMINDERS_SETUP: 'Say "setup reminders" if you want to continue setting up your reminders.',
         SETUP_TIMINGS: "You need to set some timings first.",
-        INVALID_BLOOD_GLUCOSE: "Sorry, I had trouble doing what you asked. Try again by saying: save my blood glucose level.",
-        INVALID_BLOOD_GLUCOSE_REPROMPT: "Try again by saying: save my blood glucose level.",
-        BLOOD_GLUCOSE_SUCCESS: "Your blood glucose level was registered.",
         NO_GLUCOSE_RECORDS_FOUND: "I didn't find records for that date",
         NO_RECORDS_FOUND: "I didn't find records",
-        QUERY_SETUP: 'Now, try asking me about your care plan for a date again.',
-        LOW_GLUCOSE: 'Your blood glucose level is lower than the recommended value. Please consider consulting to your GP or to a health provider.',
-        HIGH_GLUCOSE: 'Your blood glucose level is higher than the recommended value. Please consider consulting to your GP or to a health provider.',
+        NO_SERVICE_REQUESTS_FOUND: "You don't need to measure your blood glucose levels for the next seven days",
+        QUERY_SETUP: 'Now, try asking me about your care plan for today again.',
         PERMISSIONS_REQUIRED: "Without permissions, I can't set a reminder.",
         REMINDER_NOT_CREATED: "Sorry, I couldn't create the reminders. Please try again.",
         SET_START_DATE_SUCCESSFUL: 'You have set the start date for',
+        PROMPT_START_TIME: 'At what time will you start it?',
+        REPROMPT_START_TIME: 'At what time are your starting or have you started it?',
     }
 
     words = {
         DATE_PREPOSITION: "On",
         CONCAT_WORD: "and",
-        TODAY: 'hoy',
-        TOMORROW: 'mañana',
-        YESTERDAY: 'ayer',
+        TODAY: 'today',
+        TOMORROW: 'tomorrow',
+        YESTERDAY: 'yesterday',
         TIME_PREPOSITION: 'at',
         FOR: 'for'
     }
@@ -52,11 +55,6 @@ export class MessagesEn extends AbstractMessage {
     getMedicationReminderText(value: number, unit: string, medication: string, times: string[]): string {
         const timeList = this.buildListTimesOrTimings(times);
         return `Take ${value} ${unit} of ${medication} ${timeList}`;
-    }
-
-    getSuggestedTimeText(mealCode: string): string {
-        const meal = this.getMealSuggestion(mealCode);
-        return `Is this measure before ${meal}, after ${meal}, or none?`
     }
 
     getMedicationSsmlReminderText(value: number, unit: string, medication: string, times: string[]): string {
@@ -71,54 +69,6 @@ export class MessagesEn extends AbstractMessage {
         const timeList = this.listItems(stringTimes, this.words.CONCAT_WORD);
         const message = `${action} ${timeList}`;
         return this.wrapSpeakMessage(message);
-    }
-
-    getStartDatePrompt(missingDate: CustomRequest): string {
-        const init = 'I need some information first.';
-        const unit = this.durationUnitToString(missingDate.durationUnit);
-        if (missingDate.type === 'MedicationRequest') {
-            return `${init} You need to take ${missingDate.name} for ${missingDate.duration} ${unit}.`;
-        }
-
-        if (missingDate.type === 'ServiceRequest') {
-            return `${init} Your plan includes: ${missingDate.name} for ${missingDate.duration} ${unit}.`;
-        }
-
-        return '';
-    }
-
-    /**
-     *
-     * @param day {string}
-     * @param observationsValues {{time: string, value: string, timing: string}[]}
-     */
-    makeTextForObservationDay(day: string, observationsValues: ObservationValue[]): string {
-        let text = `${day}, you had a blood glucose level of`;
-        if (observationsValues.length === 1) {
-            const observation = observationsValues[0];
-            const time = this.getTimingOrTime(observation);
-            text = `${text} ${observation.value} ${time}`;
-            return text;
-        }
-
-        const values = observationsValues.map((value, index) => {
-            const time = this.getTimingOrTime(value);
-            if (index === observationsValues.length - 1) {
-                return ` and ${value.value} ${time}.`;
-            }
-
-            return ` ${value.value} ${time}`;
-        }).join(',');
-
-        return `${text} ${values}`;
-    }
-
-    getTimingOrTime(observationValue: ObservationValue): string {
-        if (!observationValue.timing || observationValue.timing === timingEvent.EXACT) {
-            return `at ${observationValue.time}`;
-        }
-
-        return this.timingToText(observationValue.timing);
     }
 
     /**
@@ -155,12 +105,53 @@ export class MessagesEn extends AbstractMessage {
         return `Take ${medicationData.medication}, ${doseText}`;
     }
 
-    /**
-     * @param serviceData {{action: string, timings: [string]}}
-     */
-    makeServiceText(serviceData: ServiceData): string {
-        const timeList = this.buildListTimesOrTimings(serviceData.timings);
-        return `Do a ${serviceData.action} ${timeList}`;
+    buildServiceRequestText(occurrences: OccurrencesPerDay[], today: Day, tomorrow: Day): string {
+        const dailyOccurrences = occurrences
+            .map(occurrence => this.occurrenceText(occurrence, today, tomorrow));
+
+        return `Measure your blood glucose level ${this.listItems(dailyOccurrences, this.words.CONCAT_WORD)}`;
+    }
+
+    promptMissingRequest(missingDateRequest: MissingDateSetupRequest, currentDate: DateTime, slot: DateSlot): string {
+        let textStart = 'I need some information first.';
+        const unit = this.durationUnitToString(missingDateRequest.durationUnit);
+        let textEnd;
+
+        switch (missingDateRequest.type) {
+            case 'MedicationRequest':
+                textStart = `${textStart} You need to take ${missingDateRequest.name} for ${missingDateRequest.duration} ${unit}.`;
+                break;
+            case 'ServiceRequest':
+                textStart = `${textStart} Your need to measure your blood glucose level for ${missingDateRequest.duration} ${unit}.`;
+                break;
+            default:
+                throwWithMessage(`Could not determine request type: ${missingDateRequest.type}`);
+        }
+
+        switch (slot) {
+            case "time":
+                textEnd = this.promptStartTime();
+                break;
+            case "date":
+                textEnd = this.promptStartDate(currentDate);
+                break;
+            default:
+                throwWithMessage('Could not get determine whether resource needs date or time');
+        }
+
+        return this.wrapSpeakMessage(`${textStart} ${textEnd}`);
+    }
+
+    promptStartDate(currentDate: DateTime): string {
+        const day = digitWithLeadingZero(currentDate.day);
+        const month = digitWithLeadingZero(currentDate.month);
+        return `On which date have you started or will you start? Today is <say-as interpret-as=\"date\">????${month}${day}</say-as>`
+    }
+
+    rePromptStartDate(currentDate: DateTime): string {
+        const day = digitWithLeadingZero(currentDate.day);
+        const month = digitWithLeadingZero(currentDate.month);
+        return `Tell me the day and month you have started, or you will start. Today is <say-as interpret-as=\"date\">????${month}${day}</say-as>`;
     }
 
     timingToText(timing: string): string {
@@ -194,78 +185,6 @@ export class MessagesEn extends AbstractMessage {
         }
     }
 
-    stringToTimingCode(value: string): string {
-        switch (value) {
-            case 'lunch':
-                return 'CD';
-            case "before lunch":
-                return 'ACD';
-            case "after lunch":
-                return 'PCD'
-            case 'breakfast':
-                return 'CM';
-            case 'before breakfast':
-                return 'ACM';
-            case 'after breakfast':
-                return 'PCM';
-            case 'dinner':
-                return 'CV'
-            case 'before dinner':
-                return 'ACV';
-            case 'after dinner':
-                return 'PCV';
-            case 'before meal':
-                return 'AC'
-            case 'after meal':
-                return 'PC'
-            case 'dawn':
-                return 'MORN_early'
-            case 'morning':
-                return 'MORN'
-            case 'noon':
-                return 'NOON'
-            case 'afternoon':
-                return 'AFT'
-            case 'evening':
-                return 'EVE'
-            case 'night':
-                return 'NIGHT'
-            default:
-                return 'EXACT'
-        }
-    }
-
-    getMealSuggestion(timingCode: string): string {
-        switch (timingCode) {
-            case 'CM':
-                return 'breakfast'
-            case 'CD':
-                return 'lunch'
-            case 'CV':
-                return 'dinner'
-            case 'C':
-            default:
-                return 'meal'
-        }
-    }
-
-    /**
-     * To get exact code translations, for intent's timingEvent type
-     * @param timingCode
-     */
-    codeToString(timingCode: string): string {
-        switch (timingCode) {
-            case 'CM':
-                return 'breakfast';
-            case 'CD':
-                return 'lunch';
-            case 'CV':
-                return 'dinner';
-            default:
-                throw new Error(`Invalid timing code ${timingCode}`);
-        }
-    }
-
     unitsToStrings(unit: string, isPlural: boolean): string {
         switch (unit.toLowerCase()) {
             case 'u':
@@ -287,6 +206,27 @@ export class MessagesEn extends AbstractMessage {
                 return 'months';
             default:
                 throw new Error(`Invalid unit code ${unit}`);
+        }
+    }
+
+    dayToString(day: Day): string {
+        switch (day) {
+            case "mon":
+                return 'Monday';
+            case "tue":
+                return 'Tuesday';
+            case "wed":
+                return 'Wednesday';
+            case "thu":
+                return 'Thursday';
+            case "fri":
+                return 'Friday';
+            case "sat":
+                return 'Saturday';
+            case "sun":
+                return 'Sunday';
+            default:
+                return day;
         }
     }
 }

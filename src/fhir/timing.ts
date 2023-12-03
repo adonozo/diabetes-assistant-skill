@@ -2,8 +2,7 @@ import { DateTime } from "luxon";
 import { RRule, Weekday } from "rrule";
 import { getExtension } from "./fhir";
 import { Duration, Timing } from "fhir/r5";
-import { StartEndDateTime } from "../types";
-import { TimingEvent } from "../enums";
+import { DateTimeInterval } from "../types";
 
 const DEFAULT_TIMEZONE = 'UTC'
 const TIMING_START_DATE = 'http://diabetes-assistant.com/fhir/StructureDefinition/TimingStartDate';
@@ -92,22 +91,7 @@ export const timingOrder: {[p: string]: number} = {
     ALL_DAY: 20
 }
 
-export function alexaTimingToFhirTiming(alexaTiming: string): TimingEvent {
-    switch (alexaTiming) {
-        case 'EV':
-            return TimingEvent.EVE;
-        case 'NI':
-            return TimingEvent.NIGHT;
-        case 'MO':
-            return TimingEvent.MORN;
-        case 'AF':
-            return TimingEvent.AFT;
-        default:
-            return TimingEvent.EXACT;
-    }
-}
-
-export function getDatesFromTiming(timing: Timing, timezone: string = DEFAULT_TIMEZONE): StartEndDateTime {
+export function getDatesFromTiming(timing: Timing, timezone: string = DEFAULT_TIMEZONE): DateTimeInterval {
     if (timing.repeat?.boundsPeriod?.start && timing.repeat?.boundsPeriod?.end) {
         const startDate = DateTime.fromISO(timing.repeat.boundsPeriod.start, {zone: timezone});
         const endDate = DateTime.fromISO(timing.repeat.boundsPeriod.end, {zone: timezone})

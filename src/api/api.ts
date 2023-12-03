@@ -1,5 +1,5 @@
 import { RequestOptions } from "https";
-import { HttpResolvePromise } from "../types";
+import { HttpResolvePromise, ProblemDetails } from "../types";
 import { IncomingMessage } from "http";
 
 const baseUrl = '__ENV_BACKEND_URL';
@@ -45,4 +45,8 @@ export function getOptionsFor(path: string, method: string): RequestOptions {
         path: path,
         method: method,
     };
+}
+
+export function errorIsProblemDetails(error: any): error is ProblemDetails {
+    return error != undefined && error.status != undefined;
 }

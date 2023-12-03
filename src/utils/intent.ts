@@ -10,7 +10,7 @@ export function getLocalizedStrings(handlerInput: HandlerInput): AbstractMessage
 export const sessionValues = {
     requestMissingDate: 'RequestMissingDate',
     createRemindersIntent: 'CreateRemindersIntent',
-    getMedicationToTakeIntent: 'GetMedicationToTakeIntent',
+    medicationToTakeIntent: 'MedicationToTakeIntent',
     carePlanIntent: 'CarePlanIntent',
 }
 

@@ -1,5 +1,6 @@
-import { DateTime, Settings } from "luxon";
+import { DateTime, Settings, WeekdayNumbers } from "luxon";
 import {
+    compareWhen,
     getTimesFromTimingWithFrequency,
     getTimingStartTime,
     timingNeedsStartDate,
@@ -7,16 +8,17 @@ import {
 } from "../fhir/timing";
 import { Dosage, FhirResource, MedicationRequest, ServiceRequest, Timing } from "fhir/r5";
 import { HandlerInput } from "ask-sdk-core";
-import { CustomRequest, HoursAndMinutes } from "../types";
+import { MissingDateSetupRequest, Day, HoursAndMinutes } from "../types";
 import { getMedicationName } from "../fhir/medicationRequest";
+import { throwWithMessage } from "./intent";
 
-export function requestsNeedStartDate(requests: FhirResource[]): CustomRequest | undefined {
-    for (const request of requests) {
+export function requestsNeedStartDate(requests: FhirResource[] | undefined): MissingDateSetupRequest | undefined {
+    for (const request of requests ?? []) {
         if (request.resourceType === 'MedicationRequest') {
             const dosage = getDosageNeedingSetup(request);
             const medicationName = getMedicationName(request);
             return dosage && buildCustomMedicationRequest(dosage, medicationName);
-        } else if (request.resourceType === 'ServiceRequest' && serviceNeedsDateTimeSetup(request)) {
+        } else if (request.resourceType === 'ServiceRequest' && serviceNeedsDateSetup(request)) {
             return buildCustomServiceRequest(request);
         }
     }
@@ -36,43 +38,28 @@ export async function getTimezoneOrDefault(handlerInput: HandlerInput): Promise<
     return userTimeZone;
 }
 
-export function utcDateFromLocalDate(date: string, timezone: string): string | null {
-    const time = DateTime.now().setZone(timezone);
-    const utcDate = DateTime.fromISO(`${date}T${time.toISOTime()}`, {zone: timezone}).toUTC();
-    return utcDate.toISO();
-}
-
-export function utcTimeFromLocalTime(time: string, timezone: string): string | null {
-    const date = DateTime.now().setZone(timezone);
-    const utcDate = DateTime.fromISO(`${date.toISODate()}T${time}`, {zone: timezone});
-    return utcDate.toUTC().toISO();
-}
-
-export function utcDateTimeFromLocalDateAndTime(date: string, time: string, timezone: string): string | null {
-    const utcDate = DateTime.fromISO(`${date}T${time}`, {zone: timezone});
-    return utcDate.toISO();
-}
-
-function buildCustomMedicationRequest(dosageInstruction: Dosage, medicationName: string): CustomRequest {
+function buildCustomMedicationRequest(dosageInstruction: Dosage, medicationName: string): MissingDateSetupRequest {
+    const duration = getDuration(dosageInstruction.timing!);
     return {
         type: 'MedicationRequest',
         id: dosageInstruction.id ?? '',
         name: medicationName,
-        duration: dosageInstruction.timing!.repeat?.boundsDuration?.value ?? 0,
-        durationUnit: dosageInstruction.timing!.repeat?.boundsDuration?.unit ?? '',
+        duration: duration.duration,
+        durationUnit: duration.durationUnit,
         frequency: dosageInstruction.timing!.repeat!.frequency ?? 0,
         timing: dosageInstruction.timing!
     };
 }
 
-function buildCustomServiceRequest(serviceRequest: ServiceRequest): CustomRequest {
+function buildCustomServiceRequest(serviceRequest: ServiceRequest): MissingDateSetupRequest {
     const timing = serviceRequest.occurrenceTiming!;
+    const duration = getDuration(timing);
     return {
         type: 'ServiceRequest',
         id: serviceRequest.id!,
-        name: (serviceRequest.code?.concept?.coding && serviceRequest.code?.concept?.coding[0].display) ?? '',
-        duration: timing?.repeat!.boundsDuration?.value ?? 0,
-        durationUnit: timing?.repeat!.boundsDuration?.unit ?? '',
+        name: '',
+        duration: duration.duration,
+        durationUnit: duration.durationUnit,
         frequency: timing?.repeat!.frequency ?? 0,
         timing: timing
     }
@@ -81,9 +68,9 @@ function buildCustomServiceRequest(serviceRequest: ServiceRequest): CustomReques
 export function timesStringArraysFromTiming(timing: Timing, timezone: string): string[] {
     let times;
     if (timing.repeat?.when && Array.isArray(timing.repeat.when) && timing.repeat.when.length > 0) {
-        times = timing.repeat.when;
+        times = timing.repeat.when.sort(compareWhen);
     } else if (timing.repeat?.timeOfDay && Array.isArray(timing.repeat.timeOfDay) && timing.repeat.timeOfDay.length > 0) {
-        times = timing.repeat.timeOfDay;
+        times = timing.repeat.timeOfDay.sort();
     } else {
         const startTime = getTimingStartTime(timing);
         if (!startTime) {
@@ -100,11 +87,56 @@ export function getHoursAndMinutes(stringTime: string): HoursAndMinutes {
     return {hour: +timeParts[0], minute: +timeParts[1]};
 }
 
-export function serviceNeedsDateTimeSetup(serviceRequest: ServiceRequest): boolean {
-    return timingNeedsStartDate(serviceRequest.occurrenceTiming) || timingNeedsStartTime(serviceRequest.occurrenceTiming);
+export function serviceNeedsDateSetup(serviceRequest: ServiceRequest): boolean {
+    return timingNeedsStartDate(serviceRequest.occurrenceTiming);
 }
 
 export function getDosageNeedingSetup(medicationRequest: MedicationRequest): Dosage | undefined {
     return medicationRequest.dosageInstruction!
         .find(dosage => timingNeedsStartDate(dosage.timing) || timingNeedsStartTime(dosage.timing));
 }
+
+export function digitWithLeadingZero(number: number): string {
+    return number < 10 ? `0${number}` : number.toString();
+}
+
+export function dayNumberToShortCode(day: WeekdayNumbers): Day {
+    switch (day) {
+        case 1:
+            return 'mon';
+        case 2:
+            return 'tue';
+        case 3:
+            return 'wed';
+        case 4:
+            return 'thu';
+        case 5:
+            return 'fri';
+        case 6:
+            return 'sat';
+        case 7:
+            return 'sun';
+    }
+}
+
+function getDuration(timing: Timing): ResourceDuration {
+    if (timing.repeat?.boundsDuration) {
+        return {
+            duration: timing.repeat.boundsDuration.value ?? throwWithMessage('Malformed duration'),
+            durationUnit: timing.repeat.boundsDuration.unit ?? throwWithMessage('Malformed unit'),
+        }
+    }
+
+    if (timing.repeat?.boundsPeriod?.start && timing.repeat?.boundsPeriod?.end) {
+        const start = DateTime.fromISO(timing.repeat.boundsPeriod.start);
+        const end = DateTime.fromISO(timing.repeat.boundsPeriod.end);
+        return {
+            duration: end.diff(start, 'day').days + 1, // duration is end date inclusive
+            durationUnit: 'd'
+        }
+    }
+
+    throwWithMessage('Invalid timing');
+}
+
+type ResourceDuration = { duration: number, durationUnit: string };

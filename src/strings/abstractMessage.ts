@@ -1,7 +1,8 @@
 import { DateTime } from "luxon";
-import { CustomRequest, MedicationData, ServiceData } from "../types";
-import { Observation } from "fhir/r5";
+import { MissingDateSetupRequest, Day, MedicationData, OccurrencesPerDay, DateSlot } from "../types";
 import { AppLocale } from "../enums";
+import { digitWithLeadingZero } from "../utils/time";
+import { throwWithMessage } from "../utils/intent";
 
 export abstract class AbstractMessage {
     locale: AppLocale;
@@ -14,29 +15,29 @@ export abstract class AbstractMessage {
 
     abstract responses: {
         WELCOME: string,
+        WELCOME_FIRST: string,
+        WELCOME_REPROMPT: string,
         REMINDER_PERMISSIONS: string,
         SUCCESSFUL_REMINDER_PERMISSION: string,
         SUCCESSFUL_REMINDER_PERMISSION_REPROMPT: string,
         REPROMPT_REMINDER_PERMISSIONS: string,
         HELP: string,
+        HELP_REPROMPT: string,
         ERROR: string,
         STOP: string,
         ACCOUNT_LINK: string,
-        UPDATED_TIMING: string,
         SUCCESSFUL_REMINDERS: string,
         REQUESTS_REMINDERS_SETUP: string,
         SETUP_TIMINGS: string,
-        INVALID_BLOOD_GLUCOSE: string,
-        INVALID_BLOOD_GLUCOSE_REPROMPT: string,
-        BLOOD_GLUCOSE_SUCCESS: string,
         NO_GLUCOSE_RECORDS_FOUND: string,
         NO_RECORDS_FOUND: string,
+        NO_SERVICE_REQUESTS_FOUND: string,
         QUERY_SETUP: string,
-        LOW_GLUCOSE: string,
-        HIGH_GLUCOSE: string,
         PERMISSIONS_REQUIRED: string,
         REMINDER_NOT_CREATED: string,
         SET_START_DATE_SUCCESSFUL: string,
+        PROMPT_START_TIME: string,
+        REPROMPT_START_TIME: string,
     }
 
     abstract words: {
@@ -47,28 +48,6 @@ export abstract class AbstractMessage {
         YESTERDAY: string,
         TIME_PREPOSITION: string,
         FOR: string,
-    }
-
-    makeTextFromObservations(observations: Observation[], timezone: string): string {
-        const dateMap = new Map<string, ObservationValue[]>();
-        observations.forEach(observation => {
-            const date = DateTime.fromISO(observation.issued!).setZone(timezone);
-            const dayKey = this.getTextForDay(observation.issued!, timezone);
-            const observationValue = {
-                time: this.getHoursAndMinutes(date),
-                value: observation.valueQuantity?.value?.toString() ?? '',
-                timing: (observation.extension && observation.extension[0]?.valueCode) ?? ''
-            };
-            this.upsertValueToMap(dateMap, dayKey, observationValue);
-        });
-
-        let text = '';
-        dateMap.forEach((value, day) => {
-            const textForDay = this.makeTextForObservationDay(day, value)
-            text = text + textForDay + '. ';
-        })
-
-        return this.wrapSpeakMessage(text);
     }
 
     buildListTimesOrTimings(timings: string[]): string {
@@ -83,17 +62,9 @@ export abstract class AbstractMessage {
 
     abstract getMedicationReminderText(value: number, unit: string, medication: string, times: string[]): string;
 
-    abstract getSuggestedTimeText(mealCode: string): string
-
     abstract getMedicationSsmlReminderText(value: number, unit: string, medication: string, times: string[]): string;
 
     abstract getServiceSsmlReminderText(action: string, times: string[]): string;
-
-    abstract getStartDatePrompt(missingDate: CustomRequest): string;
-
-    abstract makeTextForObservationDay(day: string, observationsValues: ObservationValue[]): string;
-
-    abstract getTimingOrTime(observationValue: ObservationValue): string;
 
     abstract getHoursAndMinutes(date: DateTime): string;
 
@@ -101,19 +72,21 @@ export abstract class AbstractMessage {
 
     abstract makeMedicationText(medicationData: MedicationData): string;
 
-    abstract makeServiceText(serviceData: ServiceData): string;
+    abstract buildServiceRequestText(occurrences: OccurrencesPerDay[], today: Day, tomorrow: Day): string;
+
+    abstract promptMissingRequest(missingDateRequest: MissingDateSetupRequest, currentDate: DateTime, slot: DateSlot): string;
+
+    abstract promptStartDate(date: DateTime): string;
+
+    abstract rePromptStartDate(date: DateTime): string;
 
     abstract timingToText(timing: string): string;
-
-    abstract stringToTimingCode(value: string): string;
-
-    abstract getMealSuggestion(timingCode: string): string;
-
-    abstract codeToString(timingCode: string): string;
 
     abstract unitsToStrings(unit: string, isPlural: boolean): string;
 
     abstract durationUnitToString(unit: string): string;
+
+    abstract dayToString(day: Day): string;
 
     protected wrapSpeakMessage(message: string): string {
         return `<speak>${message}</speak>`
@@ -134,6 +107,33 @@ export abstract class AbstractMessage {
         if (!this.supportedLocales.includes(this.locale)) {
             throw new Error(`Unsupported locale ${this.locale}. Expected values: ${this.supportedLocales.join(', ')}`);
         }
+    }
+
+    protected occurrenceText(occurrence: OccurrencesPerDay, today: Day, tomorrow: Day): string {
+        let start: string;
+        switch (occurrence.day) {
+            case today:
+                start = this.words.TODAY;
+                break;
+            case tomorrow:
+                start = this.words.TOMORROW;
+                break;
+            default:
+                start = `${this.words.DATE_PREPOSITION} ${this.dayToString(occurrence.day)}`;
+        }
+
+        const when = occurrence.when.map(this.timingToText)
+            .join(', ')
+
+        return `${start}, ${when}`
+    }
+
+    protected promptStartTime(): string {
+        return this.responses.PROMPT_START_TIME;
+    }
+
+    protected rePromptStartTime(): string {
+        return this.responses.REPROMPT_START_TIME;
     }
 
     /**
@@ -157,8 +157,8 @@ export abstract class AbstractMessage {
                 return this.words.TOMORROW;
         }
 
-        const month = referenceDateTime.month < 10 ? `0${referenceDateTime.month}` : referenceDateTime.month;
-        const day = referenceDateTime.day < 10 ? `0${referenceDateTime.day}` : referenceDateTime.day;
+        const month = digitWithLeadingZero(referenceDateTime.month);
+        const day = digitWithLeadingZero(referenceDateTime.day);
         return `${this.words.DATE_PREPOSITION} <say-as interpret-as="date">????${month}${day}</say-as>`;
     }
 
@@ -188,13 +188,14 @@ export abstract class AbstractMessage {
         return `${this.responses.NO_RECORDS_FOUND} ${this.words.FOR} ${this.getTextForDay(date, userTimezone)}`;
     }
 
-    private upsertValueToMap(map: Map<string, ObservationValue[]>, key: string, value: ObservationValue): void {
-        if (map.has(key)) {
-            map.get(key)!.push(value);
-        } else {
-            map.set(key, [value]);
+    rePromptMissingRequest(currentDate: DateTime, slot: DateSlot): string {
+        switch (slot) {
+            case "time":
+                return this.wrapSpeakMessage(this.rePromptStartDate(currentDate));
+            case "date":
+                return this.rePromptStartTime();
+            default:
+                throwWithMessage('Could not get determine whether resource needs date or time');
         }
     }
 }
-
-export type ObservationValue = {time: string, value: string, timing: string}
