@@ -47,6 +47,19 @@ export function getOptionsFor(path: string, method: string): RequestOptions {
     };
 }
 
+export function getOptions(path: string, method: string, locale: string): RequestOptions {
+    return {
+        host: baseUrl,
+        port: port,
+        path: path,
+        method: method,
+        headers: {
+            "accept-language": locale,
+            "content-language": locale
+        }
+    };
+}
+
 export function errorIsProblemDetails(error: any): error is ProblemDetails {
     return error != undefined && error.status != undefined;
 }
