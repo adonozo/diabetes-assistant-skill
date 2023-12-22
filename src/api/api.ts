@@ -38,15 +38,6 @@ export function createJsonResponse<T>(
     });
 }
 
-export function getOptionsFor(path: string, method: string): RequestOptions {
-    return {
-        host: baseUrl,
-        port: port,
-        path: path,
-        method: method,
-    };
-}
-
 export function getOptions(path: string, method: string, locale: string): RequestOptions {
     return {
         host: baseUrl,
@@ -54,8 +45,7 @@ export function getOptions(path: string, method: string, locale: string): Reques
         path: path,
         method: method,
         headers: {
-            "accept-language": locale,
-            "content-language": locale
+            "accept-language": locale
         }
     };
 }
