@@ -1,6 +1,6 @@
 import { getTimezoneOrDefault, requestsNeedStartDate } from "../utils/time";
-import { getLocalizedStrings, throwWithMessage } from "../utils/intent";
-import { getActiveCarePlan } from "../api/carePlan";
+import { getLocalizedStrings, localeFromInput, throwWithMessage } from "../utils/intent";
+import { CarePLanClient } from "../api/carePlan";
 import { requestListFromBundle } from "../fhir/carePlan";
 import { FhirResource } from "fhir/r5";
 import { HandlerInput } from "ask-sdk-core";
@@ -36,7 +36,7 @@ export class CreateRemindersInProgressHandler extends AbstractIntentHandler {
     }
 
     private async handleValidation(handlerInput: HandlerInput, username: string): Promise<Response> {
-        const requests = await getActiveRequests(username);
+        const requests = await getActiveRequests(handlerInput, username);
         const customResource = requestsNeedStartDate(requests);
         if (customResource) {
             const localizedMessages = getLocalizedStrings(handlerInput);
@@ -81,7 +81,7 @@ export class CreateRemindersHandler extends AbstractIntentHandler {
         const messages = getLocalizedStrings(handlerInput);
         const userTimeZone = await getTimezoneOrDefault(handlerInput);
 
-        const requests = await getActiveRequests(username);
+        const requests = await getActiveRequests(handlerInput, username);
         const customResource = requestsNeedStartDate(requests);
         if (customResource) {
             return this.switchContextToStartDateTime(handlerInput,
@@ -122,7 +122,8 @@ export class CreateRemindersHandler extends AbstractIntentHandler {
     }
 }
 
-async function getActiveRequests(username: string): Promise<FhirResource[]> {
-    const requestBundle = await getActiveCarePlan(username);
+async function getActiveRequests(handlerInput: HandlerInput, username: string): Promise<FhirResource[]> {
+    const client = new CarePLanClient(localeFromInput(handlerInput));
+    const requestBundle = await client.getActiveCarePlan(username);
     return requestListFromBundle(requestBundle);
 }
