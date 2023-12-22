@@ -2,8 +2,8 @@ import { AbstractIntentHandler } from "./abstractIntentHandler";
 import { HandlerInput } from "ask-sdk-core";
 import { Response } from "ask-sdk-model";
 import { getAuthorizedUser } from "../auth";
-import { getServiceRequests } from "../api/patients";
-import { getLocalizedStrings, throwWithMessage } from "../utils/intent";
+import { PatientClient } from "../api/patients";
+import { getLocalizedStrings, localeFromInput, throwWithMessage } from "../utils/intent";
 import { serviceRequestsFromBundle } from "../fhir/carePlan";
 import { getTextForServiceRequests } from "../fhir/serviceRequest";
 import { getTimezoneOrDefault, requestsNeedStartDate } from "../utils/time";
@@ -29,7 +29,7 @@ export class SearchNextServiceRequestsHandler extends AbstractIntentHandler {
         }
 
         const localizedMessages = getLocalizedStrings(handlerInput);
-        const searchResult = await this.getNextServiceRequests(userTimezone, userInfo.username);
+        const searchResult = await this.getNextServiceRequests(userInfo.username, handlerInput);
         if (!searchResult.success) {
             const customResource = requestsNeedStartDate([searchResult.error!])
                 ?? throwWithMessage("Couldn't get the resource");
@@ -53,10 +53,17 @@ export class SearchNextServiceRequestsHandler extends AbstractIntentHandler {
             .getResponse();
     }
 
-    private async getNextServiceRequests(timezone: string, patientUsername: string): Promise<Result<Bundle, ServiceRequest>> {
+    private async getNextServiceRequests(
+        patientUsername: string,
+        handlerInput: HandlerInput
+    ): Promise<Result<Bundle, ServiceRequest>> {
+        const timezone = await getTimezoneOrDefault(handlerInput);
         const interval = this.getRequestInterval(timezone);
+        const patientClient = new PatientClient(localeFromInput(handlerInput));
+
         try {
-            const serviceRequestsBundle = await getServiceRequests(patientUsername,
+            const serviceRequestsBundle = await patientClient.getServiceRequests(
+                patientUsername,
                 interval.start.toISODate()!,
                 interval.end.toISODate()!);
             return { success: true, value: serviceRequestsBundle };
