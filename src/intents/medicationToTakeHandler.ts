@@ -1,7 +1,7 @@
 import { Response } from "ask-sdk-model";
-import { getLocalizedStrings, throwWithMessage } from "../utils/intent";
+import { getLocalizedStrings, localeFromInput, throwWithMessage } from "../utils/intent";
 import { getTimezoneOrDefault, requestsNeedStartDate } from "../utils/time";
-import { getMedicationRequests } from "../api/patients";
+import { PatientClient } from "../api/patients";
 import { timingEvent } from "../fhir/timing";
 import { medicationsFromBundle } from "../fhir/carePlan";
 import { getTextForMedicationRequests } from "../fhir/medicationRequest";
@@ -35,7 +35,7 @@ export class MedicationToTakeHandler extends AbstractIntentHandler {
         const userTimezone = await getTimezoneOrDefault(handlerInput);
         const date = DateTime.now().setZone(userTimezone).toISODate()!;
 
-        const result = await this.getTodayMedicationRequests(date, patientEmail, userTimezone);
+        const result = await this.getTodayMedicationRequests(date, patientEmail, handlerInput);
         if (!result.success) {
             const customResource = requestsNeedStartDate([result.error!])
                 ?? throwWithMessage("Couldn't get the resource");
@@ -62,10 +62,13 @@ export class MedicationToTakeHandler extends AbstractIntentHandler {
     private async getTodayMedicationRequests(
         date: string,
         patientEmail: string,
-        timezone: string
+        handlerInput: HandlerInput
     ): Promise<Result<Bundle, MedicationRequest>> {
+        const timezone = await getTimezoneOrDefault(handlerInput);
+        const patientClient = new PatientClient(localeFromInput(handlerInput));
         try {
-            const medicationRequest = await getMedicationRequests(patientEmail, date, timingEvent.ALL_DAY, timezone);
+            const medicationRequest = await patientClient
+                .getMedicationRequests(patientEmail, date, timingEvent.ALL_DAY, timezone);
             return {success: true, value: medicationRequest};
         } catch (errorResponse: any) {
             if (errorResponse?.status !== 422) {

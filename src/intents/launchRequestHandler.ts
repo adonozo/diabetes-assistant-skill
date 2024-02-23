@@ -1,8 +1,8 @@
 import { HandlerInput, RequestHandler } from "ask-sdk-core";
 import { Response } from "ask-sdk-model";
-import { getLocalizedStrings } from "../utils/intent";
+import { getLocalizedStrings, localeFromInput } from "../utils/intent";
 import { getAuthorizedUser } from "../auth";
-import { getLastRequest } from "../api/alexa";
+import { AlexaClient } from "../api/alexa";
 import { errorIsProblemDetails } from "../api/api";
 
 export class LaunchRequestHandler implements RequestHandler {
@@ -29,9 +29,10 @@ export class LaunchRequestHandler implements RequestHandler {
             return true;
         }
 
+        const alexaClient = new AlexaClient(localeFromInput(handlerInput));
         const deviceId = handlerInput.requestEnvelope.context.System.device?.deviceId ?? '';
         try {
-            await getLastRequest(userInfo.username, deviceId);
+            await alexaClient.getLastRequest(userInfo.username, deviceId);
             return false;
         } catch (errorResponse: unknown) {
             if (errorIsProblemDetails(errorResponse)) {

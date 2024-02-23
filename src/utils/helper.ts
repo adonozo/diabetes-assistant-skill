@@ -19,7 +19,7 @@ export function messagesForLocale(locale: string | undefined): AbstractMessage {
     return messageInitializer();
 }
 
-function isAppLocale(locale: string | undefined): locale is AppLocale {
+export function isAppLocale(locale: string | undefined): locale is AppLocale {
     return Object.values<string>(AppLocale).includes(locale ?? '');
 }
 

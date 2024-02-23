@@ -1,10 +1,19 @@
 import { HandlerInput } from "ask-sdk-core";
 import { AbstractMessage } from "../strings/abstractMessage";
-import { messagesForLocale } from "./helper";
+import { isAppLocale, messagesForLocale } from "./helper";
 
 export function getLocalizedStrings(handlerInput: HandlerInput): AbstractMessage {
     const locale = handlerInput.requestEnvelope.request.locale;
     return messagesForLocale(locale);
+}
+
+export function localeFromInput(handlerInput: HandlerInput): string {
+    const locale = handlerInput.requestEnvelope.request.locale;
+    if (!isAppLocale(locale)) {
+        throw new Error(`Locale ${locale} not supported.`);
+    }
+
+    return locale;
 }
 
 export const sessionValues = {
