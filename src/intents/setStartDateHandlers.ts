@@ -1,7 +1,7 @@
 import { IntentRequest, Response } from "ask-sdk-model";
-import { getLocalizedStrings, sessionValues, throwWithMessage } from "../utils/intent";
+import { getLocalizedStrings, localeFromInput, sessionValues, throwWithMessage } from "../utils/intent";
 import { getTimingStartDate, getTimingStartTime, timingNeedsStartDate, timingNeedsStartTime } from "../fhir/timing";
-import { setDosageStartDate, setServiceRequestStartDate } from "../api/patients";
+import { PatientClient } from "../api/patients";
 import { HandlerInput } from "ask-sdk-core";
 import { AbstractMessage } from "../strings/abstractMessage";
 import { AbstractIntentHandler } from "./abstractIntentHandler";
@@ -106,13 +106,14 @@ async function submitStartDateTime(
     const {date, time} = getIntentData(handlerInput);
     const amendedDate = amendFutureDate(timezone, date);
     const startDateTime = {startDate: amendedDate, startTime: time + ':00'};
+    const patientClient = new PatientClient(localeFromInput(handlerInput));
 
     switch (missingDateRequest.type) {
         case 'ServiceRequest':
-            await setServiceRequestStartDate(patientEmail, missingDateRequest.id, startDateTime)
+            await patientClient.setServiceRequestStartDate(patientEmail, missingDateRequest.id, startDateTime)
             break;
         case 'MedicationRequest':
-            await setDosageStartDate(patientEmail, missingDateRequest.id, startDateTime);
+            await patientClient.setDosageStartDate(patientEmail, missingDateRequest.id, startDateTime);
             break;
     }
 }
